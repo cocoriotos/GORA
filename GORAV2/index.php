@@ -201,7 +201,7 @@
 
 
   <p class="video-caption" data-i18n="video_caption">¿Tienes preguntas? Escríbenos por <a href="https://wa.me/573117592209" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">WhatsApp</a> y te ayudamos.</p>
-</section>--> 
+</section>
 
 <!-- PRICING -->
 <section id="pricing">
