@@ -182,14 +182,14 @@
 </section>
 
 <!-- VIDEO -->
-<!--<section id="video">
+<section id="video">
   <div class="tc">
     <div class="s-tag" data-i18n="video_tag">Demo</div>
     <h2 class="s-title" data-i18n="video_title">Míralo en acción</h2>
     <p class="s-sub" data-i18n="video_sub">En menos de 3 minutos verás exactamente cómo GORA puede cambiar la forma en que gestionas tu información.</p>
   </div>
   <div class="video-wrap reveal">
-    <iframe src="https://www.youtube.com/embed/rzKkmjfY7nk?rel=0&modestbranding=1" title="GORA Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe src="https://www.youtube.com/embed/qEt4bgTXqYc?rel=0&modestbranding=1" title="GORA Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
   </div>
   <p class="video-caption" data-i18n="video_caption">¿Tienes preguntas? Escríbenos por <a href="https://wa.me/573117592209" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">WhatsApp</a> y te ayudamos.</p>
 </section>--> 
