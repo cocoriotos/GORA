@@ -182,17 +182,39 @@
 </section>
 
 <!-- VIDEO -->
-<!--<section id="video">
+<section id="video">
   <div class="tc">
     <div class="s-tag" data-i18n="video_tag">Demo</div>
     <h2 class="s-title" data-i18n="video_title">Míralo en acción</h2>
     <p class="s-sub" data-i18n="video_sub">En menos de 3 minutos verás exactamente cómo GORA puede cambiar la forma en que gestionas tu información.</p>
   </div>
-  <div class="video-wrap reveal">
-    <iframe src="https://www.youtube.com/embed/rzKkmjfY7nk?rel=0&modestbranding=1" title="GORA Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+  <!-- Contenedor de Imágenes Lado a Lado -->
+  <div class="images-comparison reveal" style="display: flex; gap: 16px; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 24px;">
+    <div class="img-box" style="flex: 1; min-width: 280px; max-width: 500px;">
+      <img src="GORABefore.png" alt="GORA Antes" style="width: 100%; height: auto; border-radius: 8px; display: block;" />
+    </div>
+    <div class="img-box" style="flex: 1; min-width: 280px; max-width: 500px;">
+      <img src="GORAAfter.png" alt="GORA Después" style="width: 100%; height: auto; border-radius: 8px; display: block;" />
+    </div>
   </div>
+
+  <!-- Contenedor de Video -->
+  <div class="video-wrap reveal">
+    <iframe src="https://www.youtube.com/embed/qEt4bgTXqYc?rel=0&modestbranding=1" title="GORA Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+
+<!-- Reproductor de Audio -->
+  <div class="audio-wrap reveal" style="margin-top: 20px; text-align: center;">
+    <audio controls style="width: 100%; max-width: 600px;"> 
+      <source src="/GORAV2/GoraPodCast.mp3" type="audio/mpeg">
+      Tu navegador no soporta el reproductor de audio.
+    </audio>
+  </div>
+
+
   <p class="video-caption" data-i18n="video_caption">¿Tienes preguntas? Escríbenos por <a href="https://wa.me/573117592209" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">WhatsApp</a> y te ayudamos.</p>
-</section>--> 
+</section>
 
 <!-- PRICING -->
 <section id="pricing">
