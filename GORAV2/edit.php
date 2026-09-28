@@ -98,8 +98,6 @@ include "db_connection1.php";
                                 <input id="save_link" type="submit" class="btn btn-success" name="update_link" value="Actualizar" style="flex: 1; font-size: 16px; line-height: 1.5; padding: 10px 0; margin: 0; box-sizing: border-box;">
                                 <a href="videolinkadminmodule.php" class="btn btn-success" style="flex: 1; font-size: 16px; line-height: 1.5; padding: 10px 0; margin: 0; box-sizing: border-box; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center;">Cancelar</a>
                             </div>
-                            <!--<input id="save_link" type="submit" class="btn btn-success btn-block" name="update_link" value="Actualizar"></input>
-                            <a href="videolinkadminmodule.php" class="btn btn-success btn-block" style="text-decoration: none;">Cancelar</a>-->
                         </center><br>
                     </form>
                 </div>
