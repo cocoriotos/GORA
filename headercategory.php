@@ -13,14 +13,14 @@ $name = $_SESSION['name'];
   <center><a id="welcome"  class="navbar-brand"><span class="username-style"><?php echo $name; ?></span>, <span data-i18n="header_welcome_msg">estás en tu Biblioteca de Contenidos Útiles</span></a></center>
   </nav>
   
-  <nav class="navbar navbar-dark bg-dark d-flex justify-content-between align-items-center">
+  <!--<nav class="navbar navbar-dark bg-dark d-flex justify-content-between align-items-center">
              
             <div class="header-action-group">
                 <a id="headerfonts" href="addcategory.php" class="header-action-btn clear"><i class="fas fa-broom"></i> <span data-i18n="header_clear">Limpiar Formulario</span></a>
                 <a id="headerfonts" href="videolinkadminmodule.php" class="header-action-btn categories"><i class="fas fa-link"></i> <span data-i18n="header_add_link">Adicionar Enlace</span></a>
                 <a id="headerfonts" href="closetaskscon.php" class="header-action-btn logout"><i class="fas fa-right-from-bracket"></i> <span data-i18n="header_logout">Salir</span></a>
             </div>   
-    </nav>
+    </nav>-->
   
   <!-- BOOTSTRAP -->	
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"></link>
