@@ -95,7 +95,7 @@ include "db_connection1.php";
                         </center>
                         <center>
                             <input id="save_link" type="submit" class="btn btn-success btn-block" name="update_link" value="Actualizar"></input>
-                            <a id="save_link" type="submit" href="videolinkadminmodule.php" class="btn btn-success btn-block" style="text-decoration: none;">Cancelar</a>
+                            <a href="videolinkadminmodule.php" class="btn btn-success btn-block" style="text-decoration: none;">Cancelar</a>
                             <!--<input id="save_link" type="submit" class="btn btn-success btn-block" name="logout" value="Borrar" formaction="delete.php"></input>-->
                         </center><br>
                     </form>
