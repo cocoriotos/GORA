@@ -109,7 +109,7 @@ include "db_connection1.php";
                             <thead id="tableswhite">
                                 <tr>
                                     <!--<th>ID</th>-->
-                                    <th style="width: 16.66%;">Enlace o URL</th>
+                                    <th style="width: 16.66%;">Enlace</th>
                                     <th style="width: 16.66%;">Categoría</th>
                                     <th style="width: 16.66%;">Subcategoría</th>
                                     <th style="width: 16.66%;">Contenido</th>
