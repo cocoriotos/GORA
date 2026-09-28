@@ -94,9 +94,12 @@ include "db_connection1.php";
                             </div>
                         </center>
                         <center>
-                            <input id="save_link" type="submit" class="btn btn-success btn-block" name="update_link" value="Actualizar"></input>
-                            <a href="videolinkadminmodule.php" class="btn btn-success btn-block" style="text-decoration: none;">Cancelar</a>
-                            <!--<input id="save_link" type="submit" class="btn btn-success btn-block" name="logout" value="Borrar" formaction="delete.php"></input>-->
+                            <div style="display: flex; justify-content: center; gap: 15px; max-width: 400px; margin: 0 auto;">
+                                <input id="save_link" type="submit" class="btn btn-success" name="update_link" value="Actualizar" style="flex: 1; padding: 10px 0;">
+                                <a href="videolinkadminmodule.php" class="btn btn-success" style="flex: 1; padding: 10px 0; text-decoration: none; text-align: center;">Cancelar</a>
+                            </div>
+                            <!--<input id="save_link" type="submit" class="btn btn-success btn-block" name="update_link" value="Actualizar"></input>
+                            <a href="videolinkadminmodule.php" class="btn btn-success btn-block" style="text-decoration: none;">Cancelar</a>-->
                         </center><br>
                     </form>
                 </div>
