@@ -191,6 +191,16 @@
   <div class="video-wrap reveal">
     <iframe src="https://www.youtube.com/embed/qEt4bgTXqYc?rel=0&modestbranding=1" title="GORA Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
   </div>
+
+<!-- Reproductor de Audio -->
+  <div class="audio-wrap reveal" style="margin-top: 20px; text-align: center;">
+    <audio controls style="width: 100%; max-width: 600px;">
+      <!-- Ruta a tu archivo de audio -->
+      <source src="/GORAV2/GoraPodCast.m4a" type="audio/mp4">
+    </audio>
+  </div>
+
+
   <p class="video-caption" data-i18n="video_caption">¿Tienes preguntas? Escríbenos por <a href="https://wa.me/573117592209" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">WhatsApp</a> y te ayudamos.</p>
 </section>--> 
 
