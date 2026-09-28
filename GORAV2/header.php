@@ -16,7 +16,7 @@ $name = $_SESSION['name'];
   <script src="copynumber.js"></script>
   <script src="copypaypal.js"></script>
 
-  <nav class="navbar navbar-dark bg-dark d-flex justify-content-between align-items-center">
+  <!--<nav class="navbar navbar-dark bg-dark d-flex justify-content-between align-items-center">
       <div class="header-action-group">
         <a id="headerfonts" href="suscriptionpayment.php" class="header-action-btn subscribe"><i class="fas fa-gem"></i> <span data-i18n="header_subscribe">Suscribirse</span></a>
         <a id="headerfonts" href="https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5" class="header-action-btn tutorials" target="_blank"><i class="fas fa-play-circle"></i> <span data-i18n="header_tutorials">Tutoriales</span></a>
@@ -25,7 +25,7 @@ $name = $_SESSION['name'];
         <a id="headerfonts" href="addcategory.php" class="header-action-btn categories"><i class="fas fa-folder-tree"></i> <span data-i18n="header_categories">Categorías</span></a>
         <a id="headerfonts" href="closetaskscon.php" class="header-action-btn logout"><i class="fas fa-right-from-bracket"></i> <span data-i18n="header_logout">Salir</span></a>
       </div>
-  </nav>
+  </nav>-->
 
 
   <!-- BOOTSTRAP -->	
