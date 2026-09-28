@@ -193,12 +193,11 @@
   </div>
 
 <!-- Reproductor de Audio -->
-  <div class="audio-wrap reveal" style="margin-top: 20px; text-align: center;">
-    <audio controls style="width: 100%; max-width: 600px;">
-      <!-- Ruta a tu archivo de audio -->
+  <!--<div class="audio-wrap reveal" style="margin-top: 20px; text-align: center;">
+    <audio controls style="width: 100%; max-width: 600px;"> 
       <source src="/GORAV2/GoraPodCast.m4a" type="audio/mp4">
     </audio>
-  </div>
+  </div>-->
 
 
   <p class="video-caption" data-i18n="video_caption">¿Tienes preguntas? Escríbenos por <a href="https://wa.me/573117592209" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;">WhatsApp</a> y te ayudamos.</p>
