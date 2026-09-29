@@ -528,6 +528,9 @@
                         <a class="module-sidebar-link" href="videolinkadminmodule.php">
                             <i class="fas fa-plus-circle"></i><span data-i18n="sidebar_add">Adicionar Enlace</span>
                         </a>
+                        <a class="module-sidebar-link" href="addcategory.php">
+                            <i class="fas fa-plus-circle"></i><span data-i18n="sidebar_add">Adicionar Categoría</span>
+                        </a>
                         <button type="button" class="module-sidebar-link" data-view="search-category" onclick="showCategoryView('search-category', this)">
                             <i class="fas fa-search"></i><span data-i18n="sidebar_search">Buscar Categoría</span>
                         </button>
