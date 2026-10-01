@@ -6,6 +6,7 @@
     const heartbeatInterval = 60000;
     let authenticated = false;
     let idleTimer;
+    let expiryCheckInterval;
     let lastHeartbeat = 0;
     let lastActivityAt = 0;
     let redirecting = false;
@@ -14,6 +15,7 @@
         if (redirecting) return;
         redirecting = true;
         window.clearTimeout(idleTimer);
+        window.clearInterval(expiryCheckInterval);
         window.location.replace('sessionactivity.php?timeout=1');
     }
 
@@ -87,7 +89,8 @@
         lastActivityAt = Date.now();
         lastHeartbeat = Date.now();
         armIdleTimer();
-        ['click', 'input', 'keydown', 'pointerdown', 'pointermove', 'scroll', 'touchstart'].forEach(eventName => {
+        expiryCheckInterval = window.setInterval(checkSessionExpiry, 1000);
+        ['click', 'input', 'keydown', 'pointerdown', 'scroll', 'touchstart'].forEach(eventName => {
             document.addEventListener(eventName, registerActivity, { passive: true });
         });
         document.addEventListener('visibilitychange', () => {
