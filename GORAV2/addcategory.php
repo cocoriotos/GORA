@@ -329,7 +329,7 @@
 
         .content-card {
             border-radius: 24px;
-            overflow: hidden;
+            overflow: visible;
             display: flex;
             flex-direction: column;
             min-height: 330px;
@@ -585,14 +585,18 @@
 
         .grid-item-actions {
             position: relative;
+            flex: 0 0 46px;
+            width: 46px;
+            height: 46px;
         }
 
         .grid-item-action-menu {
             display: none;
             position: absolute;
-            right: 0;
-            top: 50px;
+            top: 0;
+            left: calc(100% + 8px);
             width: 220px;
+            max-width: calc(100vw - 110px);
             background-color: #ffffff;
             border: 1px solid rgba(3, 38, 66, 0.08);
             border-radius: 18px;
@@ -761,8 +765,8 @@
                             ?>
                             <div class="content-card grid-item" style="background-color: <?php echo $randomColor; ?>;">
                                 <div class="grid-item-content">
-                                    <button class="grid-item-action-btn" onclick="toggleActions(event, <?php echo $categories['id']; ?>)">...</button>
                                     <div class="grid-item-actions">
+                                        <button class="grid-item-action-btn" onclick="toggleActions(event, <?php echo $categories['id']; ?>)">...</button>
                                         <div class="grid-item-action-menu" id="action-menu-<?php echo $categories['id']; ?>">
                                             <button class="action-button" data-key="copy-category" onclick="copyToClipboard('<?php echo $categories['maincategory']; ?>'); toggleActions(event, <?php echo $categories['id']; ?>);">Copiar Categoría</button>
                                             <button class="action-button" data-key="copy-subcategory" onclick="copyToClipboard('<?php echo $categories['category']; ?>'); toggleActions(event, <?php echo $categories['id']; ?>);">Copiar Subcategoría</button>

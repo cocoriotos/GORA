@@ -313,7 +313,7 @@ include "header.php";
 
         .content-card {
             border-radius: 24px;
-            overflow: hidden;
+            overflow: visible;
             display: flex;
             flex-direction: column;
             min-height: 330px;
@@ -374,14 +374,18 @@ include "header.php";
 
         .grid-item-actions {
             position: relative;
+            flex: 0 0 46px;
+            width: 46px;
+            height: 46px;
         }
 
         .grid-item-action-menu {
             display: none;
             position: absolute;
-            right: 0;
-            top: 50px;
+            top: 0;
+            left: calc(100% + 8px);
             width: 220px;
+            max-width: calc(100vw - 110px);
             background-color: #ffffff;
             border: 1px solid rgba(3, 38, 66, 0.08);
             border-radius: 18px;
@@ -1099,8 +1103,8 @@ include "header.php";
                         ?>
                             <div class="content-card grid-item" data-sort-date="<?php echo htmlspecialchars($links['creationdate'], ENT_QUOTES, 'UTF-8'); ?>" data-sort-category="<?php echo htmlspecialchars($links['maincategory'], ENT_QUOTES, 'UTF-8'); ?>" data-sort-subcategory="<?php echo htmlspecialchars($links['category'], ENT_QUOTES, 'UTF-8'); ?>" data-sort-content="<?php echo htmlspecialchars($links['content'], ENT_QUOTES, 'UTF-8'); ?>" style="background-color: <?php echo $randomColor; ?>; display: none;">
                                 <div class="grid-item-content">
-                                    <button class="grid-item-action-btn" onclick="toggleActions(event, <?php echo $links['id']; ?>)">...</button>
                                     <div class="grid-item-actions">
+                                        <button class="grid-item-action-btn" onclick="toggleActions(event, <?php echo $links['id']; ?>)">...</button>
                                         <div class="grid-item-action-menu" id="action-menu-<?php echo $links['id']; ?>">
                                             <button class="action-button" data-action="copy" onclick="copyToClipboard('<?php echo $links['videolink']; ?>'); toggleActions(event, <?php echo $links['id']; ?>);">Copiar Enlace</button>
                                             <button class="action-button" data-action="edit" onclick="window.location.href = 'edit.php?id=<?php echo $links['id']; ?>'">Modificar</button>
