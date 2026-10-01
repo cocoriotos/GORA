@@ -524,7 +524,7 @@ include "header.php";
 
             .admin-wrapper {
                 width: 100%;
-                padding: 0 12px 48px;
+                padding: 60px 12px 48px;
                 box-sizing: border-box;
             }
 
@@ -552,10 +552,22 @@ include "header.php";
                 overflow-y: auto;
             }
 
-            .module-sidebar.collapsed,
-            .module-sidebar:not(.collapsed),
-            .module-sidebar.collapsed:hover {
+            .module-sidebar:not(.collapsed) {
                 width: 100%;
+                background: #032642;
+                padding: 8px 12px;
+                box-shadow: 0 16px 32px rgba(3, 38, 66, 0.16);
+            }
+
+            .module-sidebar.collapsed,
+            .module-sidebar.collapsed:hover {
+                width: 60px;
+                height: 50px;
+                max-height: none;
+                padding: 0 0 0 8px;
+                overflow: visible;
+                background: transparent;
+                box-shadow: none;
             }
 
             .module-sidebar.collapsed .module-sidebar-nav {
