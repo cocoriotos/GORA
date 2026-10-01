@@ -542,22 +542,25 @@ include "header.php";
 
             .module-sidebar {
                 position: fixed;
-                top: var(--welcome-bottom);
+                top: calc(var(--welcome-bottom) + 4px);
                 left: 0;
                 z-index: 1200;
                 display: flex;
                 flex-direction: column;
                 width: 100%;
-                height: auto;
+                height: 60px;
                 min-height: 0;
-                max-height: calc(100vh - var(--welcome-bottom));
-                max-height: calc(100dvh - var(--welcome-bottom));
                 padding: 8px 12px;
                 overflow-y: auto;
+                background: #032642;
+                box-shadow: 0 8px 18px rgba(3, 38, 66, 0.14);
             }
 
             .module-sidebar:not(.collapsed) {
                 width: 100%;
+                height: auto;
+                max-height: calc(100vh - var(--welcome-bottom));
+                max-height: calc(100dvh - var(--welcome-bottom));
                 background: #032642;
                 padding: 8px 12px;
                 box-shadow: 0 16px 32px rgba(3, 38, 66, 0.16);
@@ -565,26 +568,24 @@ include "header.php";
 
             .module-sidebar.collapsed,
             .module-sidebar.collapsed:hover {
-                width: 0;
-                height: 0;
+                width: 100%;
+                height: 60px;
                 max-height: none;
-                padding: 0;
-                overflow: visible;
-                background: transparent;
-                box-shadow: none;
+                padding: 8px 12px;
+                overflow: hidden;
+                background: #032642;
+                box-shadow: 0 8px 18px rgba(3, 38, 66, 0.14);
             }
 
             .module-sidebar.collapsed .module-sidebar-toggle {
-                position: fixed;
-                top: calc(var(--welcome-bottom) + 8px);
-                left: 8px;
-                z-index: 1201;
                 width: 44px;
                 height: 44px;
+                margin: 0;
             }
 
             .module-sidebar:not(.collapsed) .module-sidebar-toggle {
                 position: static;
+                margin: 0 0 8px;
             }
 
             .module-sidebar.collapsed .module-sidebar-nav {
