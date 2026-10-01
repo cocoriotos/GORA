@@ -7,14 +7,30 @@
     let authenticated = false;
     let idleTimer;
     let lastHeartbeat = 0;
+    let lastActivityAt = 0;
+    let redirecting = false;
 
     function expireSession() {
+        if (redirecting) return;
+        redirecting = true;
+        window.clearTimeout(idleTimer);
         window.location.replace('sessionactivity.php?timeout=1');
+    }
+
+    function hasSessionExpired() {
+        return authenticated && Date.now() - lastActivityAt >= idleLimit;
     }
 
     function armIdleTimer() {
         window.clearTimeout(idleTimer);
-        idleTimer = window.setTimeout(expireSession, idleLimit);
+        idleTimer = window.setTimeout(() => {
+            if (hasSessionExpired()) {
+                expireSession();
+                return;
+            }
+
+            armIdleTimer();
+        }, Math.max(0, idleLimit - (Date.now() - lastActivityAt)));
     }
 
     function sendHeartbeat() {
@@ -39,9 +55,18 @@
 
     function registerActivity(event) {
         if (!authenticated || !event.isTrusted) return;
+        if (hasSessionExpired()) {
+            expireSession();
+            return;
+        }
 
+        lastActivityAt = Date.now();
         armIdleTimer();
         if (Date.now() - lastHeartbeat >= heartbeatInterval) sendHeartbeat();
+    }
+
+    function checkSessionExpiry() {
+        if (hasSessionExpired()) expireSession();
     }
 
     fetch('sessionactivity.php', {
@@ -59,10 +84,16 @@
         authenticated = result.active === true;
         if (!authenticated) return;
 
+        lastActivityAt = Date.now();
         lastHeartbeat = Date.now();
         armIdleTimer();
         ['click', 'input', 'keydown', 'pointerdown', 'pointermove', 'scroll', 'touchstart'].forEach(eventName => {
             document.addEventListener(eventName, registerActivity, { passive: true });
         });
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) checkSessionExpiry();
+        });
+        window.addEventListener('focus', checkSessionExpiry);
+        window.addEventListener('pageshow', checkSessionExpiry);
     }).catch(() => {});
 })();
