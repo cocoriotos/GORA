@@ -528,7 +528,7 @@ include "header.php";
 
             .admin-wrapper {
                 width: 100%;
-                padding: 60px 12px 48px;
+                padding: 0 12px 48px;
                 box-sizing: border-box;
             }
 
@@ -541,8 +541,8 @@ include "header.php";
             }
 
             .module-sidebar {
-                position: fixed;
-                top: calc(var(--welcome-bottom) + 4px);
+                position: absolute;
+                top: 0;
                 left: 0;
                 z-index: 1200;
                 display: flex;
@@ -621,6 +621,7 @@ include "header.php";
             .module-main {
                 width: 100%;
                 margin-left: 0;
+                padding-top: 60px;
             }
 
             .module-workspace.sidebar-open .module-main {
