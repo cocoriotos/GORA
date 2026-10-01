@@ -565,13 +565,26 @@ include "header.php";
 
             .module-sidebar.collapsed,
             .module-sidebar.collapsed:hover {
-                width: 60px;
-                height: 50px;
+                width: 0;
+                height: 0;
                 max-height: none;
-                padding: 0 0 0 8px;
+                padding: 0;
                 overflow: visible;
                 background: transparent;
                 box-shadow: none;
+            }
+
+            .module-sidebar.collapsed .module-sidebar-toggle {
+                position: fixed;
+                top: calc(var(--welcome-bottom) + 8px);
+                left: 8px;
+                z-index: 1201;
+                width: 44px;
+                height: 44px;
+            }
+
+            .module-sidebar:not(.collapsed) .module-sidebar-toggle {
+                position: static;
             }
 
             .module-sidebar.collapsed .module-sidebar-nav {
@@ -1145,6 +1158,13 @@ include "header.php";
         const welcomeBottom = Math.ceil(welcomeNav.getBoundingClientRect().bottom);
         document.documentElement.style.setProperty('--welcome-bottom', `${welcomeBottom}px`);
     }
+
+    const welcomeNav = document.querySelector('nav#welcome');
+    if (welcomeNav && window.ResizeObserver) {
+        new ResizeObserver(alignSidebarToWelcome).observe(welcomeNav);
+    }
+    document.fonts?.ready.then(alignSidebarToWelcome);
+    window.addEventListener('languageChanged', alignSidebarToWelcome);
 
     alignSidebarToWelcome();
     window.addEventListener('load', alignSidebarToWelcome);
