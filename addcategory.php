@@ -1,5 +1,6 @@
 <!-- Developed by Julián González Bucheli -->
 <html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <?php 
     include "sessions.php";
     include "sessionvalidation.php";
@@ -328,7 +329,7 @@
 
         .content-card {
             border-radius: 24px;
-            overflow: hidden;
+            overflow: visible;
             display: flex;
             flex-direction: column;
             min-height: 330px;
@@ -337,22 +338,254 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
+            html,
+            body.admin-module-page {
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            body.admin-module-page nav#welcome {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                padding: 10px 12px;
+            }
+
+            body.admin-module-page nav#welcome > center {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            body.admin-module-page nav#welcome .navbar-brand {
+                display: block;
+                max-width: 100%;
+                margin: 0;
+                font-size: 16px;
+                line-height: 1.3;
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+
             .admin-wrapper {
-                padding: 0 16px 48px 0;
+                width: 100%;
+                max-width: 100%;
+                padding: 0 12px 48px;
+                box-sizing: border-box;
+            }
+
+            .admin-wrapper > .container-fluid,
+            .module-workspace,
+            .module-main,
+            .module-main > .row,
+            .module-view,
+            .category-search-row,
+            .section-card,
+            .content-grid,
+            .content-card,
+            .grid-item-content,
+            .search-container,
+            .search-wrapper,
+            #searchInput,
+            .total-cards {
+                box-sizing: border-box;
+                min-width: 0;
+                max-width: 100%;
+            }
+
+            .admin-wrapper > .container-fluid,
+            .module-workspace,
+            .module-main,
+            .module-view,
+            .category-search-row,
+            .section-card,
+            .content-grid,
+            .content-card,
+            .grid-item-content,
+            .search-container,
+            .search-wrapper,
+            #searchInput,
+            .total-cards {
+                width: 100%;
             }
 
             .module-sidebar {
-                min-height: calc(100vh - var(--welcome-bottom));
-                height: 100%;
+                position: absolute;
+                top: 0;
+                left: -12px;
+                z-index: 1200;
+                display: flex;
+                flex-direction: column;
+                width: calc(100% + 24px);
+                height: 60px;
+                min-height: 0;
+                padding: 8px 12px;
+                overflow-y: auto;
+                background: #032642;
+                box-shadow: 0 8px 18px rgba(3, 38, 66, 0.14);
+            }
+
+            .module-sidebar:not(.collapsed) {
+                width: calc(100% + 24px);
+                height: auto;
+                max-height: calc(100vh - var(--welcome-bottom));
+                max-height: calc(100dvh - var(--welcome-bottom));
+                background: #032642;
+                padding: 8px 12px;
+                box-shadow: 0 16px 32px rgba(3, 38, 66, 0.16);
+            }
+
+            .module-sidebar.collapsed,
+            .module-sidebar.collapsed:hover {
+                width: calc(100% + 24px);
+                height: 60px;
+                max-height: none;
+                padding: 8px 12px;
+                overflow: hidden;
+                background: #032642;
+                box-shadow: 0 8px 18px rgba(3, 38, 66, 0.14);
+            }
+
+            .module-sidebar.collapsed .module-sidebar-toggle {
+                width: 44px;
+                height: 44px;
+                margin: 0;
+            }
+
+            .module-sidebar:not(.collapsed) .module-sidebar-toggle {
+                position: static;
+                margin: 0 0 8px;
+            }
+
+            .module-sidebar.collapsed .module-sidebar-nav {
+                display: none;
+            }
+
+            .module-sidebar:not(.collapsed) .module-sidebar-nav {
+                display: flex;
+            }
+
+            .module-sidebar-toggle {
+                margin-bottom: 0;
+            }
+
+            .module-sidebar:not(.collapsed) .module-sidebar-link {
+                justify-content: flex-start;
+                padding: 12px;
+            }
+
+            .module-sidebar:not(.collapsed) .module-sidebar-link span {
+                display: inline;
             }
 
             .module-main {
+                width: 100%;
                 margin-left: 0;
+                padding-top: 60px;
             }
 
             .module-workspace.sidebar-open .module-main {
-                margin-left: 172px;
+                margin-left: 0;
+            }
+
+            .module-main > .row {
+                width: 100% !important;
+                margin: 0;
+            }
+
+            .module-main .col-md-12 {
+                padding-right: 0;
+                padding-left: 0;
+            }
+
+            .section-card,
+            .hero-card {
+                padding: 16px 12px;
+                border-radius: 18px;
+            }
+
+            .section-heading,
+            .section-subtitle,
+            .form-group label,
+            .grid-item-title,
+            .grid-item-body,
+            .grid-item-body p,
+            .module-sidebar-link {
+                overflow-wrap: anywhere;
+            }
+
+            .section-heading {
+                font-size: 1.4rem;
+                line-height: 1.25;
+            }
+
+            .section-subtitle {
+                font-size: 1rem;
+                line-height: 1.45;
+                margin-bottom: 1.2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .form-control,
+            .form-group label,
+            .btn-success {
+                font-size: 16px;
+            }
+
+            .form-control {
+                width: 100%;
+                min-width: 0;
+                min-height: 48px;
+                padding: 12px 14px;
+            }
+
+            .whatsapp-fab {
+                right: 12px;
+                bottom: calc(12px + env(safe-area-inset-bottom));
+                padding: 8px;
+            }
+
+            .whatsapp-fab img {
+                width: 28px;
+                height: 28px;
+            }
+
+            .whatsapp-fab span {
+                display: none;
+            }
+
+            .category-search-row {
+                width: 100%;
+                margin-left: 0;
+                margin-right: 0;
+                padding: 14px 0;
+            }
+
+            .content-grid {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 14px;
+            }
+
+            .content-card {
+                width: 100%;
+                min-height: 0;
+                border-radius: 16px;
+            }
+
+            .grid-item-content {
+                padding: 18px;
+                gap: 14px;
+            }
+
+            .grid-item-title,
+            .grid-item-body p,
+            .action-button {
+                font-size: 16px;
             }
         }
 
@@ -408,14 +641,18 @@
 
         .grid-item-actions {
             position: relative;
+            flex: 0 0 46px;
+            width: 46px;
+            height: 46px;
         }
 
         .grid-item-action-menu {
             display: none;
             position: absolute;
-            right: 0;
-            top: 50px;
+            top: 0;
+            left: calc(100% + 8px);
             width: 220px;
+            max-width: calc(100vw - 110px);
             background-color: #ffffff;
             border: 1px solid rgba(3, 38, 66, 0.08);
             border-radius: 18px;
@@ -456,7 +693,7 @@
     </style>
     <script>
         window.moduleTranslations = {
-            es: { add_category_title: 'Adicionar Categoría y Subcategoría', add_category_subtitle: 'Administra tus categorías con el diseño de GORA.' , save: 'Adicionar Categoría', label_category: 'Categoría:', label_subcategory: 'Subcategoría:', form_category: 'Categoría', form_subcategory: 'Subcategoría', maincategory_placeholder: 'Digite la Categoría Principal', subcategory_placeholder: 'Digite la SubCategoría', copy_category: 'Copiar Categoría', copy_subcategory: 'Copiar Subcategoría', edit_category: 'Modificar', delete_category: 'Borrar', sidebar_add: 'Adicionar Enlace', sidebar_addCategory: 'Adicionar Categoría', sidebar_search: 'Buscar Categoría', sidebar_exit: 'Salir' },
+             es: { add_category_title: 'Adicionar Categoría y Subcategoría', add_category_subtitle: 'Administra tus categorías con el diseño de GORA.' , save: 'Adicionar Categoría', label_category: 'Categoría:', label_subcategory: 'Subcategoría:', form_category: 'Categoría', form_subcategory: 'Subcategoría', maincategory_placeholder: 'Digite la Categoría Principal', subcategory_placeholder: 'Digite la SubCategoría', copy_category: 'Copiar Categoría', copy_subcategory: 'Copiar Subcategoría', edit_category: 'Modificar', delete_category: 'Borrar', sidebar_add: 'Adicionar Enlace', sidebar_addCategory: 'Adicionar Categoría', sidebar_search: 'Buscar Categoría', sidebar_exit: 'Salir' },
             en: { add_category_title: 'Add Category and Subcategory', add_category_subtitle: 'Manage your categories with GORA design.' , save: 'Add Category', label_category: 'Category:', label_subcategory: 'Subcategory:', form_category: 'Category', form_subcategory: 'Subcategory', maincategory_placeholder: 'Enter the Main Category', subcategory_placeholder: 'Enter the Subcategory', copy_category: 'Copy Category', copy_subcategory: 'Copy Subcategory', edit_category: 'Edit', delete_category: 'Delete', sidebar_add: 'Add Link',  sidebar_addCategory: 'Add Category', sidebar_search: 'Search Category', sidebar_exit: 'Logout' },
             pt: { add_category_title: 'Adicionar Categoria e Subcategoria', add_category_subtitle: 'Gerencie suas categorias com o design GORA.' , save: 'Adicionar Categoria', label_category: 'Categoria:', label_subcategory: 'Subcategoria:', form_category: 'Categoria', form_subcategory: 'Subcategoria', maincategory_placeholder: 'Digite a Categoria Principal', subcategory_placeholder: 'Digite a Subcategoria', copy_category: 'Copiar Categoria', copy_subcategory: 'Copiar Subcategoria', edit_category: 'Modificar', delete_category: 'Excluir', sidebar_add: 'Adicionar Link',  sidebar_addCategory: 'Adicionar Categoria', sidebar_search: 'Buscar Categoria', sidebar_exit: 'Sair' }
         };
@@ -521,7 +758,7 @@
         <div class="container-fluid p-0">
             <div class="module-workspace">
                 <aside class="module-sidebar collapsed" id="module-sidebar">
-                    <button type="button" class="module-sidebar-toggle" aria-label="Menu" onclick="toggleModuleSidebar()">
+                    <button type="button" class="module-sidebar-toggle" aria-label="Menu" aria-expanded="false" onclick="toggleModuleSidebar()">
                         <i class="fas fa-bars"></i>
                     </button>
                     <nav class="module-sidebar-nav">
@@ -584,8 +821,8 @@
                             ?>
                             <div class="content-card grid-item" style="background-color: <?php echo $randomColor; ?>;">
                                 <div class="grid-item-content">
-                                    <button class="grid-item-action-btn" onclick="toggleActions(event, <?php echo $categories['id']; ?>)">...</button>
                                     <div class="grid-item-actions">
+                                        <button class="grid-item-action-btn" onclick="toggleActions(event, <?php echo $categories['id']; ?>)">...</button>
                                         <div class="grid-item-action-menu" id="action-menu-<?php echo $categories['id']; ?>">
                                             <button class="action-button" data-key="copy-category" onclick="copyToClipboard('<?php echo $categories['maincategory']; ?>'); toggleActions(event, <?php echo $categories['id']; ?>);">Copiar Categoría</button>
                                             <button class="action-button" data-key="copy-subcategory" onclick="copyToClipboard('<?php echo $categories['category']; ?>'); toggleActions(event, <?php echo $categories['id']; ?>);">Copiar Subcategoría</button>
@@ -620,11 +857,19 @@
         document.documentElement.style.setProperty('--welcome-bottom', `${welcomeBottom}px`);
     }
 
+    const welcomeNav = document.querySelector('nav#welcome');
+    if (welcomeNav && window.ResizeObserver) {
+        new ResizeObserver(alignCategorySidebar).observe(welcomeNav);
+    }
+    document.fonts?.ready.then(alignCategorySidebar);
+    window.addEventListener('languageChanged', alignCategorySidebar);
+
     function toggleModuleSidebar() {
         const sidebar = document.getElementById('module-sidebar');
         const workspace = document.querySelector('.module-workspace');
         const isCollapsed = sidebar.classList.toggle('collapsed');
         workspace.classList.toggle('sidebar-open', !isCollapsed);
+        document.querySelector('.module-sidebar-toggle').setAttribute('aria-expanded', String(!isCollapsed));
     }
 
     function showCategoryView(viewName, selectedButton) {
@@ -635,6 +880,12 @@
         document.querySelectorAll('.module-sidebar-link[data-view]').forEach(button => {
             button.classList.toggle('active', button === selectedButton);
         });
+
+        if (window.matchMedia('(max-width: 600px)').matches) {
+            document.getElementById('module-sidebar').classList.add('collapsed');
+            document.querySelector('.module-sidebar-toggle').setAttribute('aria-expanded', 'false');
+            document.querySelector('.module-workspace').classList.remove('sidebar-open');
+        }
 
         if (viewName === 'search-category' && window.searchCards) {
             window.searchCards();

@@ -1,6 +1,7 @@
 
 <!-- Developed by Julián González Bucheli -->
 <html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <?php
 include "sessions.php";
 include "sessionvalidation.php";
@@ -312,7 +313,7 @@ include "header.php";
 
         .content-card {
             border-radius: 24px;
-            overflow: hidden;
+            overflow: visible;
             display: flex;
             flex-direction: column;
             min-height: 330px;
@@ -373,14 +374,18 @@ include "header.php";
 
         .grid-item-actions {
             position: relative;
+            flex: 0 0 46px;
+            width: 46px;
+            height: 46px;
         }
 
         .grid-item-action-menu {
             display: none;
             position: absolute;
-            right: 0;
-            top: 50px;
+            top: 0;
+            left: calc(100% + 8px);
             width: 220px;
+            max-width: calc(100vw - 110px);
             background-color: #ffffff;
             border: 1px solid rgba(3, 38, 66, 0.08);
             border-radius: 18px;
@@ -496,9 +501,76 @@ include "header.php";
             transform: translateY(-1px);
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
+            html,
+            body.admin-module-page {
+                width: 100%;
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            body.admin-module-page nav#welcome {
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                padding: 10px 12px;
+            }
+
+            body.admin-module-page nav#welcome > center {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            body.admin-module-page nav#welcome .navbar-brand {
+                display: block;
+                max-width: 100%;
+                margin: 0;
+                font-size: 16px;
+                line-height: 1.3;
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+
             .admin-wrapper {
-                padding: 0 16px 48px 0;
+                width: 100%;
+                max-width: 100%;
+                padding: 0 12px 48px;
+                box-sizing: border-box;
+            }
+
+            .admin-wrapper > .container-fluid,
+            .module-workspace,
+            .module-main,
+            .module-main > .row,
+            .module-view,
+            .search-section,
+            .section-card,
+            .content-grid,
+            .content-card,
+            .grid-item-content,
+            .search-container,
+            .search-wrapper,
+            #searchInput,
+            .total-cards {
+                box-sizing: border-box;
+                min-width: 0;
+                max-width: 100%;
+            }
+
+            .admin-wrapper > .container-fluid,
+            .module-workspace,
+            .module-main,
+            .module-view,
+            .search-section,
+            .section-card,
+            .content-grid,
+            .content-card,
+            .grid-item-content,
+            .search-container,
+            .search-wrapper,
+            #searchInput,
+            .total-cards {
+                width: 100%;
             }
 
             .section-heading {
@@ -510,9 +582,72 @@ include "header.php";
             }
 
             .module-sidebar {
-                width: 68px;
-                min-height: calc(100vh - var(--welcome-bottom));
-                height: 100%;
+                position: absolute;
+                top: 0;
+                left: -12px;
+                z-index: 1200;
+                display: flex;
+                flex-direction: column;
+                width: calc(100% + 24px);
+                height: 60px;
+                min-height: 0;
+                padding: 8px 12px;
+                overflow-y: auto;
+                background: #032642;
+                box-shadow: 0 8px 18px rgba(3, 38, 66, 0.14);
+            }
+
+            .module-sidebar:not(.collapsed) {
+                width: calc(100% + 24px);
+                height: auto;
+                max-height: calc(100vh - var(--welcome-bottom));
+                max-height: calc(100dvh - var(--welcome-bottom));
+                background: #032642;
+                padding: 8px 12px;
+                box-shadow: 0 16px 32px rgba(3, 38, 66, 0.16);
+            }
+
+            .module-sidebar.collapsed,
+            .module-sidebar.collapsed:hover {
+                width: calc(100% + 24px);
+                height: 60px;
+                max-height: none;
+                padding: 8px 12px;
+                overflow: hidden;
+                background: #032642;
+                box-shadow: 0 8px 18px rgba(3, 38, 66, 0.14);
+            }
+
+            .module-sidebar.collapsed .module-sidebar-toggle {
+                width: 44px;
+                height: 44px;
+                margin: 0;
+            }
+
+            .module-sidebar:not(.collapsed) .module-sidebar-toggle {
+                position: static;
+                margin: 0 0 8px;
+            }
+
+            .module-sidebar.collapsed .module-sidebar-nav {
+                display: none;
+            }
+
+            .module-sidebar:not(.collapsed) .module-sidebar-nav {
+                display: flex;
+            }
+
+            .module-sidebar-toggle {
+                margin-bottom: 0;
+            }
+
+            .module-sidebar:not(.collapsed) .module-sidebar-link {
+                justify-content: flex-start;
+                padding: 12px;
+            }
+
+            .module-sidebar:not(.collapsed) .module-sidebar-link span {
+                display: inline;
             }
 
             .module-sidebar-nav {
@@ -525,17 +660,39 @@ include "header.php";
             }
 
             .module-main {
-                margin-left: 90px;
+                width: 100%;
+                margin-left: 0;
+                padding-top: 60px;
             }
 
             .module-workspace.sidebar-open .module-main {
-                margin-left: 262px;
+                margin-left: 0;
+            }
+
+            .module-main > .row {
+                width: 100% !important;
+                margin: 0;
+            }
+
+            .module-main .col-md-12 {
+                padding-right: 0;
+                padding-left: 0;
             }
 
             .section-card,
             .hero-card {
-                padding: 18px 14px;
+                padding: 16px 12px;
                 border-radius: 18px;
+            }
+
+            .section-heading,
+            .section-subtitle,
+            .form-group label,
+            .grid-item-title,
+            .grid-item-body,
+            .grid-item-body p,
+            .module-sidebar-link {
+                overflow-wrap: anywhere;
             }
 
             .section-heading {
@@ -561,16 +718,34 @@ include "header.php";
             }
 
             .form-control {
+                width: 100%;
+                min-width: 0;
                 min-height: 48px;
                 padding: 12px 14px;
             }
 
+            .whatsapp-fab {
+                right: 12px;
+                bottom: calc(12px + env(safe-area-inset-bottom));
+                padding: 8px;
+            }
+
+            .whatsapp-fab img {
+                width: 28px;
+                height: 28px;
+            }
+
+            .whatsapp-fab span {
+                display: none;
+            }
+
             .content-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(0, 1fr);
                 gap: 14px;
             }
 
             .content-card {
+                width: 100%;
                 min-height: 0;
                 border-radius: 16px;
             }
@@ -844,7 +1019,7 @@ include "header.php";
         <div class="container-fluid p-0">
             <div class="module-workspace">
                 <aside class="module-sidebar collapsed" id="module-sidebar">
-                    <button type="button" class="module-sidebar-toggle" aria-label="Menu" onclick="toggleModuleSidebar()">
+                    <button type="button" class="module-sidebar-toggle" aria-label="Menu" aria-expanded="false" onclick="toggleModuleSidebar()">
                         <i class="fas fa-bars"></i>
                     </button>
                     <nav class="module-sidebar-nav">
@@ -984,8 +1159,8 @@ include "header.php";
                         ?>
                             <div class="content-card grid-item" data-sort-date="<?php echo htmlspecialchars($links['creationdate'], ENT_QUOTES, 'UTF-8'); ?>" data-sort-category="<?php echo htmlspecialchars($links['maincategory'], ENT_QUOTES, 'UTF-8'); ?>" data-sort-subcategory="<?php echo htmlspecialchars($links['category'], ENT_QUOTES, 'UTF-8'); ?>" data-sort-content="<?php echo htmlspecialchars($links['content'], ENT_QUOTES, 'UTF-8'); ?>" style="background-color: <?php echo $randomColor; ?>; display: none;">
                                 <div class="grid-item-content">
-                                    <button class="grid-item-action-btn" onclick="toggleActions(event, <?php echo $links['id']; ?>)">...</button>
                                     <div class="grid-item-actions">
+                                        <button class="grid-item-action-btn" onclick="toggleActions(event, <?php echo $links['id']; ?>)">...</button>
                                         <div class="grid-item-action-menu" id="action-menu-<?php echo $links['id']; ?>">
                                             <button class="action-button" data-action="copy" onclick="copyToClipboard('<?php echo $links['videolink']; ?>'); toggleActions(event, <?php echo $links['id']; ?>);">Copiar Enlace</button>
                                             <button class="action-button" data-action="edit" onclick="window.location.href = 'edit.php?id=<?php echo $links['id']; ?>'">Modificar</button>
@@ -1013,7 +1188,7 @@ include "header.php";
         </div>
     </div>
     <!-- Botón de WhatsApp -->
-    <a href="https://wa.me/573117592209" target="_blank" class="whatsapp-fab">
+    <a href="https://wa.me/573117592209" target="_blank" class="whatsapp-fab" aria-label="Soporte">
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
         <span id="support-label">Soporte</span>
     </a>
@@ -1027,6 +1202,13 @@ include "header.php";
         document.documentElement.style.setProperty('--welcome-bottom', `${welcomeBottom}px`);
     }
 
+    const welcomeNav = document.querySelector('nav#welcome');
+    if (welcomeNav && window.ResizeObserver) {
+        new ResizeObserver(alignSidebarToWelcome).observe(welcomeNav);
+    }
+    document.fonts?.ready.then(alignSidebarToWelcome);
+    window.addEventListener('languageChanged', alignSidebarToWelcome);
+
     alignSidebarToWelcome();
     window.addEventListener('load', alignSidebarToWelcome);
     window.addEventListener('resize', alignSidebarToWelcome);
@@ -1036,6 +1218,7 @@ include "header.php";
         const workspace = document.querySelector('.module-workspace');
         const isCollapsed = sidebar.classList.toggle('collapsed');
         workspace.classList.toggle('sidebar-open', !isCollapsed);
+        document.querySelector('.module-sidebar-toggle').setAttribute('aria-expanded', String(!isCollapsed));
     }
 
     function showModuleView(viewName, selectedButton) {
@@ -1046,6 +1229,12 @@ include "header.php";
         document.querySelectorAll('.module-sidebar-link[data-view]').forEach(button => {
             button.classList.toggle('active', button === selectedButton);
         });
+
+        if (window.matchMedia('(max-width: 600px)').matches) {
+            document.getElementById('module-sidebar').classList.add('collapsed');
+            document.querySelector('.module-sidebar-toggle').setAttribute('aria-expanded', 'false');
+            document.querySelector('.module-workspace').classList.remove('sidebar-open');
+        }
 
         if (viewName === 'search-content' && window.searchCards) {
             window.searchCards();
