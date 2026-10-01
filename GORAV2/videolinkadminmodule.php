@@ -498,8 +498,34 @@ include "header.php";
         }
 
         @media (max-width: 600px) {
+            body.admin-module-page {
+                overflow-x: hidden;
+            }
+
+            body.admin-module-page nav#welcome {
+                width: 100%;
+                padding: 10px 12px;
+            }
+
+            body.admin-module-page nav#welcome > center {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            body.admin-module-page nav#welcome .navbar-brand {
+                display: block;
+                max-width: 100%;
+                margin: 0;
+                font-size: 16px;
+                line-height: 1.3;
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+
             .admin-wrapper {
-                padding: 0 16px 48px 0;
+                width: 100%;
+                padding: 0 12px 48px;
+                box-sizing: border-box;
             }
 
             .section-heading {
@@ -511,9 +537,46 @@ include "header.php";
             }
 
             .module-sidebar {
-                width: 68px;
-                min-height: calc(100vh - var(--welcome-bottom));
-                height: 100%;
+                position: fixed;
+                top: var(--welcome-bottom);
+                left: 0;
+                z-index: 1200;
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                height: auto;
+                min-height: 0;
+                max-height: calc(100vh - var(--welcome-bottom));
+                max-height: calc(100dvh - var(--welcome-bottom));
+                padding: 8px 12px;
+                overflow-y: auto;
+            }
+
+            .module-sidebar.collapsed,
+            .module-sidebar:not(.collapsed),
+            .module-sidebar.collapsed:hover {
+                width: 100%;
+            }
+
+            .module-sidebar.collapsed .module-sidebar-nav {
+                display: none;
+            }
+
+            .module-sidebar:not(.collapsed) .module-sidebar-nav {
+                display: flex;
+            }
+
+            .module-sidebar-toggle {
+                margin-bottom: 0;
+            }
+
+            .module-sidebar:not(.collapsed) .module-sidebar-link {
+                justify-content: flex-start;
+                padding: 12px;
+            }
+
+            .module-sidebar:not(.collapsed) .module-sidebar-link span {
+                display: inline;
             }
 
             .module-sidebar-nav {
@@ -526,17 +589,39 @@ include "header.php";
             }
 
             .module-main {
-                margin-left: 76px;
+                width: 100%;
+                margin-left: 0;
             }
 
             .module-workspace.sidebar-open .module-main {
-                margin-left: 76px;
+                margin-left: 0;
+            }
+
+            .module-main > .row {
+                width: auto !important;
+                margin-right: 0;
+                margin-left: 0;
+            }
+
+            .module-main .col-md-12 {
+                padding-right: 0;
+                padding-left: 0;
             }
 
             .section-card,
             .hero-card {
-                padding: 18px 14px;
+                padding: 16px 12px;
                 border-radius: 18px;
+            }
+
+            .section-heading,
+            .section-subtitle,
+            .form-group label,
+            .grid-item-title,
+            .grid-item-body,
+            .grid-item-body p,
+            .module-sidebar-link {
+                overflow-wrap: anywhere;
             }
 
             .section-heading {
@@ -562,8 +647,25 @@ include "header.php";
             }
 
             .form-control {
+                width: 100%;
+                min-width: 0;
                 min-height: 48px;
                 padding: 12px 14px;
+            }
+
+            .whatsapp-fab {
+                right: 12px;
+                bottom: calc(12px + env(safe-area-inset-bottom));
+                padding: 8px;
+            }
+
+            .whatsapp-fab img {
+                width: 28px;
+                height: 28px;
+            }
+
+            .whatsapp-fab span {
+                display: none;
             }
 
             .content-grid {
@@ -845,7 +947,7 @@ include "header.php";
         <div class="container-fluid p-0">
             <div class="module-workspace">
                 <aside class="module-sidebar collapsed" id="module-sidebar">
-                    <button type="button" class="module-sidebar-toggle" aria-label="Menu" onclick="toggleModuleSidebar()">
+                    <button type="button" class="module-sidebar-toggle" aria-label="Menu" aria-expanded="false" onclick="toggleModuleSidebar()">
                         <i class="fas fa-bars"></i>
                     </button>
                     <nav class="module-sidebar-nav">
@@ -1014,7 +1116,7 @@ include "header.php";
         </div>
     </div>
     <!-- Botón de WhatsApp -->
-    <a href="https://wa.me/573117592209" target="_blank" class="whatsapp-fab">
+    <a href="https://wa.me/573117592209" target="_blank" class="whatsapp-fab" aria-label="Soporte">
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp">
         <span id="support-label">Soporte</span>
     </a>
@@ -1037,6 +1139,7 @@ include "header.php";
         const workspace = document.querySelector('.module-workspace');
         const isCollapsed = sidebar.classList.toggle('collapsed');
         workspace.classList.toggle('sidebar-open', !isCollapsed);
+        document.querySelector('.module-sidebar-toggle').setAttribute('aria-expanded', String(!isCollapsed));
     }
 
     function showModuleView(viewName, selectedButton) {
@@ -1047,6 +1150,12 @@ include "header.php";
         document.querySelectorAll('.module-sidebar-link[data-view]').forEach(button => {
             button.classList.toggle('active', button === selectedButton);
         });
+
+        if (window.matchMedia('(max-width: 600px)').matches) {
+            document.getElementById('module-sidebar').classList.add('collapsed');
+            document.querySelector('.module-sidebar-toggle').setAttribute('aria-expanded', 'false');
+            document.querySelector('.module-workspace').classList.remove('sidebar-open');
+        }
 
         if (viewName === 'search-content' && window.searchCards) {
             window.searchCards();
