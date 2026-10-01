@@ -413,11 +413,11 @@
             .module-sidebar {
                 position: absolute;
                 top: 0;
-                left: 0;
+                left: -12px;
                 z-index: 1200;
                 display: flex;
                 flex-direction: column;
-                width: 100%;
+                width: calc(100% + 24px);
                 height: 60px;
                 min-height: 0;
                 padding: 8px 12px;
@@ -427,7 +427,7 @@
             }
 
             .module-sidebar:not(.collapsed) {
-                width: 100%;
+                width: calc(100% + 24px);
                 height: auto;
                 max-height: calc(100vh - var(--welcome-bottom));
                 max-height: calc(100dvh - var(--welcome-bottom));
@@ -438,7 +438,7 @@
 
             .module-sidebar.collapsed,
             .module-sidebar.collapsed:hover {
-                width: 100%;
+                width: calc(100% + 24px);
                 height: 60px;
                 max-height: none;
                 padding: 8px 12px;
