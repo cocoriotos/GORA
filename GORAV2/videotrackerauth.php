@@ -45,6 +45,7 @@
                 <img src="GORA.ico" alt="GORA Logo" class="logo">
                 <h1 data-i18n="auth_title">Biblioteca de Contenidos Útiles</h1>
             </div>
+            <div id="session-timeout-message" class="session-timeout-message" role="alert" hidden></div>
             <form id="login" action="access_success_Tasks_final.php" method="POST" autocomplete="off">
                 <div class="lang-sw">
                     <button class="lb on" type="button" onclick="setLang('es')">ES</button>
@@ -81,9 +82,9 @@
 
 <script>
 const T={
-    es:{auth_title:"Biblioteca de Contenidos Útiles",auth_login:"Ingresar",auth_cancel:"Cancelar",auth_forgot:"¿Olvidaste tu contraseña?",auth_no_access:"¿Sin acceso?",auth_request_here:"Solicitarlo aquí",auth_questions:"¿Alguna duda?",auth_contact_email:"Contáctenos al Email:",auth_email:"Email",auth_password:"Contraseña"},
-    en:{auth_title:"Useful Content Library",auth_login:"Log In",auth_cancel:"Cancel",auth_forgot:"Forgot your password?",auth_no_access:"No access?",auth_request_here:"Request it here",auth_questions:"Any questions?",auth_contact_email:"Contact us by email:",auth_email:"Email",auth_password:"Password"},
-    pt:{auth_title:"Biblioteca de Conteúdos Úteis",auth_login:"Entrar",auth_cancel:"Cancelar",auth_forgot:"Esqueceu sua senha?",auth_no_access:"Sem acesso?",auth_request_here:"Solicite aqui",auth_questions:"Alguma dúvida?",auth_contact_email:"Contate-nos pelo Email:",auth_email:"Email",auth_password:"Senha"}
+    es:{auth_title:"Biblioteca de Contenidos Útiles",auth_login:"Ingresar",auth_cancel:"Cancelar",auth_forgot:"¿Olvidaste tu contraseña?",auth_no_access:"¿Sin acceso?",auth_request_here:"Solicitarlo aquí",auth_questions:"¿Alguna duda?",auth_contact_email:"Contáctenos al Email:",auth_email:"Email",auth_password:"Contraseña",auth_timeout:"No se detectó actividad. La sesión se cerró por seguridad."},
+    en:{auth_title:"Useful Content Library",auth_login:"Log In",auth_cancel:"Cancel",auth_forgot:"Forgot your password?",auth_no_access:"No access?",auth_request_here:"Request it here",auth_questions:"Any questions?",auth_contact_email:"Contact us by email:",auth_email:"Email",auth_password:"Password",auth_timeout:"No activity was detected. Your session was closed for security."},
+    pt:{auth_title:"Biblioteca de Conteúdos Úteis",auth_login:"Entrar",auth_cancel:"Cancelar",auth_forgot:"Esqueceu sua senha?",auth_no_access:"Sem acesso?",auth_request_here:"Solicite aqui",auth_questions:"Alguma dúvida?",auth_contact_email:"Contate-nos pelo Email:",auth_email:"Email",auth_password:"Senha",auth_timeout:"Nenhuma atividade foi detectada. Sua sessão foi encerrada por segurança."}
 };
 
 function applyTranslations(lang){
@@ -91,6 +92,11 @@ function applyTranslations(lang){
     document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(d[k]!==undefined)el.innerHTML=d[k];});
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const k=el.getAttribute('data-i18n-placeholder');if(d[k]!==undefined)el.placeholder=d[k];});
     document.querySelectorAll('.lb').forEach(b=>{b.classList.toggle('on',b.textContent.trim()===lang.toUpperCase());});
+    const timeoutMessage = document.getElementById('session-timeout-message');
+    if (timeoutMessage && new URLSearchParams(window.location.search).get('timeout') === '1') {
+        timeoutMessage.textContent = d.auth_timeout;
+        timeoutMessage.hidden = false;
+    }
     document.documentElement.lang = lang;
 }
 

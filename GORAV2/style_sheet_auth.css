@@ -98,6 +98,21 @@ select {
   margin-bottom: 26px;
 }
 
+.session-timeout-message {
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 126, 126, 0.35);
+  border-radius: 14px;
+  background: rgba(150, 35, 48, 0.18);
+  color: #ffd9dc;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.session-timeout-message[hidden] {
+  display: none;
+}
+
 .login-header img {
   width: 84px;
   height: 84px;

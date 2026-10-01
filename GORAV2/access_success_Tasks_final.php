@@ -331,6 +331,7 @@ $active = 0;
 				  else{	
 						if(mysqli_num_rows($result12)==true)
 							{	
+								$_SESSION['LAST_ACTIVITY'] = time();
 								$query18="update videotips_app_access_list SET suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), visits = visits+1, lastlogindate = CURDATE() where username ='$local_username'"; 
 								$result18=mysqli_query($conn, $query18);
 								header("refresh:0; url=videolinkadminmodule.php");
