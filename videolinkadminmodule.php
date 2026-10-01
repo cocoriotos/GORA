@@ -607,7 +607,7 @@ include "header.php";
         window.moduleTranslations = {
             es: {
                 add_link_title: 'Adicionar Enlace',
-                add_link_subtitle: 'Guarda y organiza contenido útil con el diseño de SmartShelf.',
+                add_link_subtitle: 'Guarda y organiza contenido útil con el diseño de GORA.',
                 useful_contents: 'Tus Contenidos Útiles',
                 search_placeholder: 'Buscar...',
                 sidebar_add: 'Adicionar Enlace',
@@ -653,7 +653,7 @@ include "header.php";
             },
             en: {
                 add_link_title: 'Add Link',
-                add_link_subtitle: 'Save and organize useful content with the SmartShelf design.',
+                add_link_subtitle: 'Save and organize useful content with the GORA design.',
                 useful_contents: 'Your Useful Contents',
                 search_placeholder: 'Search...',
                 sidebar_add: 'Add Link',
@@ -699,7 +699,7 @@ include "header.php";
             },
             pt: {
                 add_link_title: 'Adicionar Link',
-                add_link_subtitle: 'Salve e organize conteúdo útil com o design do SmartShelf.',
+                add_link_subtitle: 'Salve e organize conteúdo útil com o design do GORA.',
                 useful_contents: 'Seus Conteúdos Úteis',
                 search_placeholder: 'Buscar...',
                 sidebar_add: 'Adicionar Link',
@@ -891,7 +891,7 @@ include "header.php";
                                 <button type="button" class="lang-btn" data-lang="pt">PT</button>
                             </div>
                             <div class="section-heading" id="heading-add-link">Adicionar Enlace</div>
-                            <div class="section-subtitle" id="subtitle-add-link">Guarda y organiza contenido útil con el diseño de SmartShelf.</div>
+                            <div class="section-subtitle" id="subtitle-add-link">Guarda y organiza contenido útil con el diseño de GORA.</div>
 
                             <!-- Primera fila del formulario -->
                             <div class="form-row">
