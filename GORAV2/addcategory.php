@@ -339,12 +339,17 @@
         }
 
         @media (max-width: 600px) {
+            html,
             body.admin-module-page {
+                width: 100%;
+                max-width: 100%;
                 overflow-x: hidden;
             }
 
             body.admin-module-page nav#welcome {
                 width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
                 padding: 10px 12px;
             }
 
@@ -365,8 +370,44 @@
 
             .admin-wrapper {
                 width: 100%;
+                max-width: 100%;
                 padding: 0 12px 48px;
                 box-sizing: border-box;
+            }
+
+            .admin-wrapper > .container-fluid,
+            .module-workspace,
+            .module-main,
+            .module-main > .row,
+            .module-view,
+            .category-search-row,
+            .section-card,
+            .content-grid,
+            .content-card,
+            .grid-item-content,
+            .search-container,
+            .search-wrapper,
+            #searchInput,
+            .total-cards {
+                box-sizing: border-box;
+                min-width: 0;
+                max-width: 100%;
+            }
+
+            .admin-wrapper > .container-fluid,
+            .module-workspace,
+            .module-main,
+            .module-view,
+            .category-search-row,
+            .section-card,
+            .content-grid,
+            .content-card,
+            .grid-item-content,
+            .search-container,
+            .search-wrapper,
+            #searchInput,
+            .total-cards {
+                width: 100%;
             }
 
             .module-sidebar {
@@ -449,9 +490,8 @@
             }
 
             .module-main > .row {
-                width: auto !important;
-                margin-right: 0;
-                margin-left: 0;
+                width: 100% !important;
+                margin: 0;
             }
 
             .module-main .col-md-12 {
@@ -527,11 +567,12 @@
             }
 
             .content-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(0, 1fr);
                 gap: 14px;
             }
 
             .content-card {
+                width: 100%;
                 min-height: 0;
                 border-radius: 16px;
             }
