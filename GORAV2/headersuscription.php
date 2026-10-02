@@ -7,6 +7,7 @@ $name = $_SESSION['name'];
 <htm lang="us"> 
 <head>    
     <link rel="stylesheet" href="style_sheet_ops.css"/>
+  <script src="session-timeout.js?v=20261001-3" defer></script>
 </head>
 <header>
   <nav class="navbar navbar-dark bg-dark d-flex justify-content-center" id="welcome">

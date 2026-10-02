@@ -21,6 +21,7 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
 //$local_username = $_SESSION['email']; // Obtener el email del usuario desde la sesión
 ?>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="GORA.ico" type="image/x-icon">
   <link rel="stylesheet" href="style_sheet.css"/>
 	<style>
@@ -216,6 +217,95 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
       }
     }
 
+    @media (max-width: 600px) {
+      html,
+      body#bodyadminmodule {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+
+      .subscription-workspace {
+        width: 100%;
+        max-width: 100%;
+        padding: 0 12px 48px;
+        box-sizing: border-box;
+      }
+
+      .subscription-sidebar {
+        top: 0;
+        left: -12px;
+        z-index: 1200;
+        width: calc(100% + 24px);
+        height: 60px;
+        min-height: 0;
+        padding: 8px 12px;
+        overflow: hidden;
+        background: #032642;
+        box-shadow: 0 8px 18px rgba(3, 38, 66, 0.14);
+      }
+
+      .subscription-sidebar.collapsed,
+      .subscription-sidebar.collapsed:hover {
+        width: calc(100% + 24px);
+        height: 60px;
+      }
+
+      .subscription-sidebar:not(.collapsed) {
+        width: calc(100% + 24px);
+        height: auto;
+        max-height: calc(100vh - var(--welcome-bottom));
+        max-height: calc(100dvh - var(--welcome-bottom));
+        overflow-y: auto;
+      }
+
+      .subscription-sidebar.collapsed .subscription-sidebar-nav {
+        display: none;
+      }
+
+      .subscription-sidebar:not(.collapsed) .subscription-sidebar-nav {
+        display: flex;
+      }
+
+      .subscription-sidebar-toggle,
+      .subscription-sidebar.collapsed .subscription-sidebar-toggle {
+        width: 44px;
+        height: 44px;
+        margin: 0;
+      }
+
+      .subscription-sidebar:not(.collapsed) .subscription-sidebar-link {
+        justify-content: flex-start;
+        padding: 12px;
+      }
+
+      .subscription-sidebar:not(.collapsed) .subscription-sidebar-link span,
+      .subscription-sidebar:not(.collapsed) .subscription-sidebar-title {
+        display: inline;
+      }
+
+      .subscription-workspace > .container1 {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding-top: 60px;
+        box-sizing: border-box;
+      }
+
+      .subscription-workspace .column-wrap,
+      .subscription-workspace .column-custom-wrap,
+      .subscription-workspace .column-custom,
+      .subscription-workspace .col-xs-12,
+      .subscription-workspace .col-sm-12,
+      .subscription-workspace .col-md-12,
+      .subscription-workspace .card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+    }
+
     </style>
 	<script src="Popper/popper.min.js"></script>
 	<script src="plugins/sweetalert/sweetalert.min.js"></script>
@@ -233,7 +323,7 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
 <body id="bodyadminmodule">
   <div class="subscription-workspace">
     <aside class="subscription-sidebar collapsed" id="subscription-sidebar">
-      <button type="button" class="subscription-sidebar-toggle" aria-label="Menu" onclick="toggleSubscriptionSidebar()">
+      <button type="button" class="subscription-sidebar-toggle" aria-label="Menu" aria-expanded="false" onclick="toggleSubscriptionSidebar()">
         <i class="fas fa-bars"></i>
       </button>
       <nav class="subscription-sidebar-nav">
@@ -380,7 +470,9 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
   }
 
   function toggleSubscriptionSidebar() {
-    document.getElementById('subscription-sidebar').classList.toggle('collapsed');
+    const sidebar = document.getElementById('subscription-sidebar');
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    document.querySelector('.subscription-sidebar-toggle').setAttribute('aria-expanded', String(!isCollapsed));
   }
 
   alignSubscriptionSidebar();

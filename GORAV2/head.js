@@ -3,8 +3,3 @@ fetch("head.html")
 				.then(data => {
 					document.head.innerHTML += data;
 				});
-
-const sessionTimeoutScript = document.createElement('script');
-sessionTimeoutScript.src = 'session-timeout.js?v=20261001-2';
-sessionTimeoutScript.defer = true;
-document.head.appendChild(sessionTimeoutScript);
