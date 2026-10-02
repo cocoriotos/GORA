@@ -108,6 +108,10 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
       text-align: center;
     }
 
+    .subscription-sidebar-link .fa-right-from-bracket {
+      color: #ffffff !important;
+    }
+
     .subscription-sidebar.collapsed .subscription-sidebar-link span {
       display: none;
     }
@@ -223,6 +227,37 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
         width: 100%;
         max-width: 100%;
         overflow-x: hidden;
+      }
+
+      body#bodyadminmodule nav#welcome {
+        display: flex;
+        width: 100%;
+        max-width: 100%;
+        padding: 10px 12px;
+        box-sizing: border-box;
+      }
+
+      body#bodyadminmodule nav#welcome > center {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+      }
+
+      body#bodyadminmodule nav#welcome #welcome.navbar-brand {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        font-size: 16px !important;
+        line-height: 1.3;
+        text-align: center;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+
+      #subscription-sidebar .subscription-sidebar-link .fa-right-from-bracket,
+      #subscription-sidebar .subscription-sidebar-link:hover .fa-right-from-bracket {
+        color: #ffffff !important;
       }
 
       .subscription-workspace {
