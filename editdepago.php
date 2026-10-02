@@ -7,6 +7,7 @@ include "db_connection1.php";
 
 <head>	
     <script src="head.js" defer></script>
+	<script src="session-timeout.js?v=20261001-3" defer></script>
     <link rel="stylesheet" href="style_sheet_ops.css"/>
     <script src="Popper/popper.min.js"></script>
     <script src="plugins/sweetalert/sweetalert.min.js"></script>
