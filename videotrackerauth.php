@@ -82,9 +82,9 @@
 
 <script>
 const T={
-    es:{auth_title:"Biblioteca de Contenidos Útiles",auth_login:"Ingresar",auth_cancel:"Cancelar",auth_forgot:"¿Olvidaste tu contraseña?",auth_no_access:"¿Sin acceso?",auth_request_here:"Solicitarlo aquí",auth_questions:"¿Alguna duda?",auth_contact_email:"Contáctenos al Email:",auth_email:"Email",auth_password:"Contraseña",auth_timeout:"No se detectó actividad en los últimos 3 minutos. La sesión se cerró por seguridad."},
-    en:{auth_title:"Useful Content Library",auth_login:"Log In",auth_cancel:"Cancel",auth_forgot:"Forgot your password?",auth_no_access:"No access?",auth_request_here:"Request it here",auth_questions:"Any questions?",auth_contact_email:"Contact us by email:",auth_email:"Email",auth_password:"Password",auth_timeout:"No activity was detected in the last 3 minutes. Your session was closed for security."},
-    pt:{auth_title:"Biblioteca de Conteúdos Úteis",auth_login:"Entrar",auth_cancel:"Cancelar",auth_forgot:"Esqueceu sua senha?",auth_no_access:"Sem acesso?",auth_request_here:"Solicite aqui",auth_questions:"Alguma dúvida?",auth_contact_email:"Contate-nos pelo Email:",auth_email:"Email",auth_password:"Senha",auth_timeout:"Nenhuma atividade foi detectada nos últimos 3 minutos. Sua sessão foi encerrada por segurança."}
+    es:{auth_title:"Biblioteca de Contenidos Útiles",auth_login:"Ingresar",auth_cancel:"Cancelar",auth_forgot:"¿Olvidaste tu contraseña?",auth_no_access:"¿Sin acceso?",auth_request_here:"Solicitarlo aquí",auth_questions:"¿Alguna duda?",auth_contact_email:"Contáctenos al Email:",auth_email:"Email",auth_password:"Contraseña",auth_timeout:"No se detectó actividad en los últimos 10 minutos. La sesión se cerró por seguridad."},
+    en:{auth_title:"Useful Content Library",auth_login:"Log In",auth_cancel:"Cancel",auth_forgot:"Forgot your password?",auth_no_access:"No access?",auth_request_here:"Request it here",auth_questions:"Any questions?",auth_contact_email:"Contact us by email:",auth_email:"Email",auth_password:"Password",auth_timeout:"No activity was detected in the last 10 minutes. Your session was closed for security."},
+    pt:{auth_title:"Biblioteca de Conteúdos Úteis",auth_login:"Entrar",auth_cancel:"Cancelar",auth_forgot:"Esqueceu sua senha?",auth_no_access:"Sem acesso?",auth_request_here:"Solicite aqui",auth_questions:"Alguma dúvida?",auth_contact_email:"Contate-nos pelo Email:",auth_email:"Email",auth_password:"Senha",auth_timeout:"Nenhuma atividade foi detectada nos últimos 10 minutos. Sua sessão foi encerrada por segurança."}
 };
 
 function applyTranslations(lang){
