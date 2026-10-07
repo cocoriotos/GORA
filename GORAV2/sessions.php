@@ -11,7 +11,7 @@ if (!empty($_SESSION['email'])) {
 	$now = time();
 	$lastActivity = isset($_SESSION['LAST_ACTIVITY']) ? (int) $_SESSION['LAST_ACTIVITY'] : $now;
 
-	if (isset($_GET['timeout']) || $now - $lastActivity >= 180) {
+	if (isset($_GET['timeout']) || $now - $lastActivity >= 600) {
 		session_unset();
 		session_destroy();
 

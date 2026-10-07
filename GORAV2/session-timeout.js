@@ -2,7 +2,7 @@
     if (window.goraSessionTimeoutStarted) return;
     window.goraSessionTimeoutStarted = true;
 
-    const idleLimit = 180000;
+    const idleLimit = 600000;
     const heartbeatInterval = 60000;
     let authenticated = false;
     let idleTimer;
