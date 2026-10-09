@@ -304,7 +304,7 @@
 <footer>
   <div class="f-grid">
     <div>
-      <div class="f-logo"><img src="GORAarmonyV2.png" alt="GORAarmony"/></div>
+      <div class="f-logo"><img src="GORAArmonyV2.png" alt="GORAarmony"/></div>
       <div class="f-tag" data-i18n="f_tag">Tu biblioteca digital inteligente. Centraliza, organiza y accede a todos tus contenidos en un solo lugar.</div>
       <div class="socials">
         <a href="https://www.instagram.com/goracoloficial" target="_blank" rel="noopener" class="soc" title="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
