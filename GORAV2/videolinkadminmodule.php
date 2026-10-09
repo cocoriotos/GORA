@@ -928,6 +928,14 @@ include "header.php";
         }
 
         function updateModuleText() {
+            const manualPaths = {
+                es: 'GORAManualUsuarioES.pdf',
+                en: 'GORAUserManualEN.pdf',
+                pt: 'GORAManualUsuárioPT.pdf',
+            };
+            const manualLink = document.getElementById('module-manual-link');
+            if (manualLink) manualLink.href = manualPaths[window.currentLang] || manualPaths.es;
+
             const updateText = (selector, key) => {
                 const el = document.querySelector(selector);
                 if (el) el.textContent = t(key);
@@ -1043,7 +1051,7 @@ include "header.php";
                             <!--<a class="module-sidebar-link" href="https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5" target="_blank">
                                 <i class="fas fa-play-circle"></i><span data-i18n="header_tutorials">Tutoriales</span>
                             </a>-->
-                            <a class="module-sidebar-link" href="GORAToolManualDelUsuario2026.pdf" target="_blank">
+                            <a class="module-sidebar-link" id="module-manual-link" href="GORAManualUsuarioES.pdf" target="_blank">
                                 <i class="fas fa-book-open"></i><span data-i18n="header_manual">Manual</span>
                             </a>
                         </div>
