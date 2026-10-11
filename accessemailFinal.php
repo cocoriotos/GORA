@@ -168,7 +168,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         /*Destination email information*/
         $to = "adm@solicionespro.com";
-        $subject = "Urgent SmartShelf access request";
+        $subject = "Urgent GORA access request";
         $message = "Good day Admin Team:  \n\n";
         $message .= "This user is requesting tool access, please response ASAP \n\n";
         $message .= str_pad("Member name", 40) . ": $name \n";
@@ -187,7 +187,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mail = mail($to, $subject, $message, $header);
 
         $to = "$email, adm@solicionespro.com";
-        $subject = "Requerimiento de acceso a SmartShelf";
+        $subject = "Requerimiento de acceso a GORA";
         $message = "Buen día $lastname, $name :  \n\n";
         $message .= "Su requerimiento ha sido exitoso. Acá la información de su solicitud \n\n";
         $message .= str_pad("Nombre", 40) . ": $name \n";
@@ -197,7 +197,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message .= str_pad("Ciudad", 40) . ": $city \n";
         $message .= str_pad("Nombre de usuario asignado", 40) . ": $email \n\n";
         $message .= "Por favor no responder éste correo \n\n";
-        $message .= "Gracias por su registro, ya puede ingresar a la app desde este enlace https://solicionespro.com/SmartShelf/videotrackerauth.php con su usuario $email y la contraseña que escogió. \n\n";
+        $message .= "Gracias por su registro, ya puede ingresar a la app desde este enlace https://solicionespro.com/videotrackerauth.php con su usuario $email y la contraseña que escogió. \n\n";
         $message .= "Puedes también ingresar por este enlace donde podrás obtener más información importante de la aplicación así como videos tutoriales y manual del usuario https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5. \n\n";
         $header = "From: adm@solicionespro.com" . "\r\n";
         $header .= "Bcc: adm@solicionespro.com\r\n";
