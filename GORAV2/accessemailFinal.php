@@ -1,12 +1,5 @@
 <?php 
 session_start();
-$captcha_input = $_POST["captcha"];
-$global_username = $_POST["email"];
-$_SESSION['email'] = $global_username;
-$local_username = $_SESSION['email'];
-$password = $_POST["password"];
-$captcha_input = $_POST["captcha"];
-
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validar que los campos existan
@@ -30,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    
+    $captcha_input = (string) $_POST["captcha"];
 
     // Validar si el CAPTCHA existe y ha expirado
     if (!isset($_SESSION["captcha"])) {
@@ -84,11 +77,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Connection failed: " . mysqli_connect_error());
     }
 
-    $name = mysqli_real_escape_string($conn, $_POST['Name']);
-    $lastname = mysqli_real_escape_string($conn, $_POST['LastName']);
-    $email = mysqli_real_escape_string($conn, $_POST['Email']);
-    $country = mysqli_real_escape_string($conn, $_POST['Country']);
-    $city = mysqli_real_escape_string($conn, $_POST['City']);
+    $name = trim($_POST['Name']);
+    $lastname = trim($_POST['LastName']);
+    $email = trim($_POST['Email']);
+    $country = trim($_POST['Country']);
+    $city = trim($_POST['City']);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(400);
+        exit('La dirección de correo electrónico no es válida.');
+    }
     $phone = trim($_POST['phone']);
     if ($phone === '' || !preg_match('/^[0-9]+$/', $phone)) {
         echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
@@ -106,12 +103,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </script>";
         exit();
     }
-    $phone = mysqli_real_escape_string($conn, $phone);
-    /*$password = password_hash($_POST['password1'], PASSWORD_DEFAULT);*/
-    $password = mysqli_real_escape_string($conn, $_POST['password1']);
+    $submittedPassword = $_POST['password1'];
+    if ($submittedPassword === '') {
+        http_response_code(400);
+        exit('La contraseña es obligatoria.');
+    }
+    $passwordHash = password_hash($submittedPassword, PASSWORD_DEFAULT);
 
-    $query3 = "SELECT * from videotips_app_access_list where email = '$email'";
-    $result3 = $conn->query($query3);
+    $stmt = $conn->prepare("SELECT 1 FROM videotips_app_access_list WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result3 = $stmt->get_result();
 
     if ($result3->num_rows > 0) {
         echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
@@ -135,13 +137,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </script>";
 		exit();
     } else {
-        $query = "INSERT INTO videotips_accessrequests (name, lastname, email, country, city, password, processed, granted, phone) VALUES ('$name', '$lastname', '$email', '$country', '$city','$password','Yes','Yes', '$phone')";
-        $result = $conn->query($query);
+        $conn->begin_transaction();
+        $stmt = $conn->prepare("INSERT INTO videotips_accessrequests (name, lastname, email, country, city, password, processed, granted, phone) VALUES (?, ?, ?, ?, ?, ?, 'Yes', 'Yes', ?)");
+        $stmt->bind_param("sssssss", $name, $lastname, $email, $country, $city, $passwordHash, $phone);
+        $result = $stmt->execute();
 
-        $query1 = "INSERT INTO videotips_app_access_list (name, lastname, username, email, phone, password, role, active, adm_role, suscriptionactive, terms_conditions_awareness, suscriptionkind, lastsuscriptionpaymentdate, suscriptiondaysleft, trialdaysleft) VALUES ('$name', '$lastname', '$email', '$email', '$phone', '$password', 'user', 1, 0, 1, 'Yes', 'Trial', CURDATE(), 0, 0)";
-        $result1 = $conn->query($query1);
+        $stmt = $conn->prepare("INSERT INTO videotips_app_access_list (name, lastname, username, email, phone, password, role, active, adm_role, suscriptionactive, terms_conditions_awareness, suscriptionkind, lastsuscriptionpaymentdate, suscriptiondaysleft, trialdaysleft) VALUES (?, ?, ?, ?, ?, ?, 'user', 1, 0, 1, 'Yes', 'Trial', CURDATE(), 0, 0)");
+        $stmt->bind_param("ssssss", $name, $lastname, $email, $email, $phone, $passwordHash);
+        $result1 = $stmt->execute();
 
         if (!$result || !$result1) {
+            $conn->rollback();
             error_log('Registration insert failed: ' . $conn->error);
             echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
             echo "<script>
@@ -158,9 +164,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </script>";
             exit();
         }
+        $conn->commit();
 
-        $query2 = "INSERT INTO videotips_suscription_payments (username, active, freeregistrationdate) SELECT email, active, registrationdate from videotips_app_access_list where username = '$email'";
-        $result2 = $conn->query($query2);
+        $stmt = $conn->prepare("INSERT INTO videotips_suscription_payments (username, active, freeregistrationdate) SELECT email, active, registrationdate FROM videotips_app_access_list WHERE username = ?");
+        $stmt->bind_param("s", $email);
+        $result2 = $stmt->execute();
 
         $query3 = "UPDATE videotips_app_access_list t1 JOIN videotips_suscription_payments t2 ON t1.username = t2.username SET t1.suscription_package = t2.suscription_package;";
         $result3 = $conn->query($query3);
@@ -197,7 +205,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message .= str_pad("Ciudad", 40) . ": $city \n";
         $message .= str_pad("Nombre de usuario asignado", 40) . ": $email \n\n";
         $message .= "Por favor no responder éste correo \n\n";
-        $message .= "Gracias por su registro, ya puede ingresar a la app desde este enlace https://solicionespro.com/videotrackerauth.php con su usuario $email y la contraseña que escogió. \n\n";
+        $message .= "Gracias por su registro, ya puede ingresar a la app desde este enlace https://solicionespro.com/videotrackerauth.php con su usuario $email y la contraseña que escogió. Por seguridad, nunca enviamos contraseñas por correo. \n\n";
         $message .= "Puedes también ingresar por este enlace donde podrás obtener más información importante de la aplicación así como videos tutoriales y manual del usuario https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5. \n\n";
         $header = "From: adm@solicionespro.com" . "\r\n";
         $header .= "Bcc: adm@solicionespro.com\r\n";

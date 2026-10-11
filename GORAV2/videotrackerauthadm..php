@@ -32,11 +32,11 @@
 					<hr>
 					<div class="inputdata1">
 						<font id= "form_title" color="white"><strong>Email</strong></font><br><br>
-						<input id="username1" type="text" name="email"  placeholder="Digite el email" autocomplete="off" required ><br> <!-- Login  --><br>
+						<input id="username1" type="email" name="email" placeholder="Digite el email" autocomplete="username" required ><br> <!-- Login  --><br>
 					</div >
 					<div class="inputdata1">
 						<font id= "form_title" color="white"><strong>Contraseña</strong></font><br><br>
-						<input id="username1" type="password" name="password" placeholder="Digite su Constraseña" autocomplete="off" required ><br> <!-- Login PAM username  --><br>
+						<input id="username1" type="password" name="password" placeholder="Digite su Constraseña" autocomplete="current-password" required ><br> <!-- Login PAM username  --><br>
 					</div >
 					<input id="loginbutton" type="submit" value="Ingresar">
 					<br>

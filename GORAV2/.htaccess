@@ -1,5 +1,12 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{REQUEST_METHOD} =POST
+    RewriteRule ^ - [F,L]
+
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
     
     # Si la petición no es un directorio real y tampoco un archivo real
     RewriteCond %{REQUEST_FILENAME} !-d

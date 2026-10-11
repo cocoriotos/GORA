@@ -1,76 +1,67 @@
-<html>
-<?php 
-
-GLOBAL $global_username;
-GLOBAL $suscriptiondue;
-GLOBAL $suscriptioninactive;
-GLOBAL $sessiontimeoutreached;
-
-
+<?php
 session_start();
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['email'], $_POST['password'])) {
+    header("Location: videotrackerauth.php");
+    exit();
+}
 
-$global_username=$_POST['email'];
-$_SESSION['email']=$global_username;
-$local_username=$_SESSION['email'];
-$password=$_POST['password'];
+$local_username = trim((string) $_POST['email']);
+$password = (string) $_POST['password'];
+if (!filter_var($local_username, FILTER_VALIDATE_EMAIL) || $password === '') {
+    header("Location: videotrackerauth.php");
+    exit();
+}
 
-	if($_POST)
- {
-  $db_host="127.0.0.1";
-  $db_user="u927778197_adm";
-  $db_pass="C0mp13t3501ut10n5*";
-  $db_name="u927778197_appsdb";
-  $conn=mysqli_connect($db_host,$db_user,$db_pass,$db_name);
-		if(mysqli_connect_errno()) 
-					{	
-					include("No_DB_Connectionfinal.php");
-					include ("videotrackerauth.php");
-					exit();
-					}
-		mysqli_select_db($conn,$db_name) or die ("<center>No hay conexión disponible a la aplicación</center>");		
+include("db_connection1.php");
 
-		if ($conn==true)
-				{
+$stmt = $conn->prepare("SELECT password FROM videotips_app_access_list WHERE email = ? AND active = 1");
+$stmt->bind_param("s", $local_username);
+$stmt->execute();
+$authRecord = $stmt->get_result()->fetch_assoc();
+$storedPassword = $authRecord['password'] ?? '';
+$passwordVerified = $storedPassword !== '' && password_verify($password, $storedPassword);
 
-				}
-				
-				$query2="update videotips_app_access_list SET suscriptiondaysleft = DATEDIFF(CURDATE(), registrationdate) where username ='$local_username'"; 
-				$result2=mysqli_query($conn, $query2);
+if (!$passwordVerified && $storedPassword !== '' && hash_equals($storedPassword, $password)) {
+    $upgradedHash = password_hash($password, PASSWORD_DEFAULT);
+    $upgradeStmt = $conn->prepare("UPDATE videotips_app_access_list SET password = ? WHERE email = ? AND password = ?");
+    $upgradeStmt->bind_param("sss", $upgradedHash, $local_username, $storedPassword);
+    $upgradeStmt->execute();
+    $passwordVerified = $upgradeStmt->affected_rows === 1;
+}
 
-				$stmt = $conn->prepare("SELECT suscriptiondaysleft FROM videotips_app_access_list WHERE username = ?");
-				$stmt->bind_param("s", $local_username);
-				$stmt->execute();
-				$result3 = $stmt->get_result();
-				$suscriptiondaysleft = $result3->fetch_assoc()['suscriptiondaysleft'];
+if ($passwordVerified) {
+    $cleanupStmt = $conn->prepare("UPDATE videotips_accessrequests SET password = '' WHERE email = ?");
+    $cleanupStmt->bind_param("s", $local_username);
+    $cleanupStmt->execute();
+}
 
-				$stmt = $conn->prepare("SELECT suscriptionpayed FROM videotips_app_access_list WHERE username = ?");
-				$stmt->bind_param("s", $local_username);
-				$stmt->execute();
-				$result4 = $stmt->get_result();
-				$suscriptionpayed = $result4->fetch_assoc()['suscriptionpayed'];
+if (!$passwordVerified) {
+    header("Location: videotrackerauth.php?login=failed");
+    exit();
+}
 
-				$query1="select * from videotips_app_access_list where email='$local_username' and active='1' and password='$password'"; 
-				$result1=mysqli_query($conn, $query1); 
+session_regenerate_id(true);
+$_SESSION['email'] = $local_username;
+$_SESSION['LAST_ACTIVITY'] = time();
 
+$stmt = $conn->prepare("UPDATE videotips_app_access_list SET suscriptiondaysleft = DATEDIFF(CURDATE(), registrationdate) WHERE username = ?");
+$stmt->bind_param("s", $local_username);
+$stmt->execute();
 
-				if ($suscriptiondaysleft > 8 && $suscriptionpayed == 0) {
-					$_SESSION['suscriptiondue']=1;
-					header("refresh:0; url=suscriptionpayment.php");
-					exit();
-				  }else{	
-						if(mysqli_num_rows($result1)==true)
-							{	
-								header("refresh:0; url=videolinkadminmodule.php");
-								exit();
-							}
-							else 
-							{
-								include("access_not_successtasksfinal.php");	
-								header("refresh:0; url=videotrackerauth.php");
-								exit();
-							}
-						}		
- }
-?>	
-</html>
+$stmt = $conn->prepare("SELECT suscriptiondaysleft, suscriptionpayed FROM videotips_app_access_list WHERE username = ?");
+$stmt->bind_param("s", $local_username);
+$stmt->execute();
+$userData = $stmt->get_result()->fetch_assoc();
+$suscriptiondaysleft = (int) ($userData['suscriptiondaysleft'] ?? 0);
+$suscriptionpayed = (int) ($userData['suscriptionpayed'] ?? 0);
+
+if ($suscriptiondaysleft > 8 && $suscriptionpayed === 0) {
+    $_SESSION['suscriptiondue'] = 1;
+    header("Location: suscriptionpayment.php");
+    exit();
+}
+
+header("Location: videolinkadminmodule.php");
+exit();
+?>

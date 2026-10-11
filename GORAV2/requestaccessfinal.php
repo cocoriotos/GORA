@@ -46,7 +46,7 @@
             </div>
             <div class="input-group">
                 <i class="fas fa-envelope"></i>
-                <input type="text" name="Email" data-i18n-placeholder="req_email" placeholder="Correo electrónico" required>
+                <input type="email" name="Email" autocomplete="username" data-i18n-placeholder="req_email" placeholder="Correo electrónico" required>
             </div>
             <div class="input-group">
                 <i class="fas fa-globe"></i>
@@ -62,7 +62,7 @@
             </div>
             <div class="input-group">
                 <i class="fas fa-lock"></i>
-                <input type="password" name="password1" data-i18n-placeholder="req_password" placeholder="Contraseña" required>
+                <input type="password" name="password1" autocomplete="new-password" data-i18n-placeholder="req_password" placeholder="Contraseña" required>
             </div>
             <img src="captcha.php" alt="CAPTCHA" class="captcha-image">
             <input type="text" name="captcha" data-i18n-placeholder="req_captcha" placeholder="Ingrese el CAPTCHA" required>

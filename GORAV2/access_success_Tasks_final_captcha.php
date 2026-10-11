@@ -135,19 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     unset($_SESSION["captcha"]);
 
     // Conexión a la base de datos
-    $db_host = "127.0.0.1";
-    $db_user = "u927778197_adm";
-    $db_pass = "C0mp13t3501ut10n5*";
-    $db_name = "u927778197_appsdb";
-
-    $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
-    if (!$conn) {
-        include("No_DB_Connectionfinal.php");
-        include("videotrackerauth.php");
-        exit();
-    }
-
-    mysqli_select_db($conn, $db_name) or die("No hay conexión disponible a la aplicación");
+    include("db_connection1.php");
 
     // Obtener datos del usuario
     $stmt = $conn->prepare("SELECT suscriptiondaysleft, suscriptionpayed, name FROM videotips_app_access_list WHERE username = ?");
@@ -181,12 +169,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $suscriptionpayed = $user_data['suscriptionpayed'];
 
     // Verificar credenciales
-    $stmt = $conn->prepare("SELECT * FROM videotips_app_access_list WHERE email = ? AND active = 1 AND password = ?");
-    $stmt->bind_param("ss", $local_username, $password);
+    $stmt = $conn->prepare("SELECT password FROM videotips_app_access_list WHERE email = ? AND active = 1");
+    $stmt->bind_param("s", $local_username);
     $stmt->execute();
-    $result = $stmt->get_result();
+    $authRecord = $stmt->get_result()->fetch_assoc();
+    $storedPassword = $authRecord['password'] ?? '';
+    $passwordVerified = $storedPassword !== '' && password_verify($password, $storedPassword);
 
-    if ($result->num_rows > 0) {
+    if (!$passwordVerified && $storedPassword !== '' && hash_equals($storedPassword, $password)) {
+        $upgradedHash = password_hash($password, PASSWORD_DEFAULT);
+        $upgradeStmt = $conn->prepare("UPDATE videotips_app_access_list SET password = ? WHERE email = ? AND password = ?");
+        $upgradeStmt->bind_param("sss", $upgradedHash, $local_username, $storedPassword);
+        $upgradeStmt->execute();
+        $passwordVerified = $upgradeStmt->affected_rows === 1;
+    }
+
+    if ($passwordVerified) {
+        $cleanupStmt = $conn->prepare("UPDATE videotips_accessrequests SET password = '' WHERE email = ?");
+        $cleanupStmt->bind_param("s", $local_username);
+        $cleanupStmt->execute();
+
+        session_regenerate_id(true);
+        $_SESSION['email'] = $local_username;
+        $_SESSION['LAST_ACTIVITY'] = time();
         // Actualizar datos de suscripción
         $stmt = $conn->prepare("UPDATE videotips_suscription_payments SET currentdate = CURDATE() WHERE username = ?");
         $stmt->bind_param("s", $local_username);
@@ -260,4 +265,3 @@ if ($captchat_status == 4) {
 }
 
 ?>
-
