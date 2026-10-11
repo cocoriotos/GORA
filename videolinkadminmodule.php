@@ -931,7 +931,7 @@ include "header.php";
             const manualPaths = {
                 es: 'GORAManualUsuarioES.pdf',
                 en: 'GORAUserManualEN.pdf',
-                pt: 'GORAManualUsuarioPT.pdf',
+                pt: 'GORAManualUsuarioPT.pdf', 
             };
             const manualLink = document.getElementById('module-manual-link');
             if (manualLink) manualLink.href = manualPaths[window.currentLang] || manualPaths.es;
