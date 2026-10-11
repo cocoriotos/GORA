@@ -70,7 +70,7 @@
     </h1>
     <p class="hero-sub fu fu3" data-i18n="hero_sub">¿Cuántos links perdidos tienes hoy? GORA centraliza todos tus contenidos favoritos de internet en un solo lugar, con búsqueda instantánea y acceso desde cualquier dispositivo.</p>
     <div class="hero-ctas fu fu4">
-      <a href="https://solicionespro.com/GORA/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary btn-lg" data-i18n="hero_cta1">Comenzar Gratis — 30 días ›</a>
+      <a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary btn-lg" data-i18n="hero_cta1">Comenzar Gratis — 30 días ›</a>
       <a href="#video" class="btn-outline-lg" data-i18n="hero_cta2">Ver Demo</a>
     </div>
     <div class="hero-stats fu fu4">
