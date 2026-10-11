@@ -207,7 +207,7 @@
 <!-- Reproductor de Audio -->
   <div class="audio-wrap reveal" style="margin-top: 20px; text-align: center;">
     <audio controls style="width: 100%; max-width: 600px;"> 
-      <source src="/GORAV2/GoraPodCast.mp3" type="audio/mpeg">
+      <source src="/GoraPodCast.mp3" type="audio/mpeg">
       Tu navegador no soporta el reproductor de audio.
     </audio>
   </div>
@@ -235,7 +235,7 @@
         <li class="p-feat"><span class="p-chk">✓</span><span data-i18n="pfeat3">Buscador inteligente</span></li>
         <li class="p-feat"><span class="p-chk">✓</span><span data-i18n="pfeat4">Acceso desde cualquier dispositivo</span></li>
       </ul>
-      <a href="https://solicionespro.com/GORA/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-ghost" style="width:100%;justify-content:center;" data-i18n="plan_btn">Comenzar ›</a>
+      <a href="https://solicionespro.com/GORA/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-ghost" style="width:100%;justify-content:center;" data-i18n="plan_btn">Comenzar ›</a>
     </div>
     <div class="p-card reveal">
       <div class="p-plan" data-i18n="plan2_name">Semestral</div>
