@@ -26,6 +26,7 @@
         <div class="login-header">
             <img src="GORA.ico" alt="GORA Logo" class="logo">
             <h1 data-i18n="req_title">Solicitud de Acceso</h1>
+            <?php include __DIR__ . "/social_links.php"; ?>
         </div>
 
         <!-- Formulario de solicitud de acceso -->

@@ -25,6 +25,7 @@
     </a></li>
   </ul>
   <div class="nav-right">
+    <?php include __DIR__ . "/social_links.php"; ?>
     <div class="lang-sw">
       <button class="lb on" onclick="setLang('es')">ES</button>
       <button class="lb" onclick="setLang('en')">EN</button>

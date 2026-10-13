@@ -26,6 +26,7 @@
         <div class="login-header">
             <img src="SmartShelfUsefulContentLibraryDarrkLightGreen.ico" alt="SmartShelf Logo" class="logo">
             <h1>Solicitud de Acceso</h1>
+            <?php include __DIR__ . "/social_links.php"; ?>
         </div>
 
         <!-- Formulario de solicitud de acceso -->

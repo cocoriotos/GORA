@@ -27,6 +27,7 @@ include "sessions.php";
         <div class="login-header">
             <img src="GORA.ico" alt="GORA Logo" class="logo">
             <h1 data-i18n="rec_title">Recuperación de Contraseña</h1>
+            <?php include __DIR__ . "/social_links.php"; ?>
         </div>
 
         <!-- Formulario de recuperación de contraseña -->

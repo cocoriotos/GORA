@@ -16,6 +16,7 @@ include "sessionvalidation.php";*/
     <center><a id="welcome" class="navbar-brand">Consideraciones y cubrimientos de Servicios</a></center>
 
   </nav>
+  <?php include __DIR__ . "/social_links.php"; ?>
 	</header>
   
   

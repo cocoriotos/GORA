@@ -14,6 +14,7 @@ $name = $_SESSION['name'];
   <nav class="navbar navbar-dark bg-dark d-flex justify-content-center" id="welcome" >
   <center><a id="welcome"  class="navbar-brand"><span class="username-style"><?php echo $name; ?></span>, <span data-i18n="header_welcome_msg">estás en tu Biblioteca de Contenidos Útiles</span></a></center>
   </nav>
+  <?php include __DIR__ . "/social_links.php"; ?>
   <script src="copynumber.js"></script>
   <script src="copypaypal.js"></script>
 

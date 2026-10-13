@@ -13,6 +13,7 @@ $name = $_SESSION['name'];
     <nav class="navbar navbar-dark bg-dark d-flex justify-content-center" id="welcome">
     <center><a id="welcome" href="videolinkadminmodule.php" class="navbar-brand"><span class="username-style"><?php echo $name; ?></span>, éstas en tu Biblioteca de Contenidos Útiles</a></center>
     </nav>
+    <?php include __DIR__ . "/social_links.php"; ?>
 
     <!--<nav class="navbar navbar-dark bg-dark d-flex justify-content-between align-items-center">      
           

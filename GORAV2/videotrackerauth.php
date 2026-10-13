@@ -44,6 +44,7 @@
             <div class="login-header">
                 <img src="GORA.ico" alt="GORA Logo" class="logo">
                 <h1 data-i18n="auth_title">Biblioteca de Contenidos Útiles</h1>
+                <?php include __DIR__ . "/social_links.php"; ?>
             </div>
             <div id="session-timeout-message" class="session-timeout-message" role="alert" hidden></div>
             <form id="login" action="access_success_Tasks_final.php" method="POST" autocomplete="off">

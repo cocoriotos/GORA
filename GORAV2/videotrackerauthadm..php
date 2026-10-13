@@ -19,6 +19,7 @@
 	<header id="contact">
 			
 				<center><h1><font color="#E1EAF7">Biblioteca de Contenidos Útiles</font></h1></center>
+                <?php include __DIR__ . "/social_links.php"; ?>
 				
 	</header>	
 	  <body id="bodyadminmodule">
