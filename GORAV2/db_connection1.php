@@ -1,4 +1,8 @@
 <?php
+
+// Subes un nivel desde public_html para entrar a app_config
+require_once __DIR__ . '/../private/config.php';
+
 $db_host = getenv('GORA_DB_HOST');
 $db_user = getenv('GORA_DB_USER');
 $db_pass = getenv('GORA_DB_PASSWORD');
