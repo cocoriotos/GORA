@@ -96,7 +96,7 @@ $active = 0;
 			header("Location: videotrackerauth.php");
 			exit();
 		}
-echo "por aca voy";
+
 		include("db_connection1.php");
 
 		$stmt = $conn->prepare("SELECT password FROM videotips_app_access_list WHERE email = ? AND active = 1");
@@ -106,6 +106,7 @@ echo "por aca voy";
 		$authRecord = $authResult->fetch_assoc();
 		$storedPassword = $authRecord['password'] ?? '';
 		$passwordVerified = $storedPassword !== '' && password_verify($password, $storedPassword);
+		echo "por aca voy";
 		if (!$passwordVerified && $storedPassword !== '' && hash_equals($storedPassword, $password)) {
 			$upgradedHash = password_hash($password, PASSWORD_DEFAULT);
 			$upgradeStmt = $conn->prepare("UPDATE videotips_app_access_list SET password = ? WHERE email = ? AND password = ?");
