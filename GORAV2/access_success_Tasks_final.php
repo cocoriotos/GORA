@@ -87,6 +87,7 @@ $suscriptionkind = "None";
 $trialdaysleft = 0;
 $active = 0;
 
+echo "por aca voy";
 	if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['password']))
  {
 		$local_username = trim((string) $_POST['email']);
