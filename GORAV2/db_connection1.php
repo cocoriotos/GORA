@@ -20,18 +20,20 @@ echo "Vars $db_host, $db_user, $db_pass, $db_name";
 
 
 if (!$db_host || !$db_user || !$db_pass || !$db_name) {
+    echo "aqui entrí if vars";
     error_log('Database configuration is incomplete.');
     http_response_code(503);
     exit('La aplicación no está disponible.');
 }
-
+echo "antes del conn"; 
 $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
 if (!$conn) {
+    echo "aqui entrí if connection";
     error_log('Database connection failed: ' . mysqli_connect_error());
     http_response_code(503);
     exit('La aplicación no está disponible.');
 }
-echo "aqui estoy";
+
 
 $conn->set_charset('utf8mb4');
 ?>
