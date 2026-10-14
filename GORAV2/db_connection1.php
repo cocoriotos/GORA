@@ -1,5 +1,5 @@
 <?php
-
+echo "por aca voy";
 $configFile = dirname(__DIR__, 2) . '/private/config.php';
 if (!is_file($configFile) || !is_readable($configFile)) {
     error_log('Private database configuration file is missing or unreadable.');
