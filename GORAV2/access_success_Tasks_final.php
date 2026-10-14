@@ -88,6 +88,7 @@ $trialdaysleft = 0;
 $active = 0;
 
 
+
 	if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['password']))
  {
 		$local_username = trim((string) $_POST['email']);
@@ -108,7 +109,7 @@ $active = 0;
 		$passwordVerified = $storedPassword !== '' && password_verify($password, $storedPassword);
 		
 		if (!$passwordVerified && $storedPassword !== '' && hash_equals($storedPassword, $password)) {
-			echo "por aca voy";
+			
 			$upgradedHash = password_hash($password, PASSWORD_DEFAULT);
 			$upgradeStmt = $conn->prepare("UPDATE videotips_app_access_list SET password = ? WHERE email = ? AND password = ?");
 			$upgradeStmt->bind_param("sss", $upgradedHash, $local_username, $storedPassword);
