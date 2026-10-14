@@ -5,13 +5,12 @@ $configFile = dirname(__DIR__, 2) . '/private/config.php';
 
 if (!is_file($configFile) || !is_readable($configFile)) {
     error_log('Private database configuration file is missing or unreadable.');
-    echo "por aca entro";
     http_response_code(503);
     exit('La aplicación no está disponible.');
 }
 
 require_once $configFile;
-
+echo "por aca entro";
 $db_host = getenv('GORA_DB_HOST');
 $db_user = getenv('GORA_DB_USER');
 $db_pass = getenv('GORA_DB_PASSWORD');
