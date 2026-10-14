@@ -87,7 +87,7 @@ $suscriptionkind = "None";
 $trialdaysleft = 0;
 $active = 0;
 
-echo "por aca voy";
+
 	if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['password']))
  {
 		$local_username = trim((string) $_POST['email']);
@@ -96,7 +96,7 @@ echo "por aca voy";
 			header("Location: videotrackerauth.php");
 			exit();
 		}
-
+echo "por aca voy";
 		include("db_connection1.php");
 
 		$stmt = $conn->prepare("SELECT password FROM videotips_app_access_list WHERE email = ? AND active = 1");
