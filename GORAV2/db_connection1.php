@@ -31,6 +31,7 @@ if (!$conn) {
     http_response_code(503);
     exit('La aplicación no está disponible.');
 }
+echo "aqui estoy";
 
 $conn->set_charset('utf8mb4');
 ?>
