@@ -106,8 +106,9 @@ $active = 0;
 		$authRecord = $authResult->fetch_assoc();
 		$storedPassword = $authRecord['password'] ?? '';
 		$passwordVerified = $storedPassword !== '' && password_verify($password, $storedPassword);
-		echo "por aca voy";
+		
 		if (!$passwordVerified && $storedPassword !== '' && hash_equals($storedPassword, $password)) {
+			echo "por aca voy";
 			$upgradedHash = password_hash($password, PASSWORD_DEFAULT);
 			$upgradeStmt = $conn->prepare("UPDATE videotips_app_access_list SET password = ? WHERE email = ? AND password = ?");
 			$upgradeStmt->bind_param("sss", $upgradedHash, $local_username, $storedPassword);
