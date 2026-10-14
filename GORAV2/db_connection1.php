@@ -16,6 +16,7 @@ $db_user = getenv('GORA_DB_USER');
 $db_pass = getenv('GORA_DB_PASSWORD');
 $db_name = getenv('GORA_DB_NAME');
 
+echo "Vars $db_host, $db_user, $db_pass, $db_name";
 
 
 if (!$db_host || !$db_user || !$db_pass || !$db_name) {
