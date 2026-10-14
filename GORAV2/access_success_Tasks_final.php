@@ -98,6 +98,7 @@ $active = 0;
 			exit();
 		}
 echo "paso por access_success_Tasks_final.php";
+echo "$_POST[email]";
 		include("db_connection1.php");
 
 		$stmt = $conn->prepare("SELECT password FROM videotips_app_access_list WHERE email = ? AND active = 1");
