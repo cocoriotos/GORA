@@ -1,7 +1,13 @@
 <?php
 
-// Subes un nivel desde public_html para entrar a private y luego accedes a config.php
-require_once __DIR__ . '/../private/config.php';
+$configFile = dirname(__DIR__, 2) . '/private/config.php';
+if (!is_file($configFile) || !is_readable($configFile)) {
+    error_log('Private database configuration file is missing or unreadable.');
+    http_response_code(503);
+    exit('La aplicación no está disponible.');
+}
+
+require_once $configFile;
 
 $db_host = getenv('GORA_DB_HOST');
 $db_user = getenv('GORA_DB_USER');
