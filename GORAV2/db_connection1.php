@@ -9,6 +9,7 @@ $db_pass = getenv('GORA_DB_PASSWORD');
 $db_name = getenv('GORA_DB_NAME');
 
 echo " $db_host";
+echo "paso por aca";
 
 if (!$db_host || !$db_user || !$db_pass || !$db_name) {
     error_log('Database configuration is incomplete.');
