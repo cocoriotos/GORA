@@ -1,10 +1,11 @@
 <?php
 
 $configFile = dirname(__DIR__, 2) . '/private/config.php';
-echo "por aca voy";
+
 
 if (!is_file($configFile) || !is_readable($configFile)) {
     error_log('Private database configuration file is missing or unreadable.');
+    echo "por aca entro";
     http_response_code(503);
     exit('La aplicación no está disponible.');
 }
