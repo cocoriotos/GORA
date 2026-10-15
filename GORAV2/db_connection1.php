@@ -28,6 +28,8 @@ echo "antes del conn";
 echo "Vars $db_host, $db_user, $db_pass, $db_name";
 
 $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
+ echo "$conn";
+
 if (!$conn) {
     echo "aqui entrí if connection";
     error_log('Database connection failed: ' . mysqli_connect_error());
