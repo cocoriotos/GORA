@@ -273,7 +273,7 @@ $active = 0;
 				
 				if ($active == 1 && $daystoenjoy < 365 && $suscriptionpayed == 1 && $suscriptionkind == 'De Pago') {
 			      $_SESSION['suscriptiondue']=1;
-			      header("refresh:0; url=videolinkadminmodule.php");
+			      header("Location: videolinkadminmodule.php", true, 303);
 			  	  exit();
 			  	  }
 
@@ -349,7 +349,7 @@ $active = 0;
 							{	
 								$_SESSION['LAST_ACTIVITY'] = time();
 								$result18 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), visits = visits+1, lastlogindate = CURDATE() WHERE username = ?");
-								header("refresh:0; url=videolinkadminmodule.php");
+								header("Location: videolinkadminmodule.php", true, 303);
 								exit();
 							}
 							else 
