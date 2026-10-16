@@ -10,7 +10,6 @@ if (!is_file($configFile) || !is_readable($configFile)) {
 }
 
 require_once $configFile;
-echo "por aca entro";
 $db_host = getenv('GORA_DB_HOST');
 $db_user = getenv('GORA_DB_USER');
 $db_pass = getenv('GORA_DB_PASSWORD');
@@ -18,17 +17,13 @@ $db_name = getenv('GORA_DB_NAME');
 
 
 if (!$db_host || !$db_user || !$db_pass || !$db_name) {
-    echo "aqui entrí if vars";
     error_log('Database configuration is incomplete.');
     http_response_code(503);
     exit('La aplicación no está disponible.');
 }
-echo "antes del conn"; 
-
-echo "Vars $db_host, $db_user, $db_pass, $db_name";
 
 $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
- echo "Este es el valor de la conexión: $conn";
+echo "Este es el valor de la conexión: " . $conn;
 
 if (!$conn) {
     echo "aqui entrí if connection";
