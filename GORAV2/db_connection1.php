@@ -22,14 +22,25 @@ if (!$db_host || !$db_user || !$db_pass || !$db_name) {
     exit('La aplicación no está disponible.');
 }
 
-$conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
+try {
+    $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
+} catch (mysqli_sql_exception $exception) {
+    error_log('Database connection failed: ' . $exception->getMessage());
+    http_response_code(503);
+    exit('La aplicación no está disponible.');
+}
 
 if (!$conn) {
     error_log('Database connection failed: ' . mysqli_connect_error());
     http_response_code(503);
     exit('La aplicación no está disponible.');
 }
-
-
-$conn->set_charset('utf8mb4');
+try {
+    $conn->set_charset('utf8mb4');
+} catch (mysqli_sql_exception $exception) {
+    error_log('Database character set setup failed: ' . $exception->getMessage());
+    $conn->close();
+    http_response_code(503);
+    exit('La aplicación no está disponible.');
+}
 ?>
