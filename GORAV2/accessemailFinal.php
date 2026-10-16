@@ -172,7 +172,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $query3 = "UPDATE videotips_app_access_list t1 JOIN videotips_suscription_payments t2 ON t1.username = t2.username SET t1.suscription_package = t2.suscription_package;";
         $result3 = $conn->query($query3);
+
+        $stmt = $conn->prepare("INSERT INTO videotips_maincategory (maincategory, username) values ('Enlaces Utiles', ?)");
+        $stmt->bind_param("s", $email);
+        $result4 = $stmt->execute();
         
+        $stmt = $conn->prepare("INSERT INTO videotips_viodetipscategory (category, maincategory, username) values (Favoritos,'Enlaces Utiles', ?)");
+        $stmt->bind_param("s", $email);
+        $result5 = $stmt->execute();
+
 
         /*Destination email information*/
         $to = "adm@solicionespro.com";
