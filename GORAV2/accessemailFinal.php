@@ -177,7 +177,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("s", $email);
         $result4 = $stmt->execute();
         
-        $stmt = $conn->prepare("INSERT INTO videotips_viodetipscategory (category, maincategory, username) values (Favoritos,'Enlaces Utiles', ?)");
+        $stmt = $conn->prepare("INSERT INTO videotips_viodetipscategory (category, maincategory, username) values ('Favoritos','Enlaces Utiles', ?)");
         $stmt->bind_param("s", $email);
         $result5 = $stmt->execute();
 
@@ -213,7 +213,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message .= str_pad("Ciudad", 40) . ": $city \n";
         $message .= str_pad("Nombre de usuario asignado", 40) . ": $email \n\n";
         $message .= "Por favor no responder éste correo \n\n";
-        $message .= "Gracias por su registro, ya puede ingresar a la app desde este enlace https://solicionespro.com/videotrackerauth.php con su usuario $email y la contraseña que escogió. Por seguridad, nunca enviamos contraseñas por correo. \n\n";
+        $message .= "Gracias por su registro, ya puede ingresar a la app desde este enlace https://solicionespro.com/GORAV2/videotrackerauth.php con su usuario $email y la contraseña que escogió. Por seguridad, nunca enviamos contraseñas por correo. \n\n";
         $message .= "Puedes también ingresar por este enlace donde podrás obtener más información importante de la aplicación así como videos tutoriales y manual del usuario https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5. \n\n";
         $header = "From: adm@solicionespro.com" . "\r\n";
         $header .= "Bcc: adm@solicionespro.com\r\n";
@@ -227,7 +227,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 document.addEventListener('DOMContentLoaded', function() {
                     Swal.fire({
                         title: 'Mensaje',
-                        text: 'Su requerimiento fue enviado, puede ingresar con el usuario y contraseña que digitó. Un correo con esta información fué enviado',
+                        text: 'Su requerimiento fue enviado. Recibirá un correo con los detalles de acceso; por seguridad, la contraseña que escogió no se envía por correo.',
                         icon: 'success',
                         confirmButtonText: 'Aceptar',
                         customClass: {
