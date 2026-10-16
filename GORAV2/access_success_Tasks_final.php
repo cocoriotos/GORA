@@ -208,11 +208,13 @@ $active = 0;
 				
 				
                 //extracta en variables de session el tipo de suscripcion, dias restantes y si ha pagado o no
-				$stmt = $conn->prepare("SELECT suscriptionkind FROM videotips_app_access_list WHERE username = ?");
+				$stmt = $conn->prepare("SELECT suscriptionkind, daystoenjoy FROM videotips_app_access_list WHERE username = ?");
 				$stmt->bind_param("s", $local_username);
 				$stmt->execute();
 				$result10 = $stmt->get_result();
-				$suscriptionkind = $result10->fetch_assoc()['suscriptionkind'];
+				$subscriptionData = $result10->fetch_assoc();
+				$suscriptionkind = $subscriptionData['suscriptionkind'];
+				$daystoenjoy = $subscriptionData['daystoenjoy'];
 
 				//extracta en variables si el usuario está activo o no
 				$stmt = $conn->prepare("SELECT active FROM videotips_app_access_list WHERE username = ?");
