@@ -1,4 +1,3 @@
-<html>
 <?php 
 
 GLOBAL $global_username;
@@ -97,9 +96,7 @@ $active = 0;
 			header("Location: videotrackerauth.php");
 			exit();
 		}
-
 		include("db_connection1.php");
-echo "por aca salgo";
 		$stmt = $conn->prepare("SELECT password FROM videotips_app_access_list WHERE email = ? AND active = 1");
 		$stmt->bind_param("s", $local_username);
 		$stmt->execute();
@@ -138,10 +135,6 @@ echo "por aca salgo";
 		};
 		
 
-		if ($conn==true)
-				{
-
-				} 
 				//habilitar la actualizacion masiva 
 				$query1="SET SQL_SAFE_UPDATES = 0";
 				$result1=mysqli_query($conn, $query1);
@@ -382,4 +375,3 @@ echo "por aca salgo";
 						}		
 }
 ?>	
-</html>

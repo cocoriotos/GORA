@@ -23,10 +23,8 @@ if (!$db_host || !$db_user || !$db_pass || !$db_name) {
 }
 
 $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
-echo "Este es el valor de la conexión: " . $conn;
 
 if (!$conn) {
-    echo "aqui entrí if connection";
     error_log('Database connection failed: ' . mysqli_connect_error());
     http_response_code(503);
     exit('La aplicación no está disponible.');
