@@ -100,9 +100,10 @@ $active = 0;
 		$stmt = $conn->prepare("SELECT password FROM videotips_app_access_list WHERE email = ? AND active = 1");
 		$stmt->bind_param("s", $local_username);
 		$stmt->execute();
-		$authResult = $stmt->get_result();
-		$authRecord = $authResult->fetch_assoc();
-		$storedPassword = $authRecord['password'] ?? '';
+		$stmt->bind_result($storedPassword);
+		$stmt->fetch();
+		$stmt->close();
+		$storedPassword = $storedPassword ?? '';
 		$passwordVerified = $storedPassword !== '' && password_verify($password, $storedPassword);
 		
 		if (!$passwordVerified && $storedPassword !== '' && hash_equals($storedPassword, $password)) {
@@ -207,41 +208,18 @@ $active = 0;
 				
 				
 				
-                //extracta en variables de session el tipo de suscripcion, dias restantes y si ha pagado o no
-				$stmt = $conn->prepare("SELECT suscriptionkind, daystoenjoy FROM videotips_app_access_list WHERE username = ?");
+                //extracta en variables de session los datos de suscripción y del usuario
+				$stmt = $conn->prepare("SELECT suscriptionkind, daystoenjoy, active, suscriptiondaysleft, suscriptionpayed, name, adm_role, trialdaysleft FROM videotips_app_access_list WHERE username = ?");
 				$stmt->bind_param("s", $local_username);
 				$stmt->execute();
-				$result10 = $stmt->get_result();
-				$subscriptionData = $result10->fetch_assoc();
-				$suscriptionkind = $subscriptionData['suscriptionkind'];
-				$daystoenjoy = $subscriptionData['daystoenjoy'];
-
-				//extracta en variables si el usuario está activo o no
-				$stmt = $conn->prepare("SELECT active FROM videotips_app_access_list WHERE username = ?");
-				$stmt->bind_param("s", $local_username);
-				$stmt->execute();
-				$result11 = $stmt->get_result();
-				$active = $result11->fetch_assoc()['active'];
-
-
-				$stmt = $conn->prepare("SELECT suscriptiondaysleft FROM videotips_app_access_list WHERE username = ?");
-				$stmt->bind_param("s", $local_username);
-				$stmt->execute();
-				$result13 = $stmt->get_result();
-				$suscriptiondaysleft = $result13->fetch_assoc()['suscriptiondaysleft'];
-
-				$stmt = $conn->prepare("SELECT suscriptionpayed FROM videotips_app_access_list WHERE username = ?");
-				$stmt->bind_param("s", $local_username);
-				$stmt->execute();
-				$result14 = $stmt->get_result();
-				$suscriptionpayed = $result14->fetch_assoc()['suscriptionpayed'];
-
-				//extracta en variables de session el nombre del usuario
-				$stmt = $conn->prepare("SELECT name FROM videotips_app_access_list WHERE username = ?");
-				$stmt->bind_param("s", $local_username);
-				$stmt->execute();
-				$result15 = $stmt->get_result();
-				$_SESSION['name'] = $result15->fetch_assoc()['name'];
+				$stmt->bind_result($suscriptionkind, $daystoenjoy, $active, $suscriptiondaysleft, $suscriptionpayed, $name, $admrole, $trialdaysleft);
+				if (!$stmt->fetch()) {
+					error_log('Authenticated user subscription record was not found.');
+					http_response_code(500);
+					exit('No fue posible cargar los datos de la cuenta.');
+				}
+				$stmt->close();
+				$_SESSION['name'] = $name;
 
 				//consulta si el usuario y contraseña son correctos y si esta activa la cuenta
 				//actuzaliza la fecha de ultimo acceso del usuario 
@@ -250,19 +228,6 @@ $active = 0;
 				//actualiza los dias restantes de suscripcion de pago 
 				$result14 = $executeUserStatement("UPDATE videotips_suscription_payments SET suscriptiondaysleft = (365 - (DATEDIFF(CURDATE(), lastpaymentdate))) WHERE username = ?");
 
-				//extracta en variables de session el rol de administrador
-				$roleStmt = $executeUserStatement("SELECT adm_role FROM videotips_app_access_list WHERE username = ?");
-				$roleResult = $roleStmt->get_result();
-				$admrole = $roleResult->fetch_assoc()['adm_role'] ?? 0;
-
-				//extracta en variable trialdaysleft 
-				$stmt = $conn->prepare("SELECT trialdaysleft FROM videotips_app_access_list WHERE username = ?");
-				$stmt->bind_param("s", $local_username);
-				$stmt->execute();
-				$result16 = $stmt->get_result();
-				$trialdaysleft = $result16->fetch_assoc()['trialdaysleft'];
-				
-				
 				//si el usuario es administrador lo redirecciona a la pagina de administracion de usuarios
 				if ($admrole > 0){
 					$admrole = 0;
