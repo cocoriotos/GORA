@@ -10,7 +10,7 @@
 <body>
 
 <!-- NAV -->
-<nav>
+<nav id="landing-nav">
   <a href="#" class="nav-logo">
     <img src="GORA.ico" alt="GORA"/>
   </a>
