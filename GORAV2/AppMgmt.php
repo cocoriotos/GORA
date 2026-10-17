@@ -289,6 +289,289 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
     <script src="Linktoclipboard.js" defer></script>
     <link rel="icon" href="SSCircleBackgroundWhite.ico" type="image/x-icon">
     <link rel="stylesheet" href="style_sheet_ops.css" />
+    <style>
+        html,
+        body.admin-dashboard {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        body.admin-dashboard .container-fluid {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        #admin-welcome .navbar-brand {
+            white-space: normal;
+            line-height: 1.35;
+        }
+
+        .admin-language-switcher {
+            display: flex;
+            flex: 0 0 auto;
+            gap: 8px;
+        }
+
+        .admin-language-button {
+            min-width: 44px;
+            padding: 7px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 999px;
+            background: transparent;
+            color: #ffffff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .admin-language-button.active,
+        .admin-language-button:hover {
+            background: #25d366;
+            border-color: #25d366;
+            color: #032642;
+        }
+
+        .admin-layout {
+            position: relative;
+            min-height: calc(100vh - 90px);
+        }
+
+        .admin-sidebar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1100;
+            width: 68px;
+            box-sizing: border-box;
+            height: 100%;
+            min-height: calc(100vh - 90px);
+            padding: 14px;
+            overflow: hidden;
+            background: #032642;
+            box-shadow: 0 16px 32px rgba(3, 38, 66, 0.16);
+            transition: width 0.2s ease;
+        }
+
+        .admin-sidebar:not(.collapsed),
+        .admin-sidebar.collapsed:hover {
+            width: 240px;
+        }
+
+        .admin-sidebar-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 38px;
+            margin-bottom: 12px;
+            border: 0;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .admin-sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .admin-sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px;
+            border: 0;
+            border-radius: 10px;
+            background: transparent;
+            color: #ffffff;
+            font-size: 1rem;
+            text-align: left;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .admin-sidebar-link i {
+            flex: 0 0 24px;
+            width: 24px;
+            color: #ffffff;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .admin-sidebar-link:hover,
+        .admin-sidebar-link.active {
+            background: #25d366;
+            color: #032642;
+        }
+
+        .admin-sidebar-link:hover i,
+        .admin-sidebar-link.active i {
+            color: #032642;
+        }
+
+        .admin-sidebar.collapsed .admin-sidebar-link span {
+            display: none;
+        }
+
+        .admin-sidebar.collapsed:hover .admin-sidebar-link span {
+            display: inline;
+        }
+
+        .admin-sidebar.collapsed .admin-sidebar-link {
+            justify-content: center;
+            padding-right: 8px;
+            padding-left: 8px;
+        }
+
+        .admin-sidebar.collapsed:hover .admin-sidebar-link {
+            justify-content: flex-start;
+            padding-right: 12px;
+            padding-left: 12px;
+        }
+
+        .admin-main {
+            min-width: 0;
+            margin-left: 90px;
+            transition: margin-left 0.2s ease;
+        }
+
+        .admin-layout.sidebar-open .admin-main {
+            margin-left: 262px;
+        }
+
+        .admin-dashboard .grid-container {
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+        }
+
+        .admin-dashboard .grid-containeropstable {
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .admin-dashboard .left-text {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .admin-dashboard #adminvisits .grid-item-content,
+        .admin-dashboard #Suscriptions .grid-item-content1,
+        .admin-dashboard #opstotalsuscriptions .grid-item-content1,
+        .admin-dashboard #opsactives .grid-item-content1 {
+            min-width: 0;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .admin-dashboard #adminvisits table,
+        .admin-dashboard #Suscriptions table,
+        .admin-dashboard #opstotalsuscriptions table,
+        .admin-dashboard #opsactives table {
+            min-width: 640px;
+        }
+
+        @media (max-width: 768px) {
+            #admin-welcome {
+                padding: 10px 12px;
+            }
+
+            #admin-welcome .container-fluid {
+                justify-content: center !important;
+            }
+
+            #admin-welcome .navbar-brand {
+                width: 100%;
+                margin: 0;
+                font-size: 16px;
+                text-align: center;
+                overflow-wrap: anywhere;
+            }
+
+            #admin-welcome .admin-language-switcher {
+                flex-direction: row;
+            }
+
+            .admin-layout {
+                min-height: 0;
+            }
+
+            .admin-sidebar,
+            .admin-sidebar:not(.collapsed),
+            .admin-sidebar.collapsed:hover {
+                position: relative;
+                width: 100%;
+                height: auto;
+                min-height: 56px;
+                padding: 8px 12px;
+                overflow: visible;
+            }
+
+            .admin-sidebar.collapsed .admin-sidebar-nav {
+                display: none;
+            }
+
+            .admin-sidebar:not(.collapsed) .admin-sidebar-nav {
+                display: flex;
+                margin-top: 8px;
+            }
+
+            .admin-sidebar.collapsed .admin-sidebar-link span,
+            .admin-sidebar.collapsed:hover .admin-sidebar-link span {
+                display: inline;
+            }
+
+            .admin-sidebar.collapsed .admin-sidebar-link,
+            .admin-sidebar.collapsed:hover .admin-sidebar-link {
+                justify-content: flex-start;
+                padding: 12px;
+            }
+
+            .admin-main,
+            .admin-layout.sidebar-open .admin-main {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .admin-main > .container-fluid {
+                padding: 12px;
+            }
+
+            .admin-dashboard .grid-container {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 14px;
+                padding: 8px 0;
+            }
+
+            .admin-dashboard .grid-item,
+            .admin-dashboard .grid-item-content,
+            .admin-dashboard .grid-item-content1 {
+                min-width: 0;
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+
+            .admin-dashboard .grid-item-content {
+                padding: 16px;
+            }
+
+            .admin-dashboard .tabcontent {
+                display: block;
+                padding: 12px 0;
+                border: 0;
+            }
+
+            .admin-dashboard .grid-item-title,
+            .admin-dashboard .grid-item-body,
+            .admin-dashboard .grid-item-body p {
+                overflow-wrap: anywhere;
+            }
+        }
+    </style>
     <script src="Popper/popper.min.js"></script>
     <script src="plugins/sweetalert/sweetalert.min.js"></script>
     <script src="plugins/alertifyjs/alertify.min.js"></script>
@@ -299,16 +582,26 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css" />
 </head>
 
-<body id="bodyadminmodule" style="padding: 0%;">
+<body id="bodyadminmodule" class="admin-dashboard" style="padding: 0%;">
+    <div class="admin-layout" id="admin-layout">
+        <aside class="admin-sidebar collapsed" id="admin-sidebar">
+            <button type="button" class="admin-sidebar-toggle" aria-label="Menu" aria-expanded="false" onclick="toggleAdminSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav class="admin-sidebar-nav" aria-label="Administration menu">
+                <button type="button" class="admin-sidebar-link active" data-admin-section="Ops" onclick="showAdminSection('Ops', this)">
+                    <i class="fas fa-chart-line"></i><span data-admin-i18n="operations">Operaciones</span>
+                </button>
+                <button type="button" class="admin-sidebar-link" data-admin-section="Administration" onclick="showAdminSection('Administration', this)">
+                    <i class="fas fa-user-gear"></i><span data-admin-i18n="administration">Administración</span>
+                </button>
+                <a class="admin-sidebar-link" href="closetaskscon.php">
+                    <i class="fas fa-right-from-bracket"></i><span data-admin-i18n="logout">Salir</span>
+                </a>
+            </nav>
+        </aside>
+        <main class="admin-main">
     <div class="container-fluid">
-                <!-- Barra de navegación -->
-                
-                <!-- Pestañas -->
-                <div class="tab">
-                    <button class="tablinks" onclick="openTab(event, 'Ops')" id="defaultOpen">Operaciones</button>
-                    <button class="tablinks" onclick="openTab(event, 'Administration')">Administración</button>
-                    <!--<button class="tablinks" onclick="openTab(event, 'Reports')">Reportes y Estadísticas</button>-->
-                </div>
     
                 <!-- Contenido de las pestañas -->
                 <div id="Ops" class="tabcontent">
@@ -636,23 +929,234 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
             </div>
     </div>
     <script>
-        // Función para abrir pestañas
-        function openTab(evt, tabName) {
-            var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tabcontent");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
+        const adminTranslations = {
+            en: {
+                'Bienvenido': 'Welcome',
+                'Administración de Operaciones': 'Operations Administration',
+                'Operaciones': 'Operations',
+                'Administración': 'Administration',
+                'Salir': 'Log out',
+                'Listado de Suscripciones': 'Subscription Summary',
+                'Total Suscripciones De Pago:': 'Total Paid Subscriptions:',
+                'Total Suscripciones De No Pago:': 'Total Unpaid Subscriptions:',
+                'Ver Detalles': 'View Details',
+                'Suscripciones De Pago:': 'Paid Subscriptions:',
+                'Suscripciones No Pago:': 'Unpaid Subscriptions:',
+                'Suscripciones': 'Subscriptions',
+                'Usuarios a contactar': 'Users to contact',
+                'Inactivos': 'Inactive',
+                'Visitas de Usuarios': 'User Visits',
+                'Visitas:': 'Visits:',
+                'Por fecha': 'By date',
+                'Listado de Usuarios': 'User List',
+                'Visitas por fecha | Administración': 'Visits by Date | Administration',
+                'Usuarios Inactivos | Administración': 'Inactive Users | Administration',
+                'Suscriptores De Pago | Operación': 'Paid Subscribers | Operations',
+                'Suscripciones por Usuario | Operación': 'Subscriptions by User | Operations',
+                'Nombre': 'First Name',
+                'Apellido': 'Last Name',
+                'Usuario': 'User',
+                'Usuario Activo': 'User Active',
+                'Suscripción Activa': 'Subscription Active',
+                'Tipo de Suscripción': 'Subscription Type',
+                'Modificar': 'Edit',
+                'Último Ingreso a la Plataforma': 'Last Platform Login',
+                'Cantidad Links Guardados': 'Saved Links',
+                'Días de Suscripción Usados': 'Subscription Days Used',
+                'Fecha Registro': 'Registration Date',
+                'Ultimo Acceso': 'Last Access',
+                'Días Corridos': 'Elapsed Days',
+                'No se encontraron resultados': 'No results found',
+                'No hay usuarios activos': 'There are no active users',
+                'Sí': 'Yes',
+                'No': 'No',
+                'Trial': 'Trial',
+                'De Pago': 'Paid',
+                'Vencida': 'Expired',
+                'Suspendida': 'Suspended',
+                'Owner': 'Owner',
+                'Partner': 'Partner',
+                'Buscar...': 'Search...',
+                '1 Mes:': '1 Month:',
+                '2 Meses:': '2 Months:',
+                '3 Meses:': '3 Months:',
+                '4 Meses:': '4 Months:',
+                '5 Meses:': '5 Months:',
+                '6 Meses:': '6 Months:',
+                '7 Meses:': '7 Months:',
+                '8 Meses:': '8 Months:',
+                '9 Meses:': '9 Months:',
+                '10 Meses:': '10 Months:',
+                '11 Meses:': '11 Months:',
+                '12 Meses:': '12 Months:'
+            },
+            pt: {
+                'Bienvenido': 'Bem-vindo',
+                'Administración de Operaciones': 'Administração de Operações',
+                'Operaciones': 'Operações',
+                'Administración': 'Administração',
+                'Salir': 'Sair',
+                'Listado de Suscripciones': 'Resumo de Assinaturas',
+                'Total Suscripciones De Pago:': 'Total de Assinaturas Pagas:',
+                'Total Suscripciones De No Pago:': 'Total de Assinaturas Não Pagas:',
+                'Ver Detalles': 'Ver detalhes',
+                'Suscripciones De Pago:': 'Assinaturas Pagas:',
+                'Suscripciones No Pago:': 'Assinaturas Não Pagas:',
+                'Suscripciones': 'Assinaturas',
+                'Usuarios a contactar': 'Usuários para contatar',
+                'Inactivos': 'Inativos',
+                'Visitas de Usuarios': 'Visitas de Usuários',
+                'Visitas:': 'Visitas:',
+                'Por fecha': 'Por data',
+                'Listado de Usuarios': 'Lista de Usuários',
+                'Visitas por fecha | Administración': 'Visitas por data | Administração',
+                'Usuarios Inactivos | Administración': 'Usuários Inativos | Administração',
+                'Suscriptores De Pago | Operación': 'Assinantes Pagos | Operações',
+                'Suscripciones por Usuario | Operación': 'Assinaturas por Usuário | Operações',
+                'Nombre': 'Nome',
+                'Apellido': 'Sobrenome',
+                'Usuario': 'Usuário',
+                'Usuario Activo': 'Usuário Ativo',
+                'Suscripción Activa': 'Assinatura Ativa',
+                'Tipo de Suscripción': 'Tipo de Assinatura',
+                'Modificar': 'Editar',
+                'Último Ingreso a la Plataforma': 'Último acesso à plataforma',
+                'Cantidad Links Guardados': 'Links salvos',
+                'Días de Suscripción Usados': 'Dias de assinatura utilizados',
+                'Fecha Registro': 'Data de cadastro',
+                'Ultimo Acceso': 'Último acesso',
+                'Días Corridos': 'Dias decorridos',
+                'No se encontraron resultados': 'Nenhum resultado encontrado',
+                'No hay usuarios activos': 'Não há usuários ativos',
+                'Sí': 'Sim',
+                'No': 'Não',
+                'Trial': 'Teste',
+                'De Pago': 'Pago',
+                'Vencida': 'Expirada',
+                'Suspendida': 'Suspensa',
+                'Owner': 'Proprietário',
+                'Partner': 'Parceiro',
+                'Buscar...': 'Buscar...',
+                '1 Mes:': '1 mês:',
+                '2 Meses:': '2 meses:',
+                '3 Meses:': '3 meses:',
+                '4 Meses:': '4 meses:',
+                '5 Meses:': '5 meses:',
+                '6 Meses:': '6 meses:',
+                '7 Meses:': '7 meses:',
+                '8 Meses:': '8 meses:',
+                '9 Meses:': '9 meses:',
+                '10 Meses:': '10 meses:',
+                '11 Meses:': '11 meses:',
+                '12 Meses:': '12 meses:'
             }
-            tablinks = document.getElementsByClassName("tablinks");
-            for (i = 0; i < tablinks.length; i++) {
-                tablinks[i].className = tablinks[i].className.replace(" active", "");
+        };
+
+        const originalAdminText = new WeakMap();
+
+        function updateAdminLanguage(language) {
+            const translations = adminTranslations[language] || {};
+            document.documentElement.lang = language;
+
+            document.querySelectorAll('[data-admin-i18n]').forEach(element => {
+                const source = element.dataset.adminSource || element.textContent.trim();
+                element.dataset.adminSource = source;
+                element.textContent = translations[source] || source;
+            });
+
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+            let textNode;
+            while ((textNode = walker.nextNode())) {
+                const parent = textNode.parentElement;
+                if (!parent || parent.closest('[data-admin-i18n], .username-style, script, style')) {
+                    continue;
+                }
+
+                if (!originalAdminText.has(textNode)) {
+                    originalAdminText.set(textNode, textNode.nodeValue);
+                }
+                const original = originalAdminText.get(textNode);
+                const source = original.trim().replace(/\s+/g, ' ');
+                if (!source) {
+                    continue;
+                }
+
+                if (parent.closest('.left-text') && /^\d+ Mes(?:es)?:$/.test(source)) {
+                    textNode.nodeValue = `${original.match(/^\s*/)[0]}${translations[source] || source} `;
+                    continue;
+                }
+
+                if (translations[source]) {
+                    const leading = original.match(/^\s*/)[0];
+                    const trailing = original.match(/\s*$/)[0];
+                    textNode.nodeValue = `${leading}${translations[source]}${trailing}`;
+                } else {
+                    textNode.nodeValue = original;
+                }
             }
-            document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.className += " active";
+
+            document.querySelectorAll('.searchInput').forEach(input => {
+                const source = input.dataset.adminPlaceholder || input.placeholder;
+                input.dataset.adminPlaceholder = source;
+                input.placeholder = translations[source] || source;
+            });
+            document.querySelectorAll('.admin-language-button').forEach(button => {
+                button.classList.toggle('active', button.dataset.adminLang === language);
+                button.setAttribute('aria-pressed', String(button.dataset.adminLang === language));
+            });
         }
 
-        // Abrir la pestaña por defecto al cargar la página
-        document.getElementById("defaultOpen").click();
+        function setAdminLanguage(language) {
+            if (!adminTranslations[language] && language !== 'es') {
+                return;
+            }
+            localStorage.setItem('smartshelfLang', language);
+            localStorage.setItem('moduleLang', language);
+            updateAdminLanguage(language);
+            window.dispatchEvent(new Event('languageChanged'));
+        }
+
+        function toggleAdminSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const layout = document.getElementById('admin-layout');
+            const expanded = sidebar.classList.toggle('collapsed') === false;
+            layout.classList.toggle('sidebar-open', expanded);
+            sidebar.querySelector('.admin-sidebar-toggle').setAttribute('aria-expanded', String(expanded));
+        }
+
+        function showAdminSection(section, button) {
+            openTab(null, section);
+            document.querySelectorAll('.admin-sidebar-link[data-admin-section]').forEach(link => {
+                link.classList.toggle('active', link === button);
+            });
+            if (window.matchMedia('(max-width: 768px)').matches) {
+                const sidebar = document.getElementById('admin-sidebar');
+                sidebar.classList.add('collapsed');
+                sidebar.querySelector('.admin-sidebar-toggle').setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        function openTab(evt, tabName) {
+            const tabcontent = document.getElementsByClassName("tabcontent");
+            for (let i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            document.getElementById(tabName).style.display = "block";
+            if (tabName === 'Ops' || tabName === 'Administration') {
+                document.querySelectorAll('.admin-sidebar-link[data-admin-section]').forEach(link => {
+                    link.classList.toggle('active', link.dataset.adminSection === tabName);
+                });
+            }
+        }
+
+        document.querySelectorAll('.admin-language-button').forEach(button => {
+            button.addEventListener('click', () => setAdminLanguage(button.dataset.adminLang));
+        });
+        const savedAdminLanguage = localStorage.getItem('smartshelfLang') || localStorage.getItem('moduleLang') || 'es';
+        setAdminLanguage(['es', 'en', 'pt'].includes(savedAdminLanguage) ? savedAdminLanguage : 'es');
+        openTab(null, 'Ops');
     </script>
+        </main>
+    </div>
 </body>   
 </html>
