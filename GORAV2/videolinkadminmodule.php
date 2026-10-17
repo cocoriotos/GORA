@@ -1,10 +1,24 @@
 
+<?php
+include "sessions.php";
+include "sessionvalidation.php";
+if (!isset($conn)) {
+    include "db_connection1.php";
+}
+require_once __DIR__ . '/subscription_access.php';
+
+$local_username = (string) $_SESSION['email'];
+$subscriptionAccess = goraRefreshSubscriptionAccess($conn, $local_username);
+if (!goraCanAccessVideoModule($subscriptionAccess)) {
+    $_SESSION['suscriptiondue'] = 1;
+    header("Location: suscriptionpayment.php", true, 303);
+    exit();
+}
+?>
 <!-- Developed by Julián González Bucheli -->
 <html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <?php
-include "sessions.php";
-include "sessionvalidation.php";
 $local_username = $_SESSION['email'];
 $savedlink = $_SESSION['savedlink'];
 $duplicatedlink = $_SESSION['duplicatedlink'];
@@ -18,7 +32,6 @@ $click = $_SESSION['click'];
 $name = $_SESSION['name'];
 $delconfirm = $_SESSION['delconfirm'];
 
-include "db_connection1.php";
 include "header.php";
 ?>  
 
