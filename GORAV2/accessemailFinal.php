@@ -212,19 +212,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'subject' => 'Requerimiento de acceso a GORA',
                 'greeting' => "Buen día $lastname, $name:\n\n",
                 'details' => "Su solicitud fue recibida correctamente. Estos son los datos registrados:\n\nNombre: $name\nApellido: $lastname\nEmail: $email\nPaís: $country\nCiudad: $city\nUsuario: $email\n\n",
-                'instructions' => "Por favor, no responda a este correo.\n\nYa puede ingresar a la aplicación desde https://solicionespro.com/GORAV2/videotrackerauth.php con el usuario indicado y la contraseña que escogió. Por seguridad, nunca enviamos contraseñas por correo.\n\nPuede consultar información, videos tutoriales y el manual del usuario aquí: https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5.\n"
+                'instructions' => "Por favor, no responda a este correo.\n\nYa puede ingresar a la aplicación desde https://solicionespro.com/videotrackerauth.php con el usuario indicado y la contraseña que escogió. Por seguridad, nunca enviamos contraseñas por correo.\n\n"
             ],
             'en' => [
                 'subject' => 'GORA access request',
                 'greeting' => "Hello $name $lastname,\n\n",
                 'details' => "Your request was received successfully. These are the details you provided:\n\nName: $name\nLast name: $lastname\nEmail: $email\nCountry: $country\nCity: $city\nUsername: $email\n\n",
-                'instructions' => "Please do not reply to this email.\n\nYou can now access the application at https://solicionespro.com/GORAV2/videotrackerauth.php using the username above and the password you chose. For your security, we never send passwords by email.\n\nApplication information, video tutorials, and the user manual are available here: https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5.\n"
+                'instructions' => "Please do not reply to this email.\n\nYou can now access the application at https://solicionespro.com/videotrackerauth.php using the username above and the password you chose. For your security, we never send passwords by email.\n\n"
             ],
             'pt' => [
                 'subject' => 'Solicitação de acesso ao GORA',
                 'greeting' => "Olá $name $lastname,\n\n",
                 'details' => "Sua solicitação foi recebida com sucesso. Estes são os dados informados:\n\nNome: $name\nSobrenome: $lastname\nEmail: $email\nPaís: $country\nCidade: $city\nUsuário: $email\n\n",
-                'instructions' => "Por favor, não responda a este email.\n\nVocê já pode acessar o aplicativo em https://solicionespro.com/GORAV2/videotrackerauth.php usando o usuário informado e a senha que escolheu. Por segurança, nunca enviamos senhas por email.\n\nInformações do aplicativo, tutoriais em vídeo e o manual do usuário estão disponíveis aqui: https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5.\n"
+                'instructions' => "Por favor, não responda a este email.\n\nVocê já pode acessar o aplicativo em https://solicionespro.com/videotrackerauth.php usando o usuário informado e a senha que escolheu. Por segurança, nunca enviamos senhas por email.\n\n"
             ]
         ][$language];
         $subject = $registrationEmail['subject'];
