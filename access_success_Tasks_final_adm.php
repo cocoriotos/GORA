@@ -41,7 +41,17 @@ if (!$passwordVerified) {
     exit();
 }
 
+if (!empty($_SESSION['email'])) {
+    header("Location: videotrackerauth.php?login=active");
+    exit();
+}
+
 session_regenerate_id(true);
+require_once __DIR__ . '/session_guard.php';
+if (!goraClaimActiveSession($conn, $local_username, session_id(), time())) {
+    header("Location: videotrackerauth.php?login=active");
+    exit();
+}
 $_SESSION['email'] = $local_username;
 $_SESSION['LAST_ACTIVITY'] = time();
 

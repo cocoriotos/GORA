@@ -14,5 +14,4 @@ if (empty($_SESSION['email'])) {
     exit;
 }
 
-$_SESSION['LAST_ACTIVITY'] = time();
 echo json_encode(['active' => true]);
