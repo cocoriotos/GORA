@@ -1,7 +1,10 @@
 <?php 
+	require_once __DIR__ . '/session_guard.php';
 	include "sessions.php";
-    session_start();
-	session_unset();
-	session_destroy();
+	if (!empty($_SESSION['email'])) {
+		include __DIR__ . '/db_connection1.php';
+		goraReleaseActiveSession($conn, (string) $_SESSION['email'], session_id());
+	}
+	goraDestroyCurrentSession();
 	include "sessionvalidation.php";
 ?>

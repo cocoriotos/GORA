@@ -82,9 +82,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
          exit();
     }
 
-    $global_username = $_POST["email"];
-    $_SESSION['email'] = $global_username;
-    $local_username = $_SESSION['email'];
+    $global_username = trim((string) $_POST["email"]);
+    $local_username = $global_username;
     $password = $_POST["password"];
     $captcha_input = $_POST["captcha"];
 
@@ -185,11 +184,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if ($passwordVerified) {
+        if (!empty($_SESSION['email'])) {
+            header("Location: videotrackerauth.php?login=active");
+            exit();
+        }
+
         $cleanupStmt = $conn->prepare("UPDATE videotips_accessrequests SET password = '' WHERE email = ?");
         $cleanupStmt->bind_param("s", $local_username);
         $cleanupStmt->execute();
 
         session_regenerate_id(true);
+        require_once __DIR__ . '/session_guard.php';
+        if (!goraClaimActiveSession($conn, $local_username, session_id(), time())) {
+            header("Location: videotrackerauth.php?login=active");
+            exit();
+        }
         $_SESSION['email'] = $local_username;
         $_SESSION['LAST_ACTIVITY'] = time();
         // Actualizar datos de suscripción

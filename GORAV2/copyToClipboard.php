@@ -1,6 +1,6 @@
 <?php 
 session_cache_limiter('nocache');
-session_start();
+include "sessionvalidation.php";
 $linktoclipboard = $_SESSION['linktoclipboard'];
 ?>
 

@@ -1,5 +1,6 @@
 <?php
 
+include "sessionvalidation.php";
 include('db_connection1.php'); // Asegúrate de incluir tu conexión a la base de datos.
     $local_username = $_SESSION['email'];
 	$savedlink = $_SESSION['savedlink'];
@@ -12,8 +13,6 @@ include('db_connection1.php'); // Asegúrate de incluir tu conexión a la base d
 	$embedUrl = $_SESSION['embedUrl'];
 	$click = $_SESSION['click'];
 	
-	include "SessionTimeOut.php";
-
 if (isset($_GET['maincategory'])) {
     $maincategory = $_GET['maincategory'];
     /*$username = $_SESSION['username']; // Asegúrate de obtener el username de la sesión.*/
