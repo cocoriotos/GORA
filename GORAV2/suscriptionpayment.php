@@ -4,7 +4,7 @@
 include "sessions.php";
 include "sessionvalidation.php";
 include "db_connection1.php";
-include "headersuscription.php";
+$name = $_SESSION['name'];
 $local_username=$_SESSION['email'];
 $suscriptiondue = $_SESSION['suscriptiondue']; 
 //include "SessionTimeOut.php";
@@ -24,6 +24,12 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="GORA.ico" type="image/x-icon">
   <link rel="stylesheet" href="style_sheet.css"/>
+  <link rel="stylesheet" href="style_sheet_ops.css"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <script src="https://kit.fontawesome.com/60f0db780e.js" crossorigin="anonymous"></script>
+  <script src="session-timeout.js?v=20261001-3" defer></script>
+  <script src="copynumber.js" defer></script>
+  <script src="copypaypal.js" defer></script>
 	<style>
     body#bodyadminmodule {
       --welcome-bottom: 48px;
@@ -109,10 +115,15 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
       text-align: center;
     }
 
-    .subscription-sidebar-link .fa-right-from-bracket,
-    .subscription-sidebar-link:hover .fa-right-from-bracket,
-    .subscription-sidebar-link:focus-visible .fa-right-from-bracket {
-      color: #ffffff !important;
+    .subscription-sidebar-link .subscription-logout-icon {
+      flex: 0 0 24px;
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .subscription-sidebar.collapsed .subscription-sidebar-link span {
@@ -258,11 +269,6 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
         overflow-wrap: anywhere;
       }
 
-      #subscription-sidebar .subscription-sidebar-link .fa-right-from-bracket,
-      #subscription-sidebar .subscription-sidebar-link:hover .fa-right-from-bracket {
-        color: #ffffff !important;
-      }
-
       .subscription-workspace {
         width: 100%;
         max-width: 100%;
@@ -354,11 +360,8 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
 </head>
 
-<header>
-    <script src="copynumber.js"></script>
-    <script src="copypaypal.js"></script>
-</header>  	
 <body id="bodyadminmodule">
+  <?php include "headersuscription.php"; ?>
   <div class="subscription-workspace">
     <aside class="subscription-sidebar collapsed" id="subscription-sidebar">
       <button type="button" class="subscription-sidebar-toggle" aria-label="Menu" aria-expanded="false" onclick="toggleSubscriptionSidebar()">
@@ -397,8 +400,12 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
         </div>
         <div class="subscription-sidebar-section">
           <a class="subscription-sidebar-link" href="closetaskscon.php">
-            <!--<i class="fas fa-right-from-bracket"></i><span>Salir</span>-->
-            <i class="fas fa-right-from-bracket"></i><span data-i18n="sidebar_exit">Salir</span>
+            <svg class="subscription-logout-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5"></path>
+              <path d="M14 16l4-4-4-4"></path>
+              <path d="M18 12H9"></path>
+            </svg>
+            <span data-i18n="sidebar_exit">Salir</span>
           </a>
         </div>
       </nav>
