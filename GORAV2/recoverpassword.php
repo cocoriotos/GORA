@@ -30,7 +30,7 @@ include "sessions.php";
             <?php include __DIR__ . "/social_links.php"; ?>
         </div>
 
-        <div class="lang-sw">
+        <div class="lang-sw reset-language">
             <button class="lb" type="button" onclick="setLang('es')">ES</button>
             <button class="lb" type="button" onclick="setLang('en')">EN</button>
             <button class="lb" type="button" onclick="setLang('pt')">PT</button>

@@ -111,14 +111,6 @@ if (!$isPost && !$tokenIsWellFormed) {
     <link rel="icon" href="GORA.ico" type="image/x-icon">
     <link rel="stylesheet" href="style_sheet_auth.css">
     <style>
-        .reset-language {
-            position: static;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 18px;
-        }
-
         .reset-message {
             margin: 0 0 18px;
             overflow-wrap: anywhere;
