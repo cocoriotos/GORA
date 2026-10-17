@@ -30,13 +30,14 @@ include "sessions.php";
             <?php include __DIR__ . "/social_links.php"; ?>
         </div>
 
+        <div class="lang-sw">
+            <button class="lb" type="button" onclick="setLang('es')">ES</button>
+            <button class="lb" type="button" onclick="setLang('en')">EN</button>
+            <button class="lb" type="button" onclick="setLang('pt')">PT</button>
+        </div>
+
         <!-- Formulario de recuperación de contraseña -->
         <form id="login" action="recoverpasswordemailFinal.php" method="POST" autocomplete="off">
-            <div class="lang-sw">
-                <button class="lb" type="button" onclick="setLang('es')">ES</button>
-                <button class="lb" type="button" onclick="setLang('en')">EN</button>
-                <button class="lb" type="button" onclick="setLang('pt')">PT</button>
-            </div>
             <input type="hidden" name="language" id="recovery-language" value="es">
             <div class="input-group">
                 <i class="fas fa-envelope"></i>
