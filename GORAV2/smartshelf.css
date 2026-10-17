@@ -559,6 +559,7 @@ footer {
 @media (max-width: 960px) {
   .nav-links        { display: none; }
   .ham              { display: flex; }
+  .nav-right > .gora-social-links { display: none; }
   #hero             { grid-template-columns: 1fr; padding-top: calc(var(--nav) + 56px); }
   .mockup-wrap      { display: none; }
   .prob-grid        { grid-template-columns: 1fr; }
