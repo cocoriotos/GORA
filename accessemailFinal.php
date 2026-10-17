@@ -1,12 +1,5 @@
 <?php 
 session_start();
-$captcha_input = $_POST["captcha"];
-$global_username = $_POST["email"];
-$_SESSION['email'] = $global_username;
-$local_username = $_SESSION['email'];
-$password = $_POST["password"];
-$captcha_input = $_POST["captcha"];
-
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validar que los campos existan
@@ -30,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    
+    $captcha_input = (string) $_POST["captcha"];
 
     // Validar si el CAPTCHA existe y ha expirado
     if (!isset($_SESSION["captcha"])) {
@@ -84,11 +77,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Connection failed: " . mysqli_connect_error());
     }
 
-    $name = mysqli_real_escape_string($conn, $_POST['Name']);
-    $lastname = mysqli_real_escape_string($conn, $_POST['LastName']);
-    $email = mysqli_real_escape_string($conn, $_POST['Email']);
-    $country = mysqli_real_escape_string($conn, $_POST['Country']);
-    $city = mysqli_real_escape_string($conn, $_POST['City']);
+    $name = trim($_POST['Name']);
+    $lastname = trim($_POST['LastName']);
+    $email = trim($_POST['Email']);
+    $language = (string) ($_POST['language'] ?? 'es');
+    if (!in_array($language, ['es', 'en', 'pt'], true)) {
+        $language = 'es';
+    }
+    $country = trim($_POST['Country']);
+    $city = trim($_POST['City']);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(400);
+        exit('La dirección de correo electrónico no es válida.');
+    }
     $phone = trim($_POST['phone']);
     if ($phone === '' || !preg_match('/^[0-9]+$/', $phone)) {
         echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
@@ -106,12 +107,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </script>";
         exit();
     }
-    $phone = mysqli_real_escape_string($conn, $phone);
-    /*$password = password_hash($_POST['password1'], PASSWORD_DEFAULT);*/
-    $password = mysqli_real_escape_string($conn, $_POST['password1']);
+    $submittedPassword = $_POST['password1'];
+    if ($submittedPassword === '') {
+        http_response_code(400);
+        exit('La contraseña es obligatoria.');
+    }
+    $passwordHash = password_hash($submittedPassword, PASSWORD_DEFAULT);
 
-    $query3 = "SELECT * from videotips_app_access_list where email = '$email'";
-    $result3 = $conn->query($query3);
+    $stmt = $conn->prepare("SELECT 1 FROM videotips_app_access_list WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result3 = $stmt->get_result();
 
     if ($result3->num_rows > 0) {
         echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
@@ -135,13 +141,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </script>";
 		exit();
     } else {
-        $query = "INSERT INTO videotips_accessrequests (name, lastname, email, country, city, password, processed, granted, phone) VALUES ('$name', '$lastname', '$email', '$country', '$city','$password','Yes','Yes', '$phone')";
-        $result = $conn->query($query);
+        $conn->begin_transaction();
+        $stmt = $conn->prepare("INSERT INTO videotips_accessrequests (name, lastname, email, country, city, password, processed, granted, phone) VALUES (?, ?, ?, ?, ?, ?, 'Yes', 'Yes', ?)");
+        $stmt->bind_param("sssssss", $name, $lastname, $email, $country, $city, $passwordHash, $phone);
+        $result = $stmt->execute();
 
-        $query1 = "INSERT INTO videotips_app_access_list (name, lastname, username, email, phone, password, role, active, adm_role, suscriptionactive, terms_conditions_awareness, suscriptionkind, lastsuscriptionpaymentdate, suscriptiondaysleft, trialdaysleft) VALUES ('$name', '$lastname', '$email', '$email', '$phone', '$password', 'user', 1, 0, 1, 'Yes', 'Trial', CURDATE(), 0, 0)";
-        $result1 = $conn->query($query1);
+        $stmt = $conn->prepare("INSERT INTO videotips_app_access_list (name, lastname, username, email, phone, password, role, active, adm_role, suscriptionactive, terms_conditions_awareness, suscriptionkind, lastsuscriptionpaymentdate, suscriptiondaysleft, trialdaysleft) VALUES (?, ?, ?, ?, ?, ?, 'user', 1, 0, 1, 'Yes', 'Trial', CURDATE(), 0, 0)");
+        $stmt->bind_param("ssssss", $name, $lastname, $email, $email, $phone, $passwordHash);
+        $result1 = $stmt->execute();
 
         if (!$result || !$result1) {
+            $conn->rollback();
             error_log('Registration insert failed: ' . $conn->error);
             echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
             echo "<script>
@@ -158,13 +168,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </script>";
             exit();
         }
+        $conn->commit();
 
-        $query2 = "INSERT INTO videotips_suscription_payments (username, active, freeregistrationdate) SELECT email, active, registrationdate from videotips_app_access_list where username = '$email'";
-        $result2 = $conn->query($query2);
+        $stmt = $conn->prepare("INSERT INTO videotips_suscription_payments (username, active, freeregistrationdate) SELECT email, active, registrationdate FROM videotips_app_access_list WHERE username = ?");
+        $stmt->bind_param("s", $email);
+        $result2 = $stmt->execute();
 
         $query3 = "UPDATE videotips_app_access_list t1 JOIN videotips_suscription_payments t2 ON t1.username = t2.username SET t1.suscription_package = t2.suscription_package;";
         $result3 = $conn->query($query3);
+
+        $stmt = $conn->prepare("INSERT INTO videotips_maincategory (maincategory, username) values ('Enlaces Utiles', ?)");
+        $stmt->bind_param("s", $email);
+        $result4 = $stmt->execute();
         
+        $stmt = $conn->prepare("INSERT INTO videotips_viodetipscategory (category, maincategory, username) values ('Favoritos','Enlaces Utiles', ?)");
+        $stmt->bind_param("s", $email);
+        $result5 = $stmt->execute();
+
 
         /*Destination email information*/
         $to = "adm@solicionespro.com";
@@ -187,18 +207,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mail = mail($to, $subject, $message, $header);
 
         $to = "$email, adm@solicionespro.com";
-        $subject = "Requerimiento de acceso a GORA";
-        $message = "Buen día $lastname, $name :  \n\n";
-        $message .= "Su requerimiento ha sido exitoso. Acá la información de su solicitud \n\n";
-        $message .= str_pad("Nombre", 40) . ": $name \n";
-        $message .= str_pad("Apellido", 40) . ": $lastname \n";
-        $message .= str_pad("Email", 40) . ": $email \n";
-        $message .= str_pad("País", 40) . ": $country \n";
-        $message .= str_pad("Ciudad", 40) . ": $city \n";
-        $message .= str_pad("Nombre de usuario asignado", 40) . ": $email \n\n";
-        $message .= "Por favor no responder éste correo \n\n";
-        $message .= "Gracias por su registro, ya puede ingresar a la app desde este enlace https://solicionespro.com/videotrackerauth.php con su usuario $email y la contraseña que escogió. \n\n";
-        $message .= "Puedes también ingresar por este enlace donde podrás obtener más información importante de la aplicación así como videos tutoriales y manual del usuario https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5. \n\n";
+        $registrationEmail = [
+            'es' => [
+                'subject' => 'Requerimiento de acceso a GORA',
+                'greeting' => "Buen día $lastname, $name:\n\n",
+                'details' => "Su solicitud fue recibida correctamente. Estos son los datos registrados:\n\nNombre: $name\nApellido: $lastname\nEmail: $email\nPaís: $country\nCiudad: $city\nUsuario: $email\n\n",
+                'instructions' => "Por favor, no responda a este correo.\n\nYa puede ingresar a la aplicación desde https://solicionespro.com/videotrackerauth.php con el usuario indicado y la contraseña que escogió. Por seguridad, nunca enviamos contraseñas por correo.\n\nPuede consultar información, videos tutoriales y el manual del usuario aquí: https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5.\n"
+            ],
+            'en' => [
+                'subject' => 'GORA access request',
+                'greeting' => "Hello $name $lastname,\n\n",
+                'details' => "Your request was received successfully. These are the details you provided:\n\nName: $name\nLast name: $lastname\nEmail: $email\nCountry: $country\nCity: $city\nUsername: $email\n\n",
+                'instructions' => "Please do not reply to this email.\n\nYou can now access the application at https://solicionespro.com/videotrackerauth.php using the username above and the password you chose. For your security, we never send passwords by email.\n\nApplication information, video tutorials, and the user manual are available here: https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5.\n"
+            ],
+            'pt' => [
+                'subject' => 'Solicitação de acesso ao GORA',
+                'greeting' => "Olá $name $lastname,\n\n",
+                'details' => "Sua solicitação foi recebida com sucesso. Estes são os dados informados:\n\nNome: $name\nSobrenome: $lastname\nEmail: $email\nPaís: $country\nCidade: $city\nUsuário: $email\n\n",
+                'instructions' => "Por favor, não responda a este email.\n\nVocê já pode acessar o aplicativo em https://solicionespro.com/videotrackerauth.php usando o usuário informado e a senha que escolheu. Por segurança, nunca enviamos senhas por email.\n\nInformações do aplicativo, tutoriais em vídeo e o manual do usuário estão disponíveis aqui: https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5.\n"
+            ]
+        ][$language];
+        $subject = $registrationEmail['subject'];
+        $message = $registrationEmail['greeting'] . $registrationEmail['details'] . $registrationEmail['instructions'];
         $header = "From: adm@solicionespro.com" . "\r\n";
         $header .= "Bcc: adm@solicionespro.com\r\n";
         $header .= "X-Mailer: PHP/" . phpversion();
@@ -206,14 +236,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mail1 = mail($to, $subject, $message, $header);
 
         if ($result && $mail && $mail1) {
+            $confirmationUi = [
+                'es' => ['Mensaje', 'Su solicitud fue recibida. Recibirá un correo con los detalles de acceso; por seguridad, la contraseña no se envía por correo.', 'Aceptar'],
+                'en' => ['Message', 'Your request was received. You will receive an email with your access details; for your security, your password is not sent by email.', 'OK'],
+                'pt' => ['Mensagem', 'Sua solicitação foi recebida. Você receberá um email com os dados de acesso; por segurança, sua senha não será enviada por email.', 'OK']
+            ][$language];
             echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
             echo "<script>
                 document.addEventListener('DOMContentLoaded', function() {
                     Swal.fire({
-                        title: 'Mensaje',
-                        text: 'Su requerimiento fue enviado, puede ingresar con el usuario y contraseña que digitó. Un correo con esta información fué enviado',
+                        title: " . json_encode($confirmationUi[0], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ",
+                        text: " . json_encode($confirmationUi[1], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ",
                         icon: 'success',
-                        confirmButtonText: 'Aceptar',
+                        confirmButtonText: " . json_encode($confirmationUi[2], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ",
                         customClass: {
                             popup: 'custom-swal-popup',
                             title: 'custom-swal-title',

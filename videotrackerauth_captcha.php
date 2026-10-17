@@ -44,6 +44,7 @@
             <div class="login-header">
                 <img src="SmartShelfUsefulContentLibraryDarrkLightGreen.ico" alt="SmartShelf Logo" class="logo">
                 <h1>Biblioteca de Contenidos Útiles</h1>
+                <?php include __DIR__ . "/social_links.php"; ?>
             </div>
             <form id="login" action="access_success_Tasks_final.php" method="POST" autocomplete="off">
                 <div class="input-group">

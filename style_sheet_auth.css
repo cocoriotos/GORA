@@ -270,6 +270,12 @@ input[name="captcha"]::placeholder {
   z-index: 2;
 }
 
+.reset-language {
+  position: static;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
 .lb {
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.04);

@@ -25,6 +25,7 @@
     </a></li>
   </ul>
   <div class="nav-right">
+    <?php include __DIR__ . "/social_links.php"; ?>
     <div class="lang-sw">
       <button class="lb on" onclick="setLang('es')">ES</button>
       <button class="lb" onclick="setLang('en')">EN</button>
@@ -235,7 +236,7 @@
         <li class="p-feat"><span class="p-chk">✓</span><span data-i18n="pfeat3">Buscador inteligente</span></li>
         <li class="p-feat"><span class="p-chk">✓</span><span data-i18n="pfeat4">Acceso desde cualquier dispositivo</span></li>
       </ul>
-      <a href="https://solicionespro.com/GORA/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-ghost" style="width:100%;justify-content:center;" data-i18n="plan_btn">Comenzar ›</a>
+      <a href="https://solicionespro.com/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-ghost" style="width:100%;justify-content:center;" data-i18n="plan_btn">Comenzar ›</a>
     </div>
     <div class="p-card reveal">
       <div class="p-plan" data-i18n="plan2_name">Semestral</div>

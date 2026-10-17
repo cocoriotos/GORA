@@ -931,7 +931,7 @@ include "header.php";
             const manualPaths = {
                 es: 'GORAManualUsuarioES.pdf',
                 en: 'GORAUserManualEN.pdf',
-                pt: 'GORAManualUsuarioPT.pdf', 
+                pt: 'GORAManualUsuarioPT.pdf',
             };
             const manualLink = document.getElementById('module-manual-link');
             if (manualLink) manualLink.href = manualPaths[window.currentLang] || manualPaths.es;
@@ -1142,7 +1142,7 @@ include "header.php";
                 </div>
 
                 <!-- Sección de "Tus Contenidos Útiles" -->
-                <div class="col-md-12 module-view is-hidden" data-view-panel="search-content">
+                <div class="col-md-12 module-view is-hidden" data-view-panel="search-content"><br>
                     <div class="search-section"><?php include("search.php") ?></div> <!-- Incluir el buscador -->
                     <div class="section-card">
                         <div class="section-heading" id="heading-useful-contents">Tus Contenidos Útiles</div>

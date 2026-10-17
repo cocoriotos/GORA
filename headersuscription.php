@@ -13,6 +13,7 @@ $name = $_SESSION['name'];
   <nav class="navbar navbar-dark bg-dark d-flex justify-content-center" id="welcome">
   <center><a id="welcome" class="navbar-brand"><span class="username-style"><?php echo $name; ?></span>, Biblioteca de Contenidos Útiles | Suscripción</a></center>
   </nav>
+  <?php include __DIR__ . "/social_links.php"; ?>
 
     <center><nav class="navbar navbar-dark bg-dark d-flex justify-content-center align-items-center subscription-actions">
 	        <div class="d-flex flex-wrap flex-grow-1">

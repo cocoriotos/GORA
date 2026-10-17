@@ -26,6 +26,7 @@
         <div class="login-header">
             <img src="GORA.ico" alt="GORA Logo" class="logo">
             <h1 data-i18n="req_title">Solicitud de Acceso</h1>
+            <?php include __DIR__ . "/social_links.php"; ?>
         </div>
 
         <!-- Formulario de solicitud de acceso -->
@@ -36,6 +37,7 @@
                 <button class="lb" type="button" onclick="setLang('en')">EN</button>
                 <button class="lb" type="button" onclick="setLang('pt')">PT</button>
             </div>
+            <input type="hidden" name="language" id="registration-language" value="es">
             <div class="input-group">
                 <i class="fas fa-user"></i>
                 <input type="text" name="Name" data-i18n-placeholder="req_name" placeholder="Nombre" required>
@@ -46,7 +48,7 @@
             </div>
             <div class="input-group">
                 <i class="fas fa-envelope"></i>
-                <input type="text" name="Email" data-i18n-placeholder="req_email" placeholder="Correo electrónico" required>
+                <input type="email" name="Email" autocomplete="username" data-i18n-placeholder="req_email" placeholder="Correo electrónico" required>
             </div>
             <div class="input-group">
                 <i class="fas fa-globe"></i>
@@ -62,13 +64,13 @@
             </div>
             <div class="input-group">
                 <i class="fas fa-lock"></i>
-                <input type="password" name="password1" data-i18n-placeholder="req_password" placeholder="Contraseña" required>
+                <input type="password" name="password1" autocomplete="new-password" data-i18n-placeholder="req_password" placeholder="Contraseña" required>
             </div>
             <img src="captcha.php" alt="CAPTCHA" class="captcha-image">
             <input type="text" name="captcha" data-i18n-placeholder="req_captcha" placeholder="Ingrese el CAPTCHA" required>
             <div class="terms">
                 <input type="checkbox" id="terms" onclick="toggleSubmitButton()" required>
-                <label >Acepto los <a href="TermsConditions.php" target="_blank" style="color: var(--accent) !important; text-decoration: underline;">términos y condiciones</a></label>
+                <label for="terms" >Acepto los <a href="TermsConditions.php" target="_blank" style="color: var(--accent) !important; text-decoration: underline;">términos y condiciones</a></label>
             </div>
             <button type="submit" class="btn-login" id="loginbutton" data-i18n="req_send" disabled>Enviar</button>
             <br><br>
@@ -174,6 +176,7 @@ function applyTranslations(lang){
     document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(d[k]!==undefined)el.innerHTML=d[k];});
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const k=el.getAttribute('data-i18n-placeholder');if(d[k]!==undefined)el.placeholder=d[k];});
     document.querySelectorAll('.lb').forEach(b=>{b.classList.toggle('on',b.textContent.trim()===lang.toUpperCase());});
+    document.getElementById('registration-language').value = lang;
     document.documentElement.lang = lang;
 }
 
