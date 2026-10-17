@@ -28,6 +28,7 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
     body#bodyadminmodule {
       --welcome-bottom: 48px;
       margin: 0;
+      padding-top: 0 !important;
     }
 
     .subscription-actions {
@@ -108,7 +109,9 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
       text-align: center;
     }
 
-    .subscription-sidebar-link .fa-right-from-bracket {
+    .subscription-sidebar-link .fa-right-from-bracket,
+    .subscription-sidebar-link:hover .fa-right-from-bracket,
+    .subscription-sidebar-link:focus-visible .fa-right-from-bracket {
       color: #ffffff !important;
     }
 
