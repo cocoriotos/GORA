@@ -37,6 +37,7 @@
                 <button class="lb" type="button" onclick="setLang('en')">EN</button>
                 <button class="lb" type="button" onclick="setLang('pt')">PT</button>
             </div>
+            <input type="hidden" name="language" id="registration-language" value="es">
             <div class="input-group">
                 <i class="fas fa-user"></i>
                 <input type="text" name="Name" data-i18n-placeholder="req_name" placeholder="Nombre" required>
@@ -175,6 +176,7 @@ function applyTranslations(lang){
     document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(d[k]!==undefined)el.innerHTML=d[k];});
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const k=el.getAttribute('data-i18n-placeholder');if(d[k]!==undefined)el.placeholder=d[k];});
     document.querySelectorAll('.lb').forEach(b=>{b.classList.toggle('on',b.textContent.trim()===lang.toUpperCase());});
+    document.getElementById('registration-language').value = lang;
     document.documentElement.lang = lang;
 }
 

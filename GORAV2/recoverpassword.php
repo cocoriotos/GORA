@@ -1,5 +1,5 @@
 <!-- Developed by Julián González Bucheli -->
-<html lang="us">
+<html lang="es">
 <?php 
 include "sessions.php";
 ?>
@@ -33,10 +33,11 @@ include "sessions.php";
         <!-- Formulario de recuperación de contraseña -->
         <form id="login" action="recoverpasswordemailFinal.php" method="POST" autocomplete="off">
             <div class="lang-sw">
-                <button class="lb on" type="button" onclick="setLang('es')">ES</button>
+                <button class="lb" type="button" onclick="setLang('es')">ES</button>
                 <button class="lb" type="button" onclick="setLang('en')">EN</button>
                 <button class="lb" type="button" onclick="setLang('pt')">PT</button>
             </div>
+            <input type="hidden" name="language" id="recovery-language" value="es">
             <div class="input-group">
                 <i class="fas fa-envelope"></i>
                 <input type="email" name="email" data-i18n-placeholder="rec_email" placeholder="Email" required>
@@ -51,7 +52,7 @@ include "sessions.php";
 
         <!-- Información de contacto -->
         <form id="request-access">
-            <p>¿Alguna duda? Contáctenos al Email: <a href="mailto:adm@solicionespro.com">adm@solicionespro.com</a></p>
+            <p><span data-i18n="rec_questions">¿Alguna duda? Contáctenos al Email:</span> <a href="mailto:adm@solicionespro.com">adm@solicionespro.com</a></p>
             <br>
             <!--<p>Fecha: <?php /*echo date('m/d/Y');*/ ?></p>-->
         </form>
@@ -66,11 +67,13 @@ include "sessions.php";
             var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailPattern.test(email)) {
                 event.preventDefault();
+                const language = localStorage.getItem('smartshelfLang') || 'es';
+                const messages = T[language] || T.es;
                 Swal.fire({
-                    title: 'Mensaje',
-                    text: 'Por favor, ingresa una dirección de correo electrónico válida.',
+                    title: messages.rec_message,
+                    text: messages.rec_invalid,
                     icon: 'error',
-                    confirmButtonText: 'Aceptar',
+                    confirmButtonText: messages.rec_ok,
                     customClass: {
                         popup: 'custom-swal-popup',
                         title: 'custom-swal-title',
@@ -83,26 +86,38 @@ include "sessions.php";
 
         // Simple i18n for this page
         const T = {
-          es: { rec_title: 'Recuperación de Contraseña', rec_email: 'Email', rec_submit: 'Recuperar Contraseña' },
-          en: { rec_title: 'Password Recovery', rec_email: 'Email', rec_submit: 'Recover Password' },
-          pt: { rec_title: 'Recuperação de Senha', rec_email: 'Email', rec_submit: 'Recuperar Senha' }
+          es: { rec_title: 'Recuperación de Contraseña', rec_email: 'Email', rec_submit: 'Recuperar Contraseña', rec_cancel: 'Cancelar', rec_questions: '¿Alguna duda? Contáctenos al Email:', rec_message: 'Mensaje', rec_invalid: 'Por favor, ingresa una dirección de correo electrónico válida.', rec_ok: 'Aceptar' },
+          en: { rec_title: 'Password Recovery', rec_email: 'Email', rec_submit: 'Recover Password', rec_cancel: 'Cancel', rec_questions: 'Questions? Contact us by email:', rec_message: 'Message', rec_invalid: 'Please enter a valid email address.', rec_ok: 'OK' },
+          pt: { rec_title: 'Recuperação de Senha', rec_email: 'Email', rec_submit: 'Recuperar Senha', rec_cancel: 'Cancelar', rec_questions: 'Dúvidas? Entre em contato pelo email:', rec_message: 'Mensagem', rec_invalid: 'Digite um endereço de email válido.', rec_ok: 'OK' }
         };
 
         function applyTranslationsRec(lang){
-          const d = T[lang] || T.es;
+          const selectedLanguage = T[lang] ? lang : 'es';
+          const d = T[selectedLanguage];
           document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(d[k]!==undefined)el.innerHTML=d[k];});
           document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const k=el.getAttribute('data-i18n-placeholder');if(d[k]!==undefined)el.placeholder=d[k];});
-          document.documentElement.lang = lang;
+          document.querySelectorAll('.lang-sw .lb').forEach(button=>button.classList.toggle('on', button.textContent.trim() === selectedLanguage.toUpperCase()));
+          document.getElementById('recovery-language').value = selectedLanguage;
+          document.documentElement.lang = selectedLanguage;
+        }
+
+        function setLang(lang) {
+          if (!T[lang]) return;
+          localStorage.setItem('smartshelfLang', lang);
+          applyTranslationsRec(lang);
+          window.dispatchEvent(new Event('languageChanged'));
         }
 
         document.addEventListener('DOMContentLoaded', ()=>{
           const lang = localStorage.getItem('smartshelfLang') || 'es';
           applyTranslationsRec(lang);
+          document.querySelector('#login + form .btn-login').textContent = T[lang].rec_cancel;
         });
 
         window.addEventListener('languageChanged', ()=>{
           const lang = localStorage.getItem('smartshelfLang') || 'es';
           applyTranslationsRec(lang);
+          document.querySelector('#login + form .btn-login').textContent = T[lang].rec_cancel;
         });
     </script>
 </body>
