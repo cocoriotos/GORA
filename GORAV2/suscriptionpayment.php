@@ -419,7 +419,7 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
           <!--<a class="subscription-sidebar-link" href="https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5" target="_blank">
             <i class="fas fa-play-circle"></i><span>Tutoriales</span>
           </a>-->
-          <a class="subscription-sidebar-link" href="GORAToolManualDelUsuario2026.pdf" target="_blank">
+          <a class="subscription-sidebar-link" id="subscription-manual-link" href="GORAManualUsuarioES.pdf" target="_blank" rel="noopener">
             <i class="fas fa-book-open"></i><span>Manual</span>
           </a>
         </div>
@@ -684,6 +684,16 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
   function setSubscriptionLanguage(language) {
     if (!['es', 'en', 'pt'].includes(language)) {
       language = 'es';
+    }
+
+    const manualPaths = {
+      es: 'GORAManualUsuarioES.pdf',
+      en: 'GORAUserManualEN.pdf',
+      pt: 'GORAManualUsuarioPT.pdf'
+    };
+    const manualLink = document.getElementById('subscription-manual-link');
+    if (manualLink) {
+      manualLink.href = manualPaths[language];
     }
 
     localStorage.setItem('smartshelfLang', language);
