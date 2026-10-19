@@ -1,6 +1,6 @@
 <?php
 
-$configFile = dirname(__DIR__,2) . '/private/config.php';
+$configFile = dirname(__DIR__,1) . '/private/config.php';
 
 
 if (!is_file($configFile) || !is_readable($configFile)) {

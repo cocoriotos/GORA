@@ -119,37 +119,20 @@ $active = 0;
 			exit();
 		}
 
-		require_once __DIR__ . '/session_guard.php';
-		$reuseCurrentSession = false;
-		$takeoverRequested = ($_POST['takeover'] ?? '') === '1';
 		if (!empty($_SESSION['email'])) {
-			$currentSessionId = session_id();
-			$currentEmail = (string) $_SESSION['email'];
-			if (strcasecmp($currentEmail, $local_username) === 0) {
-				$reuseCurrentSession = goraValidateActiveSession($conn, $currentEmail, $currentSessionId, time());
-			} else {
-				goraReleaseActiveSession($conn, $currentEmail, $currentSessionId);
-				$_SESSION = [];
-			}
+			header("Location: videotrackerauth.php?login=active");
+			exit();
 		}
 
 		$cleanupStmt = $conn->prepare("UPDATE videotips_accessrequests SET password = '' WHERE email = ?");
 		$cleanupStmt->bind_param("s", $local_username);
 		$cleanupStmt->execute();
 
-		if (!$reuseCurrentSession) {
-			session_regenerate_id(true);
-			if ($takeoverRequested) {
-				goraTakeoverActiveSession($conn, $local_username, session_id(), time());
-			} elseif (!goraClaimActiveSession($conn, $local_username, session_id(), time())) {
-				goraRenderSessionTakeoverConfirmation(
-					$local_username,
-					$password,
-					'access_success_Tasks_final.php',
-					'videotrackerauth.php'
-				);
-				exit();
-			}
+		session_regenerate_id(true);
+		require_once __DIR__ . '/session_guard.php';
+		if (!goraClaimActiveSession($conn, $local_username, session_id(), time())) {
+			header("Location: videotrackerauth.php?login=active");
+			exit();
 		}
 		$_SESSION['email'] = $local_username;
 		$_SESSION['LAST_ACTIVITY'] = time();

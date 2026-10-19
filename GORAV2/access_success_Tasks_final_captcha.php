@@ -130,6 +130,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
          exit();
     }
 
+    // Destruir el CAPTCHA después de la verificación para evitar reutilización
+    unset($_SESSION["captcha"]);
+
     // Conexión a la base de datos
     include("db_connection1.php");
 
@@ -181,43 +184,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if ($passwordVerified) {
-        require_once __DIR__ . '/session_guard.php';
-        $reuseCurrentSession = false;
-        $takeoverRequested = ($_POST['takeover'] ?? '') === '1';
         if (!empty($_SESSION['email'])) {
-            $currentSessionId = session_id();
-            $currentEmail = (string) $_SESSION['email'];
-            if (strcasecmp($currentEmail, $local_username) === 0) {
-                $reuseCurrentSession = goraValidateActiveSession($conn, $currentEmail, $currentSessionId, time());
-            } else {
-                goraReleaseActiveSession($conn, $currentEmail, $currentSessionId);
-                $_SESSION = [];
-                $_SESSION['captcha'] = $captcha_input;
-            }
+            header("Location: videotrackerauth.php?login=active");
+            exit();
         }
 
         $cleanupStmt = $conn->prepare("UPDATE videotips_accessrequests SET password = '' WHERE email = ?");
         $cleanupStmt->bind_param("s", $local_username);
         $cleanupStmt->execute();
 
-        if (!$reuseCurrentSession) {
-            session_regenerate_id(true);
-            if ($takeoverRequested) {
-                goraTakeoverActiveSession($conn, $local_username, session_id(), time());
-            } elseif (!goraClaimActiveSession($conn, $local_username, session_id(), time())) {
-                goraRenderSessionTakeoverConfirmation(
-                    $local_username,
-                    $password,
-                    'access_success_Tasks_final_captcha.php',
-                    'videotrackerauth.php',
-                    $captcha_input
-                );
-                exit();
-            }
+        session_regenerate_id(true);
+        require_once __DIR__ . '/session_guard.php';
+        if (!goraClaimActiveSession($conn, $local_username, session_id(), time())) {
+            header("Location: videotrackerauth.php?login=active");
+            exit();
         }
-        unset($_SESSION["captcha"]);
         $_SESSION['email'] = $local_username;
-        $_SESSION['name'] = $user_data['name'];
         $_SESSION['LAST_ACTIVITY'] = time();
         // Actualizar datos de suscripción
         $stmt = $conn->prepare("UPDATE videotips_suscription_payments SET currentdate = CURDATE() WHERE username = ?");
@@ -241,7 +223,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
     } else {
-        unset($_SESSION["captcha"]);
         echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
         echo "<script>
             document.addEventListener('DOMContentLoaded', function() {
