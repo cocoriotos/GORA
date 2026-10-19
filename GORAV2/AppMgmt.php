@@ -40,7 +40,7 @@ $query2="SET SQL_SAFE_UPDATES = 0";
 $result2=mysqli_query($conn, $query2);
 				
 //Asignación del valor de dias de suscripción a disfrutar   
-$query5="UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate) where suscriptionkind in ('Owner', 'Partner')"; 
+$query5="UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate) where suscriptionkind in ('Owner', 'Partner', 'Trial')"; 
 $result5=mysqli_query($conn, $query5);
 
 //habilitar la actualizacion masiva    

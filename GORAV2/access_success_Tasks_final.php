@@ -153,7 +153,7 @@ $active = 0;
 				$result2=mysqli_query($conn, $query2);
 
 				//actualiza los dias usados de suscripcion del usuario  
-				$result3 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), lastlogindate = CURDATE() WHERE username = ?");
+				$result3 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate), suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), lastlogindate = CURDATE() WHERE username = ?");
 				
 
 				//habilitar la actualizacion masiva    
