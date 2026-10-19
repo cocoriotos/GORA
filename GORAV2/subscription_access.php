@@ -160,6 +160,10 @@ function goraCanAccessVideoModule(?array $user): bool
         return $daysRemaining > 0 && $daysRemaining < 31;
     }
 
+    if ($kind === 'Owner') {
+        return (int) ($user['adm_role'] ?? 0) === 0;
+    }
+
     return in_array($kind, ['Test', 'Partner'], true);
 }
 

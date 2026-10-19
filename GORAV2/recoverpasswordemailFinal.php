@@ -46,7 +46,7 @@ try {
         $conn->commit();
         $transactionStarted = false;
 
-        $resetUrl = 'https://solicionespro.com/GORAV2/resetpassword.php?token=' . rawurlencode($token) . '&lang=' . rawurlencode($language);
+        $resetUrl = 'https://solicionespro.com/resetpassword.php?token=' . rawurlencode($token) . '&lang=' . rawurlencode($language);
         $emailCopy = [
             'es' => [
                 'subject' => 'Restablecimiento de contraseña de GORA',
