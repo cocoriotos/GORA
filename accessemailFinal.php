@@ -185,7 +185,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("s", $email);
         $result5 = $stmt->execute();
 
-         $stmt = $conn->prepare("INSERT INTO videotips_videotips (videolink, maincategory, category, content, active, username) values ('https://www.youtube.com/@GORAColOficial','Enlaces Utiles', 'Favoritos', 'Canal de yourtube GORA para ver los Manuales y contenidos de la APlicación', 1, ?)");
+         $stmt = $conn->prepare("INSERT INTO videotips_videotips (videolink, maincategory, category, content, active, username) values ('https://www.youtube.com/@GORAColOficial','Enlaces Utiles', 'Favoritos', 'Canal de youtube GORA para ver los Manuales y contenidos de la Aplicación', 'Yes', ?)");
         $stmt->bind_param("s", $email);
         $result6 = $stmt->execute();
 
