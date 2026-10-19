@@ -31,7 +31,10 @@ if (!isset($GLOBALS['gora_session_guard_checked'])) {
 		if (!isset($conn)) {
 			include __DIR__ . '/db_connection1.php';
 		}
-		if (!goraValidateActiveSession($conn, (string) $_SESSION['email'], session_id(), $now)) {
+		if (
+			!goraValidateActiveSession($conn, (string) $_SESSION['email'], session_id(), $now)
+			&& !goraClaimActiveSession($conn, (string) $_SESSION['email'], session_id(), $now)
+		) {
 			goraDestroyCurrentSession();
 			if (basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'sessionactivity.php') {
 				http_response_code(401);

@@ -7,7 +7,7 @@ $name = $_SESSION['name'];
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style_sheet_ops.css"/>
-  <script src="session-timeout.js?v=20261001-3" defer></script>
+  <script src="session-timeout.js?v=20261019-1" defer></script>
 </head>
 <html lang="es">
   <header>

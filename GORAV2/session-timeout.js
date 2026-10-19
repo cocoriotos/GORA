@@ -10,6 +10,51 @@
     let lastHeartbeat = 0;
     let lastActivityAt = 0;
     let redirecting = false;
+    let navigatingAway = false;
+
+    function isSameOriginNavigation(url) {
+        try {
+            return new URL(url, window.location.href).origin === window.location.origin;
+        } catch {
+            return false;
+        }
+    }
+
+    document.addEventListener('click', event => {
+        if (event.defaultPrevented || !(event.target instanceof Element)) return;
+
+        const link = event.target.closest('a[href]');
+        if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        if (link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+
+        const destination = new URL(link.href, window.location.href);
+        if (isSameOriginNavigation(destination) &&
+            (destination.pathname !== window.location.pathname || destination.search !== window.location.search)) {
+            navigatingAway = true;
+        }
+    });
+
+    document.addEventListener('submit', event => {
+        if (event.defaultPrevented || !(event.target instanceof HTMLFormElement)) return;
+
+        const form = event.target;
+        if (form.target && form.target !== '_self') return;
+        if (isSameOriginNavigation(form.action || window.location.href)) navigatingAway = true;
+    });
+
+    window.addEventListener('pagehide', event => {
+        if (navigatingAway || event.persisted) return;
+
+        const body = new URLSearchParams({ release: '1' });
+        if (!navigator.sendBeacon || !navigator.sendBeacon('sessionrelease.php', body)) {
+            fetch('sessionrelease.php', {
+                method: 'POST',
+                body,
+                credentials: 'same-origin',
+                keepalive: true
+            }).catch(() => {});
+        }
+    });
 
     function expireSession() {
         if (redirecting) return;
