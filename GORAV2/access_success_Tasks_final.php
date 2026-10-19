@@ -119,20 +119,34 @@ $active = 0;
 			exit();
 		}
 
+		$reuseCurrentSession = false;
 		if (!empty($_SESSION['email'])) {
-			header("Location: videotrackerauth.php?login=active");
-			exit();
+			require_once __DIR__ . '/session_guard.php';
+			$currentSessionId = session_id();
+			if (
+				strcasecmp((string) $_SESSION['email'], $local_username) !== 0
+				|| (
+					!goraValidateActiveSession($conn, (string) $_SESSION['email'], $currentSessionId, time())
+					&& !goraClaimActiveSession($conn, (string) $_SESSION['email'], $currentSessionId, time())
+				)
+			) {
+				header("Location: videotrackerauth.php?login=active");
+				exit();
+			}
+			$reuseCurrentSession = true;
 		}
 
 		$cleanupStmt = $conn->prepare("UPDATE videotips_accessrequests SET password = '' WHERE email = ?");
 		$cleanupStmt->bind_param("s", $local_username);
 		$cleanupStmt->execute();
 
-		session_regenerate_id(true);
 		require_once __DIR__ . '/session_guard.php';
-		if (!goraClaimActiveSession($conn, $local_username, session_id(), time())) {
-			header("Location: videotrackerauth.php?login=active");
-			exit();
+		if (!$reuseCurrentSession) {
+			session_regenerate_id(true);
+			if (!goraClaimActiveSession($conn, $local_username, session_id(), time())) {
+				header("Location: videotrackerauth.php?login=active");
+				exit();
+			}
 		}
 		$_SESSION['email'] = $local_username;
 		$_SESSION['LAST_ACTIVITY'] = time();
