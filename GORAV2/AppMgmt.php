@@ -52,7 +52,7 @@ $result2=mysqli_query($conn, $query2);
 
 /*Sync daysleft */
 //actualizar los días restantes de suscripción y de los dias de prueba para todos los usuarios
-$query20="UPDATE videotips_app_access_list SET suscriptiondaysleft = DATEDIFF(CURDATE(), registrationdate), trialdaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate)"; 
+$query20="UPDATE videotips_app_access_list SET suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate)"; 
 $result20=mysqli_query($conn, $query20);
 
 //habilitar la actualizacion masiva    
