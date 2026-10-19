@@ -185,7 +185,8 @@ $active = 0;
 
 				if (goraCanAccessAppManagement($accessUser)){
 					$result17 = $executeUserStatement("UPDATE videotips_app_access_list SET lastlogindate = CURDATE() WHERE username = ?");
-					header("refresh:0; url=AppMgmt.php");
+					$result17->close();
+					header("Location: AppMgmt.php", true, 303);
 					exit();
 				}
 				
