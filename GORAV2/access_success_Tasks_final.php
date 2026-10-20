@@ -162,6 +162,10 @@ $active = 0;
 				$query2="SET SQL_SAFE_UPDATES = 0";
 				$result2=mysqli_query($conn, $query2);
 				
+				//Asignación del valor de dias de suscripción a disfrutar para Trial   
+				$result4 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = (31-DATEDIFF(CURRENT_DATE(), registrationdate)) WHERE suscriptionkind = 'Trial' AND username = ?");
+
+
 				//Asignación del valor de dias de suscripción a disfrutar   
 				//$result4 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = IF(DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate) > 365, 0, DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate)) WHERE suscriptionkind IN ('Suspendida', 'Vencida', 'De Pago') AND username = ?");
 
@@ -210,7 +214,7 @@ $active = 0;
 
 
 				//actualiza el estado de pago a vencido si el tiempo de trial ha vencido
-				$result9 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' WHERE (suscriptionpayed = 0 and suscriptionactive = 0 and active = 1 AND trialdaysleft > 32) AND suscriptionkind = 'Trial' AND username = ?");
+				$result9 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' WHERE (suscriptionpayed = 0 and suscriptionactive = 0 and active = 1 AND trialdaysleft > 32 and daystoenjoy = 0) AND suscriptionkind = 'Trial' AND username = ?");
 				
 
 				//deshabilitar la actualizacion masiva
