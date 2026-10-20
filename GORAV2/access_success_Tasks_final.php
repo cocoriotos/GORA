@@ -153,7 +153,7 @@ $active = 0;
 				$result2=mysqli_query($conn, $query2);
 
 				//actualiza los dias usados de suscripcion del usuario  
-				$result3 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate), suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), lastlogindate = CURDATE() WHERE username = ?");
+				$result3 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = (365- DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate)), suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), registrationdate), lastlogindate = CURDATE() WHERE username = ?");
 				
 
 				//habilitar la actualizacion masiva    
@@ -163,16 +163,16 @@ $active = 0;
 				$result2=mysqli_query($conn, $query2);
 				
 				//Asignación del valor de dias de suscripción a disfrutar   
-				$result4 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = IF(DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate) > 365, 0, DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate)) WHERE suscriptionkind IN ('Suspendida', 'Vencida', 'De Pago') AND username = ?");
+				//$result4 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = IF(DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate) > 365, 0, DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate)) WHERE suscriptionkind IN ('Suspendida', 'Vencida', 'De Pago') AND username = ?");
 
 				//habilitar la actualizacion masiva    
-				$query1="SET SQL_SAFE_UPDATES = 0";
-				$result1=mysqli_query($conn, $query1);
-				$query2="SET SQL_SAFE_UPDATES = 0";
-				$result2=mysqli_query($conn, $query2);
+				//$query1="SET SQL_SAFE_UPDATES = 0";
+				//$result1=mysqli_query($conn, $query1);
+				//$query2="SET SQL_SAFE_UPDATES = 0";
+				//$result2=mysqli_query($conn, $query2);
 				
 				//Asignación del valor de dias de suscripción a disfrutar   
-				$result5 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate) WHERE suscriptionkind IN ('Owner', 'Partner') AND username = ?");
+				//$result5 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate) WHERE suscriptionkind IN ('Owner', 'Partner') AND username = ?");
 
 
 				//habilitar la actualizacion masiva 
@@ -182,7 +182,7 @@ $active = 0;
 				$result2=mysqli_query($conn, $query2);
 				
 				//actualiza el estado de suscripción a trial si el tiempo de Trial no ha vencido
-				$result6 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptionkind = 'Trial' WHERE trialdaysleft < 32 AND suscriptiondaysleft < 32 AND username = ?");
+				$result6 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptionkind = 'Trial' WHERE trialdaysleft < 32 AND suscriptionactive = 0 and suscriptionpayed = 0  AND username = ?");
 
 				//habilitar la actualizacion masiva 
 				$query1="SET SQL_SAFE_UPDATES = 0";
@@ -191,7 +191,7 @@ $active = 0;
 				$result2=mysqli_query($conn, $query2);
 
 				//actualiza la suscripcion a vencida si el tiempo de suscripcion ha vencido
-				$result7 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' WHERE (suscriptionpayed = 0 AND daystoenjoy > 365) AND (suscriptionkind = 'De Pago' OR suscriptionkind = 'Vencida' OR suscriptionkind = 'Suspendida') AND username = ?");
+				$result7 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' WHERE (suscriptionpayed = 0 and active = 1 AND suscriptiondaysleft > 365) AND (suscriptionkind = 'De Pago' OR suscriptionkind = 'Vencida' OR suscriptionkind = 'Suspendida') AND username = ?");
 				
 				//habilitar la actualizacion masiva 
 				$query1="SET SQL_SAFE_UPDATES = 0";
@@ -210,7 +210,7 @@ $active = 0;
 
 
 				//actualiza el estado de pago a vencido si el tiempo de trial ha vencido
-				$result9 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptionkind = 'Trial' WHERE (suscriptionpayed = 0 AND daystoenjoy > 32) AND suscriptionkind = 'Trial' AND username = ?");
+				$result9 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' WHERE (suscriptionpayed = 0 and suscriptionactive = 0 and active = 1 AND trialdaysleft > 32) AND suscriptionkind = 'Trial' AND username = ?");
 				
 
 				//deshabilitar la actualizacion masiva
