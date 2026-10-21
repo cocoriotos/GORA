@@ -256,7 +256,7 @@ $active = 0;
 					exit();
 				}
 				
-				if ($active == 1 && $daystoenjoy < 365 && $suscriptionpayed == 1 && $suscriptionkind == 'De Pago') {
+				if ($active == 1 && $daystoenjoy > 365 && $suscriptionpayed == 1 && $suscriptionkind == 'De Pago') {
 			      $_SESSION['suscriptiondue']=1;
 			      header("Location: videolinkadminmodule.php", true, 303);
 			  	  exit();
