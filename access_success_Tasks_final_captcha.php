@@ -185,8 +185,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($passwordVerified) {
         if (!empty($_SESSION['email'])) {
-            header("Location: videotrackerauth.php?login=active");
-            exit();
+            $currentEmail = (string) $_SESSION['email'];
+            if (strcasecmp($currentEmail, $local_username) === 0) {
+                header("Location: videotrackerauth.php?login=active");
+                exit();
+            }
+
+            require_once __DIR__ . '/session_guard.php';
+            goraReleaseActiveSession($conn, $currentEmail, session_id());
+            $_SESSION = [];
         }
 
         $cleanupStmt = $conn->prepare("UPDATE videotips_accessrequests SET password = '' WHERE email = ?");

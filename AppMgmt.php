@@ -30,7 +30,7 @@ $query2="SET SQL_SAFE_UPDATES = 0";
 $result2=mysqli_query($conn, $query2);
 				
 //Asignación del valor de dias de suscripción a disfrutar   
-$query4="UPDATE videotips_app_access_list SET daystoenjoy = IF(DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate) > 365, 0, DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate)) where suscriptionkind in ('Suspendida', 'Vencida', 'De Pago')"; 
+$query4="UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate),  suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), registrationdate) where suscriptionkind in ('Suspendida', 'Vencida', 'De Pago','Owner', 'Partner')"; 
 $result4=mysqli_query($conn, $query4);
 
 //habilitar la actualizacion masiva    
@@ -40,7 +40,7 @@ $query2="SET SQL_SAFE_UPDATES = 0";
 $result2=mysqli_query($conn, $query2);
 				
 //Asignación del valor de dias de suscripción a disfrutar   
-$query5="UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate) where suscriptionkind in ('Owner', 'Partner', 'Trial')"; 
+$query5="UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), registrationdate) where suscriptionkind = 'Trial'"; 
 $result5=mysqli_query($conn, $query5);
 
 //habilitar la actualizacion masiva    
@@ -52,7 +52,7 @@ $result2=mysqli_query($conn, $query2);
 
 /*Sync daysleft */
 //actualizar los días restantes de suscripción y de los dias de prueba para todos los usuarios
-$query20="UPDATE videotips_app_access_list SET suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate)"; 
+$query20="UPDATE videotips_app_access_list SET suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), registrationdate)"; 
 $result20=mysqli_query($conn, $query20);
 
 //habilitar la actualizacion masiva    
@@ -63,7 +63,7 @@ $result2=mysqli_query($conn, $query2);
 
 
 //actualiza el estado de suscripción a trial si el tiempo de Trial no ha vencido
-$query25="UPDATE videotips_app_access_list SET suscriptionkind = 'Trial' where trialdaysleft < 32 and suscriptiondaysleft < 32 and username ='$local_username'"; 
+$query25="UPDATE videotips_app_access_list SET suscriptionkind = 'Trial' where trialdaysleft < 32 and suscriptionactive = 0 and suscriptionpayed = 0"; 
 $result25=mysqli_query($conn, $query25);
 
 
@@ -75,8 +75,19 @@ $result2=mysqli_query($conn, $query2);
 
 
 //actualiza el estado de pago a suspendido si el tiempo de suscripcion ha vencido
-$query9="UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' where daystoenjoy > 365 and suscriptionpayed = 0 and (suscriptionkind = 'De Pago' or suscriptionkind = 'Vencida' or suscriptionkind = 'Suspendida')"; 
+$query9="UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' where (suscriptionpayed = 0 and active = 1 AND suscriptiondaysleft > 365) AND (suscriptionkind = 'De Pago' OR suscriptionkind = 'Vencida' OR suscriptionkind = 'Suspendida')"; 
 $result9=mysqli_query($conn, $query9);
+
+$query1="SET SQL_SAFE_UPDATES = 0";
+$result1=mysqli_query($conn, $query1);
+$query2="SET SQL_SAFE_UPDATES = 0";
+$result2=mysqli_query($conn, $query2);
+
+//actualiza la suscripcion a vencida si el tiempo de suscripcion ha vencido
+$query8 = "UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' WHERE suscriptionpayed = 1 AND daystoenjoy = 0 AND active = 1 AND suscriptionactive = 1 AND suscriptionkind = 'De Pago'";
+$result8 = mysqli_query($conn, $query8);
+				
+
 
 //habilitar la actualizacion masiva 
 $query1="SET SQL_SAFE_UPDATES = 0";
@@ -86,7 +97,7 @@ $result2=mysqli_query($conn, $query2);
 
 
 //actualiza el estado de pago a vencido si el tiempo de trial ha vencido
-$query3="UPDATE videotips_app_access_list SET suscriptionkind = 'Trial' where (suscriptionpayed = 0 and daystoenjoy > 31)  and suscriptionkind = 'Trial' and username ='$local_username'"; 
+$query3="UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' where (suscriptionpayed = 0 and suscriptionactive = 0 and active = 1 AND trialdaysleft > 32 and daystoenjoy = 0)  and suscriptionkind = 'Trial' "; 
 $result3=mysqli_query($conn, $query3);
 
 /*Consulta para contar los usuarios suscritos*/

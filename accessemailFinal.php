@@ -142,11 +142,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		exit();
     } else {
         $conn->begin_transaction();
-        $stmt = $conn->prepare("INSERT INTO videotips_accessrequests (name, lastname, email, country, city, password, processed, granted, phone) VALUES (?, ?, ?, ?, ?, ?, 'Yes', 'Yes', ?)");
-        $stmt->bind_param("sssssss", $name, $lastname, $email, $country, $city, $passwordHash, $phone);
+        $stmt = $conn->prepare("INSERT INTO videotips_accessrequests (name, lastname, email, country, city, processed, granted, phone) VALUES (?, ?, ?, ?, ?, 'Yes', 'Yes', ?)");
+        $stmt->bind_param("sssssss", $name, $lastname, $email, $country, $city, $phone);
         $result = $stmt->execute();
 
-        $stmt = $conn->prepare("INSERT INTO videotips_app_access_list (name, lastname, username, email, phone, password, role, active, adm_role, suscriptionactive, terms_conditions_awareness, suscriptionkind, lastsuscriptionpaymentdate, suscriptiondaysleft, trialdaysleft) VALUES (?, ?, ?, ?, ?, ?, 'user', 1, 0, 0, 'Yes', 'Trial', CURDATE(), 0, 0)");
+        $stmt = $conn->prepare("INSERT INTO videotips_app_access_list (name, lastname, username, email, phone, password, role, active, adm_role, suscriptionactive, terms_conditions_awareness, suscriptionkind, lastsuscriptionpaymentdate, suscriptiondaysleft, trialdaysleft, suscriptionpayed) VALUES (?, ?, ?, ?, ?, ?, 'user', 1, 0, 0, 'Yes', 'Trial', CURDATE(), 0, 0, 0)");
         $stmt->bind_param("ssssss", $name, $lastname, $email, $email, $phone, $passwordHash);
         $result1 = $stmt->execute();
 
@@ -185,7 +185,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("s", $email);
         $result5 = $stmt->execute();
 
-         $stmt = $conn->prepare("INSERT INTO videotips_videotips (videolink, maincategory, category, content, active, username) values ('https://www.youtube.com/@GORAColOficial','Enlaces Utiles', 'Favoritos', 'Canal de youtube GORA para ver los Manuales y contenidos de la Aplicación',   , ?)");
+        $stmt = $conn->prepare("INSERT INTO videotips_videotips (videolink, maincategory, category, content, active, username) values ('https://www.youtube.com/@GORAColOficial','Enlaces Utiles', 'Favoritos', 'Canal de youtube GORA para ver los Manuales y contenidos de la Aplicación', 'Yes', ?)");
         $stmt->bind_param("s", $email);
         $result6 = $stmt->execute();
 
