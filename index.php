@@ -31,8 +31,8 @@
       <button class="lb" onclick="setLang('en')">EN</button>
       <button class="lb" onclick="setLang('pt')">PT</button>
     </div>
-    <a href="https://solicionespro.com/GORAV2/videotrackerauth.php" target="_blank" rel="noopener" class="btn btn-ghost" data-i18n="nav_login">Ingresar</a>
-    <a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary" data-i18n="nav_cta">Prueba Gratis</a>
+    <a href="https://solicionespro.com/videotrackerauth.php" target="_blank" rel="noopener" class="btn btn-ghost" data-i18n="nav_login">Ingresar</a>
+    <a href="https://solicionespro.com/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary" data-i18n="nav_cta">Prueba Gratis</a>
   </div>
   <button class="ham" onclick="toggleMenu()" aria-label="Menú">
     <span></span><span></span><span></span>
@@ -48,8 +48,8 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.943 3.71 1.444 5.71 1.445h.006c6.585 0 11.946-5.336 11.949-11.896.001-3.176-1.24-6.165-3.48-8.448z" fill="#25D366"/></svg>
     Soporte
   </a>
-  <a href="https://solicionespro.com/GORAV2/videotrackerauth.php" target="_blank" rel="noopener" data-i18n="nav_login">Ingresar</a>
-  <a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;" data-i18n="nav_cta_free">Comenzar Gratis — 30 días</a>
+  <a href="https://solicionespro.com/videotrackerauth.php" target="_blank" rel="noopener" data-i18n="nav_login">Ingresar</a>
+  <a href="https://solicionespro.com/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;" data-i18n="nav_cta_free">Comenzar Gratis — 30 días</a>
   <div class="mob-lang">
     <button class="lb on" onclick="setLang('es');toggleMenu()">ES</button>
     <button class="lb" onclick="setLang('en');toggleMenu()">EN</button>
@@ -71,7 +71,7 @@
     </h1>
     <p class="hero-sub fu fu3" data-i18n="hero_sub">¿Cuántos links perdidos tienes hoy? GORA centraliza todos tus contenidos favoritos de internet en un solo lugar, con búsqueda instantánea y acceso desde cualquier dispositivo.</p>
     <div class="hero-ctas fu fu4">
-      <a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary btn-lg" data-i18n="hero_cta1">Comenzar Gratis — 30 días ›</a>
+      <a href="https://solicionespro.com/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary btn-lg" data-i18n="hero_cta1">Comenzar Gratis — 30 días ›</a>
       <a href="#video" class="btn-outline-lg" data-i18n="hero_cta2">Ver Demo</a>
     </div>
     <div class="hero-stats fu fu4">
@@ -208,7 +208,7 @@
 <!-- Reproductor de Audio -->
   <div class="audio-wrap reveal" style="margin-top: 20px; text-align: center;">
     <audio controls style="width: 100%; max-width: 600px;"> 
-      <source src="/GORAV2/GoraPodCast.mp3" type="audio/mpeg">
+      <source src="/GoraPodCast.mp3" type="audio/mpeg">
       Tu navegador no soporta el reproductor de audio.
     </audio>
   </div>
@@ -236,7 +236,7 @@
         <li class="p-feat"><span class="p-chk">✓</span><span data-i18n="pfeat3">Buscador inteligente</span></li>
         <li class="p-feat"><span class="p-chk">✓</span><span data-i18n="pfeat4">Acceso desde cualquier dispositivo</span></li>
       </ul>
-      <a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-ghost" style="width:100%;justify-content:center;" data-i18n="plan_btn">Comenzar ›</a>
+      <a href="https://solicionespro.com/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-ghost" style="width:100%;justify-content:center;" data-i18n="plan_btn">Comenzar ›</a>
     </div>
     <div class="p-card reveal">
       <div class="p-plan" data-i18n="plan2_name">Semestral</div>
@@ -250,7 +250,7 @@
         <li class="p-feat"><span class="p-chk">✓</span><span data-i18n="pfeat4">Acceso desde cualquier dispositivo</span></li>
         <li class="p-feat"><span class="p-chk">✓</span><span data-i18n="pfeat5">Tutoriales y soporte prioritario</span></li>
       </ul>
-      <a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-ghost" style="width:100%;justify-content:center;" data-i18n="plan_btn">Comenzar ›</a>
+      <a href="https://solicionespro.com/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-ghost" style="width:100%;justify-content:center;" data-i18n="plan_btn">Comenzar ›</a>
     </div>
     <div class="p-card feat reveal">
       <div class="p-badge" data-i18n="plan3_badge">Más popular</div>
@@ -266,7 +266,7 @@
         <li class="p-feat"><span class="p-chk">✓</span><span data-i18n="pfeat5">Tutoriales y soporte prioritario</span></li>
         <li class="p-feat"><span class="p-chk">✓</span><span data-i18n="pfeat6">Acceso anticipado a nuevas funciones</span></li>
       </ul>
-      <a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary" style="width:100%;justify-content:center;" data-i18n="plan_btn">Comenzar ›</a>
+      <a href="https://solicionespro.com/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary" style="width:100%;justify-content:center;" data-i18n="plan_btn">Comenzar ›</a>
     </div>
   </div>
   <p style="text-align:center;margin-top:28px;font-size:.82rem;color:var(--t3);" data-i18n="price_note">Todos los planes incluyen 30 días de prueba gratuita. Sin tarjeta de crédito.</p>
@@ -293,7 +293,7 @@
   <h2 class="cta-title" data-i18n="cta_title">Deja de perder links.<br>Empieza hoy, gratis.</h2>
   <p class="cta-sub" data-i18n="cta_sub">30 días para explorar todo GORA sin restricciones. Tu conocimiento merece un mejor hogar.</p>
   <div class="cta-btns">
-    <a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary btn-lg" data-i18n="cta_btn1">Crear mi cuenta gratis ›</a>
+    <a href="https://solicionespro.com/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary btn-lg" data-i18n="cta_btn1">Crear mi cuenta gratis ›</a>
     <a href="https://wa.me/573117592209" target="_blank" rel="noopener" class="btn-outline-lg">
       <span class="wa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.943 3.71 1.444 5.71 1.445h.006c6.585 0 11.946-5.336 11.949-11.896.001-3.176-1.24-6.165-3.48-8.448zM12.045 21.785h-.005c-1.774 0-3.513-.476-5.031-1.378l-.361-.214-3.741.975.997-3.63-.235-.374a9.859 9.859 0 01-1.517-5.267c.003-5.45 4.46-9.883 9.943-9.883 2.654 0 5.145 1.031 7.021 2.902a9.825 9.825 0 012.908 6.998c-.003 5.452-4.462 9.871-9.98 9.871zm5.465-7.398c-.3-.149-1.773-.873-2.048-.972-.274-.099-.474-.149-.674.149-.198.297-.773.972-.947 1.17-.174.199-.349.223-.647.075-.3-.149-1.266-.465-2.411-1.483-.892-.792-1.492-1.77-1.668-2.069-.174-.298-.019-.459.131-.607.134-.133.298-.348.447-.521.15-.174.199-.298.299-.496.099-.198.05-.372-.025-.521-.075-.149-.674-1.62-.923-2.218-.242-.58-.487-.501-.674-.51l-.573-.01c-.198 0-.522.074-.796.372-.273.297-1.045 1.02-1.045 2.487s1.07 2.884 1.219 3.082c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.627.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.29.174-1.413-.074-.124-.273-.198-.573-.348z" fill="#25D366"/></svg></span>
       <span data-i18n="cta_btn2">Hablar con soporte</span>
@@ -321,7 +321,7 @@
         <li><a href="#features" data-i18n="nav_features">Características</a></li>
         <li><a href="#how" data-i18n="nav_how">Cómo Funciona</a></li>
         <li><a href="#pricing" data-i18n="nav_pricing">Precios</a></li>
-        <li><a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" data-i18n="f_trial">Prueba Gratis</a></li>
+        <li><a href="https://solicionespro.com/requestaccessfinal.php" target="_blank" rel="noopener" data-i18n="f_trial">Prueba Gratis</a></li>
       </ul>
     </div>
     <div>
@@ -330,7 +330,7 @@
         <li><a href="https://www.youtube.com/watch?v=qEt4bgTXqYc" target="_blank" rel="noopener" data-i18n="f_tutorials">Tutoriales</a></li>
         <li><a href="https://wa.me/573117592209" target="_blank" rel="noopener" data-i18n="f_whatsapp">WhatsApp</a></li>
         <li><a href="https://wa.me/573117592209" target="_blank" rel="noopener" data-i18n="f_contact">Contáctenos</a></li>
-        <li><a href="https://solicionespro.com/GORAV2/TermsConditions.php" target="_blank" rel="noopener" data-i18n="f_terms">Términos y Condiciones</a></li>
+        <li><a href="https://solicionespro.com/TermsConditions.php" target="_blank" rel="noopener" data-i18n="f_terms">Términos y Condiciones</a></li>
       </ul>
     </div>
     <div>
