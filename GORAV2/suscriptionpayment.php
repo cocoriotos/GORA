@@ -496,7 +496,7 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
                     <th>Fecha Registro</th>
                     <th>Suscripcion</th>
                     <th>Paquete</th>
-                    <th>Días disfrutados de la suscripción</th>
+                    <th>Días a disfrutar de la suscripción</th>
                     <!--<th>Descargar Documento</th>-->
                   </tr>
                   </thead>
@@ -576,7 +576,7 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
       'Fecha Registro': 'Registration Date',
       Suscripcion: 'Subscription',
       Paquete: 'Package',
-      'Días disfrutados de la suscripción': 'Subscription Days Used',
+      'Días a disfrutar de la suscripción': 'Subscription Days Available',
       'Enviar Constancia de Pago por Correo': 'Email Payment Receipt',
       'Mensaje': 'Message',
       'Has alcanzado el límite de 30 días Calendario de uso gratuito y/o tu Suscripción está vencida. Te invitamos a renovarla por medio nuestros canales de Nequi  para Colombia o Paypayl para Internacional': 'You have reached the 30-calendar-day free trial limit and/or your subscription has expired. Please renew using Nequi in Colombia or PayPal internationally.',
@@ -644,7 +644,7 @@ $suscriptiondue = $_SESSION['suscriptiondue'];
       'Fecha Registro': 'Data de cadastro',
       Suscripcion: 'Assinatura',
       Paquete: 'Pacote',
-      'Días disfrutados de la suscripción': 'Dias de assinatura utilizados',
+      'Días a disfrutar de la suscripción': 'Dias de assinatura disponíveis',
       'Enviar Constancia de Pago por Correo': 'Enviar comprovante de pagamento por email',
       'Mensaje': 'Mensagem',
       'Has alcanzado el límite de 30 días Calendario de uso gratuito y/o tu Suscripción está vencida. Te invitamos a renovarla por medio nuestros canales de Nequi  para Colombia o Paypayl para Internacional': 'Você atingiu o limite de 30 dias corridos de uso gratuito e/ou sua assinatura expirou. Renove pelo Nequi na Colômbia ou pelo PayPal para pagamentos internacionais.',
