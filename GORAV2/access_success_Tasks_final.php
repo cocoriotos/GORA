@@ -153,7 +153,7 @@ $active = 0;
 				$result2=mysqli_query($conn, $query2);
 
 				//actualiza los dias usados de suscripcion del usuario  
-				$result3 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = (365- DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate)), suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), registrationdate), lastlogindate = CURDATE() WHERE username = ?");
+				$result3 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate), suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), registrationdate), lastlogindate = CURDATE() WHERE username = ?");
 				
 
 				//habilitar la actualizacion masiva    
@@ -163,7 +163,7 @@ $active = 0;
 				$result2=mysqli_query($conn, $query2);
 				
 				//Asignación del valor de dias de suscripción a disfrutar para Trial   
-				$result4 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = (31-DATEDIFF(CURRENT_DATE(), registrationdate)), suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), registrationdate) WHERE suscriptionkind = 'Trial' AND username = ?");
+				$result4 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), registrationdate), suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), registrationdate) WHERE suscriptionkind = 'Trial' AND username = ?");
 
 
 				//Asignación del valor de dias de suscripción a disfrutar   
