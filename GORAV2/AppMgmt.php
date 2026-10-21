@@ -30,7 +30,7 @@ $query2="SET SQL_SAFE_UPDATES = 0";
 $result2=mysqli_query($conn, $query2);
 				
 //Asignación del valor de dias de suscripción a disfrutar   
-$query4="UPDATE videotips_app_access_list SET daystoenjoy = (365- DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate)),  suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), registrationdate) where suscriptionkind in ('Suspendida', 'Vencida', 'De Pago','Owner', 'Partner')"; 
+$query4="UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate),  suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), registrationdate) where suscriptionkind in ('Suspendida', 'Vencida', 'De Pago','Owner', 'Partner')"; 
 $result4=mysqli_query($conn, $query4);
 
 //habilitar la actualizacion masiva    
@@ -40,7 +40,7 @@ $query2="SET SQL_SAFE_UPDATES = 0";
 $result2=mysqli_query($conn, $query2);
 				
 //Asignación del valor de dias de suscripción a disfrutar   
-$query5="UPDATE videotips_app_access_list SET daystoenjoy = (31- DATEDIFF(CURRENT_DATE(), registrationdate)) where suscriptionkind = 'Trial'"; 
+$query5="UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), registrationdate) where suscriptionkind = 'Trial'"; 
 $result5=mysqli_query($conn, $query5);
 
 //habilitar la actualizacion masiva    
