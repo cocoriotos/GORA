@@ -41,13 +41,19 @@ if (!$passwordVerified) {
     exit();
 }
 
+require_once __DIR__ . '/session_guard.php';
 if (!empty($_SESSION['email'])) {
-    header("Location: videotrackerauth.php?login=active");
-    exit();
+    $currentEmail = (string) $_SESSION['email'];
+    if (strcasecmp($currentEmail, $local_username) === 0) {
+        header("Location: videotrackerauth.php?login=active");
+        exit();
+    }
+
+    goraReleaseActiveSession($conn, $currentEmail, session_id());
+    $_SESSION = [];
 }
 
 session_regenerate_id(true);
-require_once __DIR__ . '/session_guard.php';
 if (!goraClaimActiveSession($conn, $local_username, session_id(), time())) {
     header("Location: videotrackerauth.php?login=active");
     exit();
