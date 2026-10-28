@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>GORA— Tu Biblioteca Digital Inteligente</title>
+<title>GORA — Tu Biblioteca Digital Inteligente</title>
 <link rel="icon" href="GORA.ico"/>
 <link rel="stylesheet" href="smartshelf.css"/>
 </head>
@@ -11,9 +11,14 @@
 
 <!-- NAV -->
 <nav id="landing-nav">
-  <a href="#" class="nav-logo">
-    <img src="GORA.ico" alt="GORA"/>
-  </a>
+  <div class="nav-brand">
+    <a href="#" class="nav-logo">
+      <img src="GORA.ico" alt="GORA"/>
+    </a>
+    <a href="https://solicionespro.com" class="nav-qr" aria-label="Abrir la landing page de GORA">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://solicionespro.com" alt="Código QR GORA" title="Escanea para entrar a GORA"/>
+    </a>
+  </div>
   <ul class="nav-links">
     <li><a href="#features" data-i18n="nav_features">Características</a></li>
     <li><a href="#how" data-i18n="nav_how">Cómo Funciona</a></li>
