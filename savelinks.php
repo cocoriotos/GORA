@@ -17,10 +17,10 @@ $suscriptioninactive = $_SESSION['suscriptioninactive'];
 
 
 // Verificar suscripción activa
-$query = "SELECT suscriptionactive FROM videotips_app_access_list WHERE username = '$local_username'";
-$activesuscription = $conn->query($query);
-$suscription_row = $activesuscription->fetch_assoc();
-$is_active = $suscription_row['suscriptionactive'] ?? 0; // Asegúrate de que sea un valor numérico
+$query = "SELECT suscriptionkind  FROM videotips_app_access_list WHERE username = '$local_username'";
+$suscriptionkind = $conn->query($query);
+$suscription_row = $suscriptionkind->fetch_assoc();
+$kind = $suscription_row['suscriptionactive'] ?? 0; // Asegúrate de que sea un valor numérico
 
 // Verificar si el enlace ya existe
 $query1 = "SELECT * FROM videotips_videotips WHERE videolink = '$videolink' AND username = '$local_username'";
@@ -32,10 +32,11 @@ if ($urlduplicated->num_rows > 0) {
     exit();
 } 
 
-if ($is_active == 1) {
+#if ($kind == 1 )
+ if ($kind !=="Suspendida" || $kind !=="Vencida" )   
+    {
     
-    $query3 = "INSERT INTO videotips_videotips (videolink, maincategory, category,  proforpers, content, active, username) 
-                                       VALUES ('$videolink', '$maincategory', '$category', '$proforpers', '$description', 'Yes', '$local_username')";
+    $query3 = "INSERT INTO videotips_videotips (videolink, maincategory, category,  proforpers, content, active, username) VALUES ('$videolink', '$maincategory', '$category', '$proforpers', '$description', 'Yes', '$local_username')";
     
     if ($conn->query($query3) === TRUE) {
         $_SESSION['savedlink']=1;
