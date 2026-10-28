@@ -185,9 +185,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("s", $email);
         $result5 = $stmt->execute();
 
+        #Insertar el canal de youtube GORA como favorito para el usuario
         $stmt = $conn->prepare("INSERT INTO videotips_videotips (videolink, maincategory, category, content, active, username) values ('https://www.youtube.com/@GORAColOficial','Enlaces Utiles', 'Favoritos', 'Canal de youtube GORA para ver los Manuales y contenidos de la Aplicación', 'Yes', ?)");
         $stmt->bind_param("s", $email);
         $result6 = $stmt->execute();
+
+        #Insertar el canal de instagram GORA como favorito para el usuario
+        $stmt = $conn->prepare("INSERT INTO videotips_videotips (videolink, maincategory, category, content, active, username) values ('https://www.instagram.com/goracoloficial','Enlaces Utiles', 'Favoritos', 'canal de instagram GORA', 'Yes', ?)");
+        $stmt->bind_param("s", $email);
+        $result7 = $stmt->execute();
+
+        #Insertar el canal de Facebook GORA como favorito para el usuario
+        $stmt = $conn->prepare("INSERT INTO videotips_videotips (videolink, maincategory, category, content, active, username) values ('https://www.facebook.com/people/Gora-App/61594666170853/','Enlaces Utiles', 'Favoritos', 'canal de facebook GORA', 'Yes', ?)");
+        $stmt->bind_param("s", $email);
+        $result8 = $stmt->execute(); 
+
+        #Insertar el canal de TikTok GORA como favorito para el usuario
+        $stmt = $conn->prepare("INSERT INTO videotips_videotips (videolink, maincategory, category, content, active, username) values ('https://www.tiktok.com/@goracoloficial','Enlaces Utiles', 'Favoritos', 'canal de tiktok GORA', 'Yes', ?)");
+        $stmt->bind_param("s", $email);
+        $result9 = $stmt->execute();
 
         /*Destination email information*/
         $to = "adm@solicionespro.com";
