@@ -204,6 +204,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt = $conn->prepare("INSERT INTO videotips_videotips (videolink, maincategory, category, content, active, username) values ('https://www.tiktok.com/@goracoloficial','Enlaces Utiles', 'Favoritos', 'canal de tiktok GORA', 'Yes', ?)");
         $stmt->bind_param("s", $email);
         $result9 = $stmt->execute();
+        
 
         /*Destination email information*/
         $to = "adm@solicionespro.com";
