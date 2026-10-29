@@ -38,7 +38,7 @@
     border-radius: 6px;
   }
   #landing-nav .nav-links { gap: 30px; }
-  #landing-nav .nav-links a { font-size: .95rem; }
+  #landing-nav .nav-links a { font-size: .95rem; font-weight: 600; }
   #landing-nav .nav-right { gap: 14px; }
   #landing-nav .nav-right .btn {
     padding: 11px 22px;
