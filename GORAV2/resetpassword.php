@@ -109,6 +109,7 @@ if (!$isPost && !$tokenIsWellFormed) {
     <meta name="referrer" content="no-referrer">
     <title data-i18n="pageTitle">Restablecer contraseña - GORA</title>
     <link rel="icon" href="GORA.ico" type="image/x-icon">
+    <script src="password-visibility.js" defer></script>
     <link rel="stylesheet" href="style_sheet_auth.css">
     <style>
         .reset-message {
