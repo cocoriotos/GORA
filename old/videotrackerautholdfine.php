@@ -5,6 +5,7 @@
 	?>
 	<head>	
 		<script src="head.js" defer></script>	
+		<script src="../GORAV2/password-visibility.js" defer></script>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"></link>
 		<link rel="stylesheet" href="style_sheet.css"/>
 		<script src="Popper/popper.min.js"></script>

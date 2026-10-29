@@ -5,6 +5,7 @@
     <title>Solicitud de Acceso - CORA</title>
     <link rel="icon" href="GORA.ico" type="image/x-icon">
     <script src="head.js" defer></script>
+    <script src="GORAV2/password-visibility.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="style_sheet_auth.css?v=20260917">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">

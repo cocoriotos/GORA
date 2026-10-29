@@ -6,6 +6,7 @@
 	?>
 	<head>	
 	<script src="headlogin.js" defer></script>	  
+	<script src="../GORAV2/password-visibility.js" defer></script>
 	</head>
 	<!--  <header>
 		<!--<HR id="HR"/>	<!-- Header title  --> <!-- -->
