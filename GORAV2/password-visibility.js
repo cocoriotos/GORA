@@ -56,19 +56,15 @@
                 display: inline-flex !important;
                 align-items: center;
                 justify-content: center;
-                width: auto !important;
-                min-width: 40px;
-                min-height: 32px;
-                padding: 4px 8px;
+                width: 36px !important;
+                min-width: 36px;
+                height: 36px;
+                padding: 8px;
                 transform: translateY(-50%);
                 border: 0;
                 border-radius: 6px;
                 background: transparent;
                 color: var(--accent, #4b7cf7);
-                font-family: inherit;
-                font-size: 0.8rem;
-                font-weight: 600;
-                line-height: 1.2;
                 cursor: pointer;
             }
             .password-visibility-toggle svg {
