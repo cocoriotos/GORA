@@ -6,6 +6,58 @@
 <title>GORA — Tu Biblioteca Digital Inteligente</title>
 <link rel="icon" href="GORA.ico"/>
 <link rel="stylesheet" href="smartshelf.css"/>
+<style>
+  :root { --nav: 144px; }
+  #landing-nav { height: var(--nav) !important; min-height: var(--nav); }
+  #landing-nav .nav-brand {
+    display: flex !important;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+  }
+  #landing-nav .nav-logo,
+  #landing-nav .nav-qr {
+    display: flex !important;
+    flex: 0 0 auto;
+    align-items: center;
+  }
+  #landing-nav .nav-logo img,
+  #landing-nav .nav-qr img {
+    display: block !important;
+    width: 120px !important;
+    height: 120px !important;
+    max-width: none;
+    flex: 0 0 120px;
+  }
+  #landing-nav .nav-logo img { object-fit: contain; border-radius: 50%; }
+  #landing-nav .nav-qr img {
+    object-fit: contain;
+    padding: 4px;
+    background: #fff;
+    border-radius: 6px;
+  }
+  @media (max-width: 580px) {
+    :root { --nav: 100px; }
+    #landing-nav .nav-brand { gap: 8px; }
+    #landing-nav .nav-logo img,
+    #landing-nav .nav-qr img {
+      width: 80px !important;
+      height: 80px !important;
+      flex-basis: 80px;
+    }
+  }
+  @media (max-width: 360px) {
+    :root { --nav: 84px; }
+    #landing-nav .nav-brand { gap: 6px; }
+    #landing-nav .nav-logo img,
+    #landing-nav .nav-qr img {
+      width: 64px !important;
+      height: 64px !important;
+      flex-basis: 64px;
+    }
+  }
+</style>
 </head>
 <body>
 
