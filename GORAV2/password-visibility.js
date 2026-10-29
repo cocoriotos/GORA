@@ -1,8 +1,12 @@
 (() => {
     const translations = {
-        es: { show: 'Ver', hide: 'Ocultar', showLabel: 'Mostrar contraseña', hideLabel: 'Ocultar contraseña' },
-        en: { show: 'Show', hide: 'Hide', showLabel: 'Show password', hideLabel: 'Hide password' },
-        pt: { show: 'Ver', hide: 'Ocultar', showLabel: 'Mostrar senha', hideLabel: 'Ocultar senha' }
+        es: { showLabel: 'Mostrar contraseña', hideLabel: 'Ocultar contraseña' },
+        en: { showLabel: 'Show password', hideLabel: 'Hide password' },
+        pt: { showLabel: 'Mostrar senha', hideLabel: 'Ocultar senha' }
+    };
+    const eyeIcons = {
+        open: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+        crossed: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.7 10.7 0 0 1 12 5c6.4 0 10 7 10 7a15 15 0 0 1-3.1 3.8M6.2 6.2C3.5 8.1 2 12 2 12s3.6 7 10 7a10.7 10.7 0 0 0 4-.8"/></svg>'
     };
 
     const getLanguage = () => {
@@ -17,7 +21,7 @@
         const text = getLanguage();
         document.querySelectorAll('.password-visibility-toggle').forEach(button => {
             const isVisible = button.getAttribute('aria-pressed') === 'true';
-            button.textContent = isVisible ? text.hide : text.show;
+            button.innerHTML = isVisible ? eyeIcons.crossed : eyeIcons.open;
             button.setAttribute('aria-label', isVisible ? text.hideLabel : text.showLabel);
             button.title = isVisible ? text.hideLabel : text.showLabel;
         });
@@ -66,6 +70,16 @@
                 font-weight: 600;
                 line-height: 1.2;
                 cursor: pointer;
+            }
+            .password-visibility-toggle svg {
+                display: block;
+                width: 20px;
+                height: 20px;
+                fill: none;
+                stroke: currentColor;
+                stroke-width: 1.8;
+                stroke-linecap: round;
+                stroke-linejoin: round;
             }
             .password-visibility-toggle:hover,
             .password-visibility-toggle:focus-visible {
