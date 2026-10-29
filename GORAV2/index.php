@@ -37,9 +37,32 @@
     background: #fff;
     border-radius: 6px;
   }
+  #landing-nav .nav-links { gap: 30px; }
+  #landing-nav .nav-links a { font-size: .95rem; }
+  #landing-nav .nav-right { gap: 14px; }
+  #landing-nav .nav-right .btn {
+    padding: 11px 22px;
+    font-size: .95rem;
+  }
+  #landing-nav .lang-sw { gap: 3px; padding: 4px; }
+  #landing-nav .lb { padding: 5px 10px; font-size: .74rem; }
+  #landing-nav .gora-social-links { gap: 10px; }
+  #landing-nav .gora-social-links a {
+    width: 40px;
+    height: 40px;
+  }
+  #landing-nav .gora-social-links svg {
+    width: 20px;
+    height: 20px;
+  }
   @media (max-width: 580px) {
     :root { --nav: 100px; }
     #landing-nav .nav-brand { gap: 8px; }
+    #landing-nav .nav-right { gap: 8px; }
+    #landing-nav .lang-sw { gap: 2px; padding: 3px; }
+    #landing-nav .lb { padding: 5px 8px; font-size: .7rem; }
+    #landing-nav .ham { padding: 8px; }
+    #landing-nav .ham span { width: 24px; height: 2px; }
     #landing-nav .nav-logo img,
     #landing-nav .nav-qr img {
       width: 80px !important;
@@ -50,6 +73,8 @@
   @media (max-width: 360px) {
     :root { --nav: 84px; }
     #landing-nav .nav-brand { gap: 6px; }
+    #landing-nav .nav-right { gap: 6px; }
+    #landing-nav .lb { padding: 4px 6px; font-size: .66rem; }
     #landing-nav .nav-logo img,
     #landing-nav .nav-qr img {
       width: 64px !important;
