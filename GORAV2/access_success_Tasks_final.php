@@ -272,7 +272,7 @@ $active = 0;
 				if ($admrole > 0){
 					$admrole = 0;
 					$result17 = $executeUserStatement("UPDATE videotips_app_access_list SET lastlogindate = CURDATE() WHERE username = ?");
-					header("refresh:0; url=AppMgmt.php");
+					header("Location: AppMgmt.php", true, 303);
 					exit();
 				}
 				
