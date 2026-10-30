@@ -79,7 +79,8 @@
         }
 
         try {
-            localStorage.setItem('gora-auth-session-changed', `${Date.now()}-${Math.random()}`);
+            const email = String(formData.get('email') || '').trim().toLowerCase();
+            localStorage.setItem('gora-auth-session-changed', email);
         } catch (error) {
             console.warn('Could not notify other tabs about the new session.', error);
         }

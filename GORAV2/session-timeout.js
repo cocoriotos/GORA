@@ -6,6 +6,7 @@
     const heartbeatInterval = 60000;
     const script = document.currentScript;
     let sessionGeneration = script ? script.dataset.sessionGeneration : '';
+    const accountEmail = script ? (script.dataset.accountEmail || '').trim().toLowerCase() : '';
     let authenticated = false;
     let idleTimer;
     let expiryCheckInterval;
@@ -157,7 +158,10 @@
     }).catch(() => {});
 
     window.addEventListener('storage', event => {
-        if (event.key === 'gora-auth-session-changed' && event.newValue) {
+        if (event.key === 'gora-auth-session-changed'
+            && event.newValue
+            && event.newValue.trim().toLowerCase() === accountEmail
+        ) {
             expireReplacedSession();
         }
     });
