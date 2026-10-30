@@ -43,6 +43,10 @@ if (!isset($GLOBALS['gora_session_guard_checked'])) {
 			header('Location: videotrackerauth.php?login=session_invalid');
 			exit;
 		}
+
+		if (empty($_SESSION['gora_session_generation'])) {
+			$_SESSION['gora_session_generation'] = bin2hex(random_bytes(32));
+		}
 	}
 }
 ?>

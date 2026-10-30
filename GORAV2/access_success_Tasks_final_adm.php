@@ -78,6 +78,7 @@ if (!$sessionClaimed) {
 }
 $_SESSION['email'] = $local_username;
 $_SESSION['LAST_ACTIVITY'] = time();
+$_SESSION['gora_session_generation'] = bin2hex(random_bytes(32));
 
 $stmt = $conn->prepare("UPDATE videotips_app_access_list SET suscriptiondaysleft = DATEDIFF(CURDATE(), registrationdate) WHERE username = ?");
 $stmt->bind_param("s", $local_username);

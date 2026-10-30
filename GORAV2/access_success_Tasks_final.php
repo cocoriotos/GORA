@@ -160,6 +160,7 @@ $active = 0;
 		}
 		$_SESSION['email'] = $local_username;
 		$_SESSION['LAST_ACTIVITY'] = time();
+		$_SESSION['gora_session_generation'] = bin2hex(random_bytes(32));
 		$global_username = $local_username;
 		$is_authenticated = true;
 		$executeUserStatement = static function (string $sql) use ($conn, $local_username): mysqli_stmt {

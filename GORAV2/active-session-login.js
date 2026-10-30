@@ -78,6 +78,11 @@
             throw new Error(`Login request failed with status ${response.status}.`);
         }
 
+        try {
+            localStorage.setItem('gora-auth-session-changed', `${Date.now()}-${Math.random()}`);
+        } catch (error) {
+            console.warn('Could not notify other tabs about the new session.', error);
+        }
         window.location.assign(response.url);
     };
 

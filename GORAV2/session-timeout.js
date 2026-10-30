@@ -4,6 +4,8 @@
 
     const idleLimit = 600000;
     const heartbeatInterval = 60000;
+    const script = document.currentScript;
+    let sessionGeneration = script ? script.dataset.sessionGeneration : '';
     let authenticated = false;
     let idleTimer;
     let expiryCheckInterval;
@@ -17,6 +19,22 @@
         window.clearTimeout(idleTimer);
         window.clearInterval(expiryCheckInterval);
         window.location.replace('sessionactivity.php?timeout=1');
+    }
+
+    function expireReplacedSession() {
+        if (redirecting) return;
+        redirecting = true;
+        window.clearTimeout(idleTimer);
+        window.clearInterval(expiryCheckInterval);
+        window.location.replace('videotrackerauth.php?login=session_replaced');
+    }
+
+    function expireInvalidSession() {
+        if (redirecting) return;
+        redirecting = true;
+        window.clearTimeout(idleTimer);
+        window.clearInterval(expiryCheckInterval);
+        window.location.replace('videotrackerauth.php?login=session_invalid');
     }
 
     function hasSessionExpired() {
@@ -40,10 +58,24 @@
         fetch('sessionactivity.php', {
             method: 'POST',
             credentials: 'same-origin',
-            cache: 'no-store'
+            cache: 'no-store',
+            headers: sessionGeneration
+                ? { 'X-GORA-Session-Generation': sessionGeneration }
+                : {}
         }).then(async response => {
             if (response.redirected) {
                 window.location.replace(response.url);
+                return;
+            }
+
+            if (response.status === 409) {
+                const result = await response.json();
+                if (result.error === 'session_replaced') expireReplacedSession();
+                return;
+            }
+
+            if (response.status === 401) {
+                expireInvalidSession();
                 return;
             }
 
@@ -73,10 +105,24 @@
 
     fetch('sessionactivity.php', {
         credentials: 'same-origin',
-        cache: 'no-store'
+        cache: 'no-store',
+        headers: sessionGeneration
+            ? { 'X-GORA-Session-Generation': sessionGeneration }
+            : {}
     }).then(async response => {
         if (response.redirected) {
             window.location.replace(response.url);
+            return;
+        }
+
+        if (response.status === 409) {
+            const result = await response.json();
+            if (result.error === 'session_replaced') expireReplacedSession();
+            return;
+        }
+
+        if (response.status === 401) {
+            expireInvalidSession();
             return;
         }
 
@@ -86,6 +132,7 @@
         authenticated = result.active === true;
         if (!authenticated) return;
 
+        sessionGeneration = result.generation;
         lastActivityAt = Date.now();
         lastHeartbeat = Date.now();
         armIdleTimer();
@@ -94,9 +141,24 @@
             document.addEventListener(eventName, registerActivity, { passive: true });
         });
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) checkSessionExpiry();
+            if (!document.hidden) {
+                checkSessionExpiry();
+                sendHeartbeat();
+            }
         });
-        window.addEventListener('focus', checkSessionExpiry);
-        window.addEventListener('pageshow', checkSessionExpiry);
+        window.addEventListener('focus', () => {
+            checkSessionExpiry();
+            sendHeartbeat();
+        });
+        window.addEventListener('pageshow', () => {
+            checkSessionExpiry();
+            sendHeartbeat();
+        });
     }).catch(() => {});
+
+    window.addEventListener('storage', event => {
+        if (event.key === 'gora-auth-session-changed' && event.newValue) {
+            expireReplacedSession();
+        }
+    });
 })();

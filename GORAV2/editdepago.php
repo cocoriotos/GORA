@@ -7,7 +7,7 @@ include "db_connection1.php";
 
 <head>	
     <script src="head.js" defer></script>
-	<script src="session-timeout.js?v=20261001-3" defer></script>
+	<script src="session-timeout.js?v=20261029-1" data-session-generation="<?php echo htmlspecialchars((string) ($_SESSION['gora_session_generation'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
     <link rel="stylesheet" href="style_sheet_ops.css"/>
     <script src="Popper/popper.min.js"></script>
     <script src="plugins/sweetalert/sweetalert.min.js"></script>
@@ -88,4 +88,3 @@ include "db_connection1.php";
     </div>	
 </div>    
 </body>
-
