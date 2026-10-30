@@ -25,7 +25,8 @@ GLOBAL $embedUrl;
 GLOBAL $click;
 
 
-session_start();
+require_once __DIR__ . '/tab-session.php';
+goraStartTabSession();
 
 $_SESSION['savedlink']=0;
 $_SESSION['duplicatedlink']=0;

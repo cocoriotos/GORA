@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/tab-session.php';
+goraStartTabSession();
+?>
 <!--  Developed by julián González Bucheli -->
 <html lang="us">
 	<?php
@@ -10,6 +14,7 @@
         <title>Login - GORA</title>
         <link rel="icon" href="GORA.ico" type="image/x-icon">
         <script src="head.js?v=<?php echo time(); ?>" defer></script>
+        <script src="tab-context.js?v=20261029-1" defer></script>
         <script src="password-visibility.js?v=<?php echo filemtime(__DIR__ . '/password-visibility.js'); ?>" defer></script>
         <script src="active-session-login.js?v=<?php echo filemtime(__DIR__ . '/active-session-login.js'); ?>" defer></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">

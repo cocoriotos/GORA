@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/tab-session.php';
+goraStartTabSession();
 $name = $_POST["name"];
 $email = $_POST["email"];
 $message = $_POST["message"];
@@ -107,4 +108,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       }
 }
 ?>
-

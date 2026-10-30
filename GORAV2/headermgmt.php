@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/tab-session.php';
+goraStartTabSession();
+?>
 <!DOCTYPE html>
 <?php
 include "sessions.php";
@@ -7,7 +11,8 @@ $name = $_SESSION['name'];
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style_sheet_ops.css"/>
-  <script src="session-timeout.js?v=20261029-2" data-session-generation="<?php echo htmlspecialchars((string) ($_SESSION['gora_session_generation'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" data-account-email="<?php echo htmlspecialchars((string) ($_SESSION['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
+  <script src="tab-context.js?v=20261029-1" defer></script>
+  <script src="session-timeout.js?v=20261029-3" data-session-generation="<?php echo htmlspecialchars((string) ($_SESSION['gora_session_generation'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" data-account-email="<?php echo htmlspecialchars((string) ($_SESSION['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
 </head>
 <html lang="es">
   <header>

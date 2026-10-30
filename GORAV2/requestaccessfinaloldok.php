@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/tab-session.php';
+goraStartTabSession();
+?>
 <html lang="us">
 <head>
     <meta charset="UTF-8">
@@ -5,6 +9,7 @@
     <title>Solicitud de Acceso - SmartShelf</title>
     <link rel="icon" href="SSCircleBackgroundWhite.ico" type="image/x-icon">
     <script src="head.js" defer></script>
+    <script src="tab-context.js?v=20261029-1" defer></script>
     <script src="password-visibility.js?v=<?php echo filemtime(__DIR__ . '/password-visibility.js'); ?>" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="style_sheet_auth.css">

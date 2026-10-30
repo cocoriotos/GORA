@@ -114,6 +114,17 @@ function goraValidateActiveSession(mysqli $conn, string $email, string $sessionI
     return $checkStmt->get_result()->num_rows === 1;
 }
 
+function goraIsActiveSession(mysqli $conn, string $email, string $sessionId): bool
+{
+    $checkStmt = $conn->prepare(
+        'SELECT 1 FROM gora_active_sessions WHERE email = ? AND session_id = ?'
+    );
+    $checkStmt->bind_param('ss', $email, $sessionId);
+    $checkStmt->execute();
+
+    return $checkStmt->get_result()->num_rows === 1;
+}
+
 function goraReleaseActiveSession(mysqli $conn, string $email, string $sessionId): void
 {
     $deleteStmt = $conn->prepare(

@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/tab-session.php';
+goraStartTabSession();
 
 // Generar código aleatorio de 5 a 7 caracteres
 $captcha_length = rand(5, 7);
