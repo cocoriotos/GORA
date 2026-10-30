@@ -284,69 +284,69 @@ $active = 0;
 
 				if ($daystoenjoy > 31 && $suscriptionpayed == 0 && $suscriptionkind == 'Trial') {
 			      $_SESSION['suscriptiondue']=1;
-			      header("Location: suscriptionpayment.php", true, 303);
+			      header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
 			  	exit();
 			  	  }
 
 				  if ($active == 0 && $suscriptionkind == 'De Pago') {
 			      $_SESSION['suscriptiondue']=1;
-			      header("Location: suscriptionpayment.php", true, 303);
+			      header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
 			  	  exit();
 			  	  }
 
 				  if ($daystoenjoy == 0 &&  $suscriptionkind == 'De Pago') {
 			      $_SESSION['suscriptiondue']=1;
-			      header("Location: suscriptionpayment.php", true, 303);
+			      header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
 			  	  exit();
 			  	  }
 
 				  if ($daystoenjoy < 366 &&  $suscriptionkind == 'De Pago' && $active == 0) {
 			      $_SESSION['suscriptiondue']=1;
-			      header("Location: suscriptionpayment.php", true, 303);
+			      header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
 			  	  exit();
 			  	  }
 				
 			 	  if ($daystoenjoy > 31 && $suscriptionkind == 'Trial') {
 					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php", true, 303);
+					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
 					exit();
 				  }		
 				if ($daystoenjoy < 31 && $suscriptionkind == 'Trial' && $active == 0) {
 					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php", true, 303);
+					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
 					exit();
 				  }  
 				  
 				if ($active == 0 && $suscriptionkind == 'Owner') {
 					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php", true, 303);
+					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
 					exit();
 				  }
 				if ($active == 0 && $suscriptionkind == 'Partner') {
 					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php", true, 303);
+					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
 					exit();
 				  }
 				if ($suscriptionkind == 'Suspendida') {
 					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php", true, 303);
+					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
 					exit();
 				  }
 				if ($active == 0 && $suscriptionkind == 'Test') {
 					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php", true, 303);
+					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
 					exit();
 				  }
 				if ($suscriptionkind == 'Vencida') {
 					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php", true, 303);
+					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
 					exit();
 				  }
 
 
 				  if ($daystoenjoy > 365  && $suscriptionkind == 'De Pago' ) {
 					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php", true, 303);
+					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
 					exit();
 				  }    
 				  else{	

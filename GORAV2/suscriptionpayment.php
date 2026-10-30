@@ -10,7 +10,8 @@ include "sessionvalidation.php";
 include "db_connection1.php";
 $name = $_SESSION['name'];
 $local_username=$_SESSION['email'];
-$suscriptiondue = $_SESSION['suscriptiondue']; 
+$suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
+  || ($_GET['subscription_due'] ?? '') === '1') ? 1 : 0;
 //include "SessionTimeOut.php";
 /*include "SessionTimeOut.php";*/
 
@@ -809,6 +810,9 @@ if ($suscriptiondue == 1) {
     echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
     echo "<script>
     document.addEventListener('DOMContentLoaded', function() {
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.delete('subscription_due');
+      window.history.replaceState({}, '', currentUrl);
       const selectedLanguage = localStorage.getItem('smartshelfLang') || 'es';
       const alertTranslations = subscriptionTranslations[selectedLanguage] || {};
       Swal.fire({
