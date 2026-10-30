@@ -28,6 +28,69 @@ function goraClaimActiveSession(mysqli $conn, string $email, string $sessionId, 
     return $replaceStmt->affected_rows === 1;
 }
 
+function goraReplaceActiveSession(mysqli $conn, string $email, string $sessionId, int $now): bool
+{
+    $replaceStmt = $conn->prepare(
+        'UPDATE gora_active_sessions
+         SET session_id = ?, last_activity = ?
+         WHERE email = ?'
+    );
+    $replaceStmt->bind_param('sis', $sessionId, $now, $email);
+    $replaceStmt->execute();
+
+    if ($replaceStmt->affected_rows === 1) {
+        return true;
+    }
+
+    return goraClaimActiveSession($conn, $email, $sessionId, $now);
+}
+
+function goraCreateSessionReplacementChallenge(string $email): string
+{
+    $challenge = bin2hex(random_bytes(32));
+    $_SESSION['gora_session_replacement_challenge'] = [
+        'email' => $email,
+        'token' => $challenge,
+        'expires_at' => time() + 300,
+    ];
+
+    return $challenge;
+}
+
+function goraConsumeSessionReplacementChallenge(string $email, string $challenge): bool
+{
+    $pendingChallenge = $_SESSION['gora_session_replacement_challenge'] ?? null;
+    unset($_SESSION['gora_session_replacement_challenge']);
+
+    if (!is_array($pendingChallenge)
+        || !isset($pendingChallenge['email'], $pendingChallenge['token'], $pendingChallenge['expires_at'])
+        || !is_string($pendingChallenge['email'])
+        || !is_string($pendingChallenge['token'])
+        || !is_int($pendingChallenge['expires_at'])
+        || $pendingChallenge['expires_at'] < time()
+        || strcasecmp($pendingChallenge['email'], $email) !== 0
+    ) {
+        return false;
+    }
+
+    return hash_equals($pendingChallenge['token'], $challenge);
+}
+
+function goraRespondToActiveSessionConflict(string $email): void
+{
+    if (($_SERVER['HTTP_X_GORA_LOGIN_REQUEST'] ?? '') === '1') {
+        $challenge = goraCreateSessionReplacementChallenge($email);
+        http_response_code(409);
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        echo json_encode(['error' => 'active_session', 'challenge' => $challenge]);
+        exit;
+    }
+
+    header('Location: videotrackerauth.php?login=active');
+    exit;
+}
+
 function goraValidateActiveSession(mysqli $conn, string $email, string $sessionId, int $now): bool
 {
     $updateStmt = $conn->prepare(

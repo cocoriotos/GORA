@@ -42,21 +42,39 @@ if (!$passwordVerified) {
 }
 
 require_once __DIR__ . '/session_guard.php';
+$replacementChallenge = isset($_POST['replace_active_session'])
+    ? (string) $_POST['replace_active_session']
+    : '';
+$replaceActiveSession = false;
+if ($replacementChallenge !== '') {
+    $replaceActiveSession = goraConsumeSessionReplacementChallenge($local_username, $replacementChallenge);
+    if (!$replaceActiveSession) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['error' => 'replacement_expired']);
+        exit();
+    }
+}
+
 if (!empty($_SESSION['email'])) {
     $currentEmail = (string) $_SESSION['email'];
     if (strcasecmp($currentEmail, $local_username) === 0) {
-        header("Location: videotrackerauth.php?login=active");
-        exit();
+        if (!$replaceActiveSession) {
+            goraRespondToActiveSessionConflict($local_username);
+        }
+    } else {
+        goraReleaseActiveSession($conn, $currentEmail, session_id());
     }
 
-    goraReleaseActiveSession($conn, $currentEmail, session_id());
     $_SESSION = [];
 }
 
 session_regenerate_id(true);
-if (!goraClaimActiveSession($conn, $local_username, session_id(), time())) {
-    header("Location: videotrackerauth.php?login=active");
-    exit();
+$sessionClaimed = $replaceActiveSession
+    ? goraReplaceActiveSession($conn, $local_username, session_id(), time())
+    : goraClaimActiveSession($conn, $local_username, session_id(), time());
+if (!$sessionClaimed) {
+    goraRespondToActiveSessionConflict($local_username);
 }
 $_SESSION['email'] = $local_username;
 $_SESSION['LAST_ACTIVITY'] = time();
