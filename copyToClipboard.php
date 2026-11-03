@@ -1,6 +1,7 @@
 <?php 
 session_cache_limiter('nocache');
-session_start();
+require_once __DIR__ . '/tab-session.php';
+goraStartTabSession();
 $linktoclipboard = $_SESSION['linktoclipboard'];
 ?>
 

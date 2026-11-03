@@ -7,6 +7,8 @@
 
     RewriteCond %{HTTPS} !=on
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+    RewriteRule ^__tab/([a-f0-9]{32})/(.*)$ $2 [E=GORA_TAB_ID:$1,L]
     
     # Si la petición no es un directorio real y tampoco un archivo real
     RewriteCond %{REQUEST_FILENAME} !-d

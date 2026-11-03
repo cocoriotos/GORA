@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/tab-session.php';
+goraStartTabSession();
 $timeout_duration = 900;
 $sessiontimeoutreached = $_SESSION['sessiontimeoutreached'];
 

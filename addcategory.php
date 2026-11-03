@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/tab-session.php';
+goraStartTabSession();
+?>
 <!-- Developed by Julián González Bucheli -->
 <html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />

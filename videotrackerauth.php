@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/tab-session.php';
+goraStartTabSession();
+?>
 <!--  Developed by julián González Bucheli -->
 <html lang="us">
 	<?php
@@ -10,7 +14,9 @@
         <title>Login - GORA</title>
         <link rel="icon" href="GORA.ico" type="image/x-icon">
         <script src="head.js?v=<?php echo time(); ?>" defer></script>
+        <script src="tab-context.js?v=20261029-1" defer></script>
         <script src="password-visibility.js?v=<?php echo filemtime(__DIR__ . '/password-visibility.js'); ?>" defer></script>
+        <script src="active-session-login.js?v=<?php echo filemtime(__DIR__ . '/active-session-login.js'); ?>" defer></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
         <link rel="stylesheet" href="style_sheet_auth.css?v=<?php echo time(); ?>">
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -84,9 +90,9 @@
 
 <script>
 const T={
-    es:{auth_title:"Biblioteca de Contenidos Útiles",auth_login:"Ingresar",auth_cancel:"Cancelar",auth_forgot:"¿Olvidaste tu contraseña?",auth_no_access:"¿Sin acceso?",auth_request_here:"Solicitarlo aquí",auth_questions:"¿Alguna duda?",auth_contact_email:"Contáctenos al Email:",auth_email:"Email",auth_password:"Contraseña",auth_timeout:"No se detectó actividad en los últimos 10 minutos. La sesión se cerró por seguridad.",auth_invalid:"Usuario o contraseña incorrectos.",auth_active:"Este usuario ya tiene una sesión activa. Cierre la otra sesión o espere 10 minutos de inactividad.",auth_session_invalid:"La sesión ya no está activa. Inicie sesión nuevamente."},
-    en:{auth_title:"Useful Content Library",auth_login:"Log In",auth_cancel:"Cancel",auth_forgot:"Forgot your password?",auth_no_access:"No access?",auth_request_here:"Request it here",auth_questions:"Any questions?",auth_contact_email:"Contact us by email:",auth_email:"Email",auth_password:"Password",auth_timeout:"No activity was detected in the last 10 minutes. Your session was closed for security.",auth_invalid:"Incorrect email or password.",auth_active:"This user already has an active session. Sign out from the other session or wait 10 minutes for it to expire.",auth_session_invalid:"This session is no longer active. Please log in again."},
-    pt:{auth_title:"Biblioteca de Conteúdos Úteis",auth_login:"Entrar",auth_cancel:"Cancelar",auth_forgot:"Esqueceu sua senha?",auth_no_access:"Sem acesso?",auth_request_here:"Solicite aqui",auth_questions:"Alguma dúvida?",auth_contact_email:"Contate-nos pelo Email:",auth_email:"Email",auth_password:"Senha",auth_timeout:"Nenhuma atividade foi detectada nos últimos 10 minutos. Sua sessão foi encerrada por segurança.",auth_invalid:"Email ou senha incorretos.",auth_active:"Este usuário já tem uma sessão ativa. Encerre a outra sessão ou aguarde 10 minutos de inatividade.",auth_session_invalid:"Esta sessão não está mais ativa. Faça login novamente."}
+    es:{auth_title:"Biblioteca de Contenidos Útiles",auth_login:"Ingresar",auth_cancel:"Cancelar",auth_forgot:"¿Olvidaste tu contraseña?",auth_no_access:"¿Sin acceso?",auth_request_here:"Solicitarlo aquí",auth_questions:"¿Alguna duda?",auth_contact_email:"Contáctenos al Email:",auth_email:"Email",auth_password:"Contraseña",auth_timeout:"No se detectó actividad en los últimos 10 minutos. La sesión se cerró por seguridad.",auth_invalid:"Usuario o contraseña incorrectos.",auth_active:"Este usuario ya tiene una sesión activa. Cierre la otra sesión o espere 10 minutos de inactividad.",auth_session_invalid:"La sesión ya no está activa. Inicie sesión nuevamente.",auth_session_replaced:"Esta sesión se cerró porque se inició una nueva sesión en otra pestaña o dispositivo."},
+    en:{auth_title:"Useful Content Library",auth_login:"Log In",auth_cancel:"Cancel",auth_forgot:"Forgot your password?",auth_no_access:"No access?",auth_request_here:"Request it here",auth_questions:"Any questions?",auth_contact_email:"Contact us by email:",auth_email:"Email",auth_password:"Password",auth_timeout:"No activity was detected in the last 10 minutes. Your session was closed for security.",auth_invalid:"Incorrect email or password.",auth_active:"This user already has an active session. Sign out from the other session or wait 10 minutes for it to expire.",auth_session_invalid:"This session is no longer active. Please log in again.",auth_session_replaced:"This session was closed because a new session was started in another tab or device."},
+    pt:{auth_title:"Biblioteca de Conteúdos Úteis",auth_login:"Entrar",auth_cancel:"Cancelar",auth_forgot:"Esqueceu sua senha?",auth_no_access:"Sem acesso?",auth_request_here:"Solicite aqui",auth_questions:"Alguma dúvida?",auth_contact_email:"Contate-nos pelo Email:",auth_email:"Email",auth_password:"Senha",auth_timeout:"Nenhuma atividade foi detectada nos últimos 10 minutos. Sua sessão foi encerrada por segurança.",auth_invalid:"Email ou senha incorretos.",auth_active:"Este usuário já tem uma sessão ativa. Encerre a outra sessão ou aguarde 10 minutos de inatividade.",auth_session_invalid:"Esta sessão não está mais ativa. Faça login novamente.",auth_session_replaced:"Esta sessão foi encerrada porque uma nova sessão foi iniciada em outra aba ou dispositivo."}
 };
 
 function applyTranslations(lang){
@@ -109,6 +115,10 @@ function applyTranslations(lang){
     }
     if (timeoutMessage && new URLSearchParams(window.location.search).get('login') === 'session_invalid') {
         timeoutMessage.textContent = d.auth_session_invalid;
+        timeoutMessage.hidden = false;
+    }
+    if (timeoutMessage && new URLSearchParams(window.location.search).get('login') === 'session_replaced') {
+        timeoutMessage.textContent = d.auth_session_replaced;
         timeoutMessage.hidden = false;
     }
     document.documentElement.lang = lang;

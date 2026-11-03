@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/tab-session.php';
+goraStartTabSession();
 
 // Definir variables globales
 GLOBAL $global_username, $savedlink, $duplicatedlink, $updatedlink, $deletedlink;

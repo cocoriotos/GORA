@@ -1,7 +1,7 @@
 <?php
 if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_cache_limiter('nocache');
-    session_start();
+    require_once __DIR__ . '/tab-session.php';
+    goraStartTabSession();
 }
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
