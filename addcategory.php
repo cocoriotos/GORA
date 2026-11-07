@@ -730,6 +730,7 @@ goraStartTabSession();
             document.querySelectorAll('[data-key="edit-category"]').forEach(el => el.textContent = t('edit_category'));
             document.querySelectorAll('[data-key="delete-category"]').forEach(el => el.textContent = t('delete_category'));
             document.querySelectorAll('[data-i18n="sidebar_add"]').forEach(el => el.textContent = t('sidebar_add'));
+            document.querySelectorAll('[data-i18n="sidebar_addCategory"]').forEach(el => el.textContent = t('sidebar_addCategory'));
             document.querySelectorAll('[data-i18n="sidebar_search"]').forEach(el => el.textContent = t('sidebar_search'));
             document.querySelectorAll('[data-i18n="sidebar_exit"]').forEach(el => el.textContent = t('sidebar_exit'));
             const saveButton = document.getElementById('save_link');
