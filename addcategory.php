@@ -697,9 +697,9 @@ goraStartTabSession();
     </style>
     <script>
         window.moduleTranslations = {
-             es: { add_category_title: 'Adicionar Categoría y Subcategoría', add_category_subtitle: 'Administra tus categorías con el diseño de GORA.' , save: 'Adicionar Categoría', label_category: 'Categoría:', label_subcategory: 'Subcategoría:', form_category: 'Categoría', form_subcategory: 'Subcategoría', maincategory_placeholder: 'Digite la Categoría Principal', subcategory_placeholder: 'Digite la SubCategoría', copy_category: 'Copiar Categoría', copy_subcategory: 'Copiar Subcategoría', edit_category: 'Modificar', delete_category: 'Borrar', sidebar_add: 'Adicionar Enlace', sidebar_addCategory: 'Adicionar Categoría', sidebar_search: 'Buscar Categoría', sidebar_exit: 'Salir' },
-            en: { add_category_title: 'Add Category and Subcategory', add_category_subtitle: 'Manage your categories with GORA design.' , save: 'Add Category', label_category: 'Category:', label_subcategory: 'Subcategory:', form_category: 'Category', form_subcategory: 'Subcategory', maincategory_placeholder: 'Enter the Main Category', subcategory_placeholder: 'Enter the Subcategory', copy_category: 'Copy Category', copy_subcategory: 'Copy Subcategory', edit_category: 'Edit', delete_category: 'Delete', sidebar_add: 'Add Link',  sidebar_addCategory: 'Add Category', sidebar_search: 'Search Category', sidebar_exit: 'Logout' },
-            pt: { add_category_title: 'Adicionar Categoria e Subcategoria', add_category_subtitle: 'Gerencie suas categorias com o design GORA.' , save: 'Adicionar Categoria', label_category: 'Categoria:', label_subcategory: 'Subcategoria:', form_category: 'Categoria', form_subcategory: 'Subcategoria', maincategory_placeholder: 'Digite a Categoria Principal', subcategory_placeholder: 'Digite a Subcategoria', copy_category: 'Copiar Categoria', copy_subcategory: 'Copiar Subcategoria', edit_category: 'Modificar', delete_category: 'Excluir', sidebar_add: 'Adicionar Link',  sidebar_addCategory: 'Adicionar Categoria', sidebar_search: 'Buscar Categoria', sidebar_exit: 'Sair' }
+             es: { add_category_title: 'Adicionar Categoría y Subcategoría', add_category_subtitle: 'Administra tus categorías con el diseño de GORA.' , save: 'Adicionar Categoría', label_category: 'Categoría:', label_subcategory: 'Subcategoría:', form_category: 'Categoría', form_subcategory: 'Subcategoría', maincategory_placeholder: 'Digite la Categoría Principal', subcategory_placeholder: 'Digite la SubCategoría', copy_category: 'Copiar Categoría', copy_subcategory: 'Copiar Subcategoría', edit_category: 'Modificar', delete_category: 'Borrar', sidebar_add: 'Adicionar Enlace', sidebar_addCategory: 'Adicionar Categoría', sidebar_search: 'Buscar Categoría', sidebar_exit: 'Salir', confirm_delete_title: '¿Estás seguro?', confirm_delete_text: '¡No podrás revertir esta acción!', confirm_delete_yes: 'Sí, borrar', cancel: 'Cancelar', cancelled: 'Cancelado', delete_cancelled: 'El elemento no fue borrado.', accept: 'Aceptar', message: 'Mensaje', update_success: 'Subcategoría actualizada exitosamente.', update_error: 'Hubo un problema al actualizar la subcategoría. Inténtalo nuevamente.', delete_success: 'Categoría borrada satisfactoriamente.', delete_error: 'Hubo un problema al borrar la subcategoría. Inténtalo nuevamente.' },
+            en: { add_category_title: 'Add Category and Subcategory', add_category_subtitle: 'Manage your categories with GORA design.' , save: 'Add Category', label_category: 'Category:', label_subcategory: 'Subcategory:', form_category: 'Category', form_subcategory: 'Subcategory', maincategory_placeholder: 'Enter the Main Category', subcategory_placeholder: 'Enter the Subcategory', copy_category: 'Copy Category', copy_subcategory: 'Copy Subcategory', edit_category: 'Edit', delete_category: 'Delete', sidebar_add: 'Add Link', sidebar_addCategory: 'Add Category', sidebar_search: 'Search Category', sidebar_exit: 'Logout', confirm_delete_title: 'Are you sure?', confirm_delete_text: 'You will not be able to undo this action!', confirm_delete_yes: 'Yes, delete it', cancel: 'Cancel', cancelled: 'Cancelled', delete_cancelled: 'The item was not deleted.', accept: 'OK', message: 'Message', update_success: 'Subcategory updated successfully.', update_error: 'There was a problem updating the subcategory. Please try again.', delete_success: 'Category deleted successfully.', delete_error: 'There was a problem deleting the subcategory. Please try again.' },
+            pt: { add_category_title: 'Adicionar Categoria e Subcategoria', add_category_subtitle: 'Gerencie suas categorias com o design GORA.' , save: 'Adicionar Categoria', label_category: 'Categoria:', label_subcategory: 'Subcategoria:', form_category: 'Categoria', form_subcategory: 'Subcategoria', maincategory_placeholder: 'Digite a Categoria Principal', subcategory_placeholder: 'Digite a Subcategoria', copy_category: 'Copiar Categoria', copy_subcategory: 'Copiar Subcategoria', edit_category: 'Modificar', delete_category: 'Excluir', sidebar_add: 'Adicionar Link', sidebar_addCategory: 'Adicionar Categoria', sidebar_search: 'Buscar Categoria', sidebar_exit: 'Sair', confirm_delete_title: 'Tem certeza?', confirm_delete_text: 'Não será possível desfazer esta ação!', confirm_delete_yes: 'Sim, excluir', cancel: 'Cancelar', cancelled: 'Cancelado', delete_cancelled: 'O item não foi excluído.', accept: 'OK', message: 'Mensagem', update_success: 'Subcategoria atualizada com sucesso.', update_error: 'Ocorreu um problema ao atualizar a subcategoria. Tente novamente.', delete_success: 'Categoria excluída com sucesso.', delete_error: 'Ocorreu um problema ao excluir a subcategoria. Tente novamente.' }
         };
 
         window.currentLang = localStorage.getItem('smartshelfLang') || localStorage.getItem('moduleLang') || 'es';
@@ -937,14 +937,14 @@ goraStartTabSession();
 
 	function confirmDelete(id) {
         Swal.fire({
-            title: '¿Estás seguro?',
-            text: "¡No podrás revertir esta acción!",
+            title: t('confirm_delete_title'),
+            text: t('confirm_delete_text'),
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#032642',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Sí, borrar',
-            cancelButtonText: 'Cancelar',
+            confirmButtonText: t('confirm_delete_yes'),
+            cancelButtonText: t('cancel'),
             customClass: {
                 popup: 'custom-swal-popup',
                 title: 'custom-swal-title',
@@ -959,10 +959,10 @@ goraStartTabSession();
             } else {
                 // Si el usuario cancela, no hacer nada
                 Swal.fire({
-                    title: 'Cancelado',
-                    text: 'El elemento no fue borrado.',
+                    title: t('cancelled'),
+                    text: t('delete_cancelled'),
                     icon: 'error',
-                    confirmButtonText: 'Aceptar',
+                    confirmButtonText: t('accept'),
                     customClass: {
                         popup: 'custom-swal-popup',
                         title: 'custom-swal-title',
@@ -1126,10 +1126,10 @@ if ($sessiontimeoutreached  == 1){
 		echo "<script>
 		document.addEventListener('DOMContentLoaded', function() {
 		Swal.fire({
-			title: 'Mensaje',
-			text: 'Subcategoría Actualizada Exitosamente',
+			title: t('message'),
+			text: t('update_success'),
 			icon: 'success',
-			confirmButtonText: 'Aceptar',
+			confirmButtonText: t('accept'),
 			customClass: {
 			popup: 'custom-swal-popup',
 			title: 'custom-swal-title',
@@ -1155,10 +1155,10 @@ if ($sessiontimeoutreached  == 1){
 		echo "<script>
 		document.addEventListener('DOMContentLoaded', function() {
 		Swal.fire({
-			title: 'Mensaje',
-			text: 'Hubo un problema al actualizar la subcategoría, intente nuevamente',
+			title: t('message'),
+			text: t('update_error'),
 			icon: 'error',
-			confirmButtonText: 'Aceptar',
+			confirmButtonText: t('accept'),
 			customClass: {
 			popup: 'custom-swal-popup',
 			title: 'custom-swal-title',
@@ -1185,10 +1185,10 @@ if ($sessiontimeoutreached  == 1){
 		echo "<script>
 		document.addEventListener('DOMContentLoaded', function() {
 		Swal.fire({
-			title: 'Mensaje',
-			text: 'Categoría Borrada satisfactoriamente',
-			icon: 'Success',
-			confirmButtonText: 'Aceptar',
+			title: t('message'),
+			text: t('delete_success'),
+			icon: 'success',
+			confirmButtonText: t('accept'),
 			customClass: {
 			popup: 'custom-swal-popup',
 			title: 'custom-swal-title',
@@ -1214,10 +1214,10 @@ if ($sessiontimeoutreached  == 1){
 		echo "<script>
 		document.addEventListener('DOMContentLoaded', function() {
 		Swal.fire({
-			title: 'Mensaje',
-			text: 'Hubo un problema al borrar subcategoría, intente nuevamente',
+			title: t('message'),
+			text: t('delete_error'),
 			icon: 'error',
-			confirmButtonText: 'Aceptar',
+			confirmButtonText: t('accept'),
 			customClass: {
 			popup: 'custom-swal-popup',
 			title: 'custom-swal-title',
