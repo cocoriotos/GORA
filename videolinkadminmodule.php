@@ -819,14 +819,20 @@ include "header.php";
                 label_creation: 'Creación:',
                 support: 'Soporte',
                 confirm_title: '¿Estás seguro?',
+                confirm_delete_text: '¡No podrás revertir esta acción!',
                 confirm_delete_button: 'Sí, borrar',
                 cancel_button: 'Cancelar',
+                cancelled_title: 'Cancelado',
                 cancel_text: 'El elemento no fue borrado.',
                 accept_button: 'Aceptar',
                 message_title: 'Mensaje',
                 copied_text: '¡Enlace copiado al portapapeles!',
                 added_text: '¡Enlace Adicionado Exitosamente!',
+                add_error_text: 'Hubo un problema al adicionar el enlace, intente nuevamente',
+                duplicate_text: 'Este enlace ya lo tenías guardado en tu Biblioteca',
                 updated_text: 'Enlace Actualizado Exitosamente',
+                update_error_text: 'Hubo un problema al actualizar el enlace, intente nuevamente',
+                deleted_text: 'Enlace Borrado Exitosamente',
                 delete_error_text: 'Hubo un problema al borrar el enlace, intente nuevamente',
             },
             en: {
@@ -865,14 +871,20 @@ include "header.php";
                 label_creation: 'Creation:',
                 support: 'Support',
                 confirm_title: 'Are you sure?',
+                confirm_delete_text: 'You will not be able to undo this action!',
                 confirm_delete_button: 'Yes, delete',
                 cancel_button: 'Cancel',
+                cancelled_title: 'Cancelled',
                 cancel_text: 'The item was not deleted.',
                 accept_button: 'OK',
                 message_title: 'Message',
                 copied_text: 'Link copied to clipboard!',
                 added_text: 'Link added successfully!',
+                add_error_text: 'There was a problem adding the link. Please try again.',
+                duplicate_text: 'This link is already saved in your library.',
                 updated_text: 'Link updated successfully',
+                update_error_text: 'There was a problem updating the link. Please try again.',
+                deleted_text: 'Link deleted successfully.',
                 delete_error_text: 'There was a problem deleting the link, please try again',
             },
             pt: {
@@ -911,19 +923,26 @@ include "header.php";
                 label_creation: 'Criação:',
                 support: 'Suporte',
                 confirm_title: 'Tem certeza?',
+                confirm_delete_text: 'Não será possível desfazer esta ação!',
                 confirm_delete_button: 'Sim, excluir',
                 cancel_button: 'Cancelar',
+                cancelled_title: 'Cancelado',
                 cancel_text: 'O item não foi excluído.',
                 accept_button: 'OK',
                 message_title: 'Mensagem',
                 copied_text: 'Link copiado para a área de transferência!',
                 added_text: 'Link adicionado com sucesso!',
+                add_error_text: 'Ocorreu um problema ao adicionar o link. Tente novamente.',
+                duplicate_text: 'Este link já está salvo na sua biblioteca.',
                 updated_text: 'Link atualizado com sucesso',
+                update_error_text: 'Ocorreu um problema ao atualizar o link. Tente novamente.',
+                deleted_text: 'Link excluído com sucesso.',
                 delete_error_text: 'Houve um problema ao excluir o link, tente novamente',
             }
         };
 
-        window.currentLang = localStorage.getItem('smartshelfLang') || localStorage.getItem('moduleLang') || 'es';
+        const savedModuleLanguage = localStorage.getItem('smartshelfLang') || localStorage.getItem('moduleLang') || 'es';
+        window.currentLang = window.moduleTranslations[savedModuleLanguage] ? savedModuleLanguage : 'es';
 
         function t(key) {
             const translations = window.moduleTranslations?.[window.currentLang] || window.moduleTranslations?.es || {};
@@ -1253,15 +1272,27 @@ include "header.php";
     }
 
     function getSubcategories(maincategory) {
+        const categorySelect = document.getElementById("category");
+        const placeholderOption = () => {
+            const option = document.createElement("option");
+            option.value = "";
+            option.disabled = true;
+            option.selected = true;
+            option.dataset.i18n = "select_subcategory";
+            option.textContent = t("select_subcategory");
+            return option;
+        };
+
         if (maincategory == "") {
-            document.getElementById("category").innerHTML = "<option value=''>Seleccione una subcategoría</option>";
+            categorySelect.replaceChildren(placeholderOption());
+            checkForm();
             return;
         }
 
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-                document.getElementById("category").innerHTML = this.responseText;
+                categorySelect.innerHTML = this.responseText;
                 checkForm(); // Verificar el estado del formulario después de cargar las subcategorías
             }
         };
@@ -1334,14 +1365,14 @@ include "header.php";
 
     function confirmDelete(id) {
         Swal.fire({
-            title: '¿Estás seguro?',
-            text: "¡No podrás revertir esta acción!",
+            title: t('confirm_title'),
+            text: t('confirm_delete_text'),
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#032642',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Sí, borrar',
-            cancelButtonText: 'Cancelar',
+            confirmButtonText: t('confirm_delete_button'),
+            cancelButtonText: t('cancel_button'),
             customClass: {
                 popup: 'custom-swal-popup',
                 title: 'custom-swal-title',
@@ -1356,10 +1387,10 @@ include "header.php";
             } else {
                 // Si el usuario cancela, no hacer nada
                 Swal.fire({
-                    title: 'Cancelado',
-                    text: 'El elemento no fue borrado.',
+                    title: t('cancelled_title'),
+                    text: t('cancel_text'),
                     icon: 'error',
-                    confirmButtonText: 'Aceptar',
+                    confirmButtonText: t('accept_button'),
                     customClass: {
                         popup: 'custom-swal-popup',
                         title: 'custom-swal-title',
@@ -1437,10 +1468,10 @@ if ($copytoclipboard == 1) {
     echo "<script>
     document.addEventListener('DOMContentLoaded', function() {
       Swal.fire({
-        title: 'Mensaje',
-        text: '¡Enlace copiado al portapapeles!',
+        title: t('message_title'),
+        text: t('copied_text'),
         icon: 'success',
-        confirmButtonText: 'Aceptar',
+        confirmButtonText: t('accept_button'),
         customClass: {
           popup: 'custom-swal-popup',
           title: 'custom-swal-title',
@@ -1465,10 +1496,10 @@ if ($savedlink == 1) {
     echo "<script>
     document.addEventListener('DOMContentLoaded', function() {
       Swal.fire({
-        title: 'Mensaje',
-        text: '¡Enlace Adicionado Exitosamente!',
+        title: t('message_title'),
+        text: t('added_text'),
         icon: 'success',
-        confirmButtonText: 'Aceptar',
+        confirmButtonText: t('accept_button'),
         customClass: {
           popup: 'custom-swal-popup',
           title: 'custom-swal-title',
@@ -1493,10 +1524,10 @@ if ($savedlink == 2) {
     echo "<script>
     document.addEventListener('DOMContentLoaded', function() {
       Swal.fire({
-        title: 'Mensaje',
-        text: 'Hubo un problema al adicionar el enlace, intente nuevamente',
+        title: t('message_title'),
+        text: t('add_error_text'),
         icon: 'error',
-        confirmButtonText: 'Aceptar',
+        confirmButtonText: t('accept_button'),
         customClass: {
           popup: 'custom-swal-popup',
           title: 'custom-swal-title',
@@ -1521,10 +1552,10 @@ if ($duplicatedlink == 1) {
     echo "<script>
     document.addEventListener('DOMContentLoaded', function() {
       Swal.fire({
-        title: 'Mensaje',
-        text: 'Este enlace ya lo Tenías guardado en tu Biblioteca',
+        title: t('message_title'),
+        text: t('duplicate_text'),
         icon: 'error',
-        confirmButtonText: 'Aceptar',
+        confirmButtonText: t('accept_button'),
         customClass: {
           popup: 'custom-swal-popup',
           title: 'custom-swal-title',
@@ -1549,10 +1580,10 @@ if ($updatedlink == 1) {
     echo "<script>
     document.addEventListener('DOMContentLoaded', function() {
       Swal.fire({
-        title: 'Mensaje',
-        text: 'Enlace Actualizado Exitosamente',
+        title: t('message_title'),
+        text: t('updated_text'),
         icon: 'success',
-        confirmButtonText: 'Aceptar',
+        confirmButtonText: t('accept_button'),
         customClass: {
           popup: 'custom-swal-popup',
           title: 'custom-swal-title',
@@ -1577,10 +1608,10 @@ if ($updatedlink == 2) {
     echo "<script>
     document.addEventListener('DOMContentLoaded', function() {
       Swal.fire({
-        title: 'Mensaje',
-        text: 'Hubo un problema al actualizar el enlace, intente nuevamente',
+        title: t('message_title'),
+        text: t('update_error_text'),
         icon: 'error',
-        confirmButtonText: 'Aceptar',
+        confirmButtonText: t('accept_button'),
         customClass: {
           popup: 'custom-swal-popup',
           title: 'custom-swal-title',
@@ -1605,10 +1636,10 @@ if ($deletedlink == 1) {
     echo "<script>
     document.addEventListener('DOMContentLoaded', function() {
       Swal.fire({
-        title: 'Mensaje',
-        text: 'Enlace Borrado Exitosamente',
+        title: t('message_title'),
+        text: t('deleted_text'),
         icon: 'success',
-        confirmButtonText: 'Aceptar',
+        confirmButtonText: t('accept_button'),
         customClass: {
           popup: 'custom-swal-popup',
           title: 'custom-swal-title',
@@ -1633,10 +1664,10 @@ if ($deletedlink == 2) {
     echo "<script>
     document.addEventListener('DOMContentLoaded', function() {
       Swal.fire({
-        title: 'Mensaje',
-        text: 'Hubo un problema al borrar el enlace, intente nuevamente',
+        title: t('message_title'),
+        text: t('delete_error_text'),
         icon: 'error',
-        confirmButtonText: 'Aceptar',
+        confirmButtonText: t('accept_button'),
         customClass: {
           popup: 'custom-swal-popup',
           title: 'custom-swal-title',
