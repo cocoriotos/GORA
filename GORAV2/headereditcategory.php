@@ -8,15 +8,16 @@ include "sessions.php";
 include "sessionvalidation.php";
 $name = $_SESSION['name'];
 ?>
-<html lang="us">
+<html lang="es">
 <head>    
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="style_sheet_ops.css"/>
     <script src="tab-context.js?v=20261029-1" defer></script>
   <script src="session-timeout.js?v=20261029-3" data-session-generation="<?php echo htmlspecialchars((string) ($_SESSION['gora_session_generation'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" data-account-email="<?php echo htmlspecialchars((string) ($_SESSION['email'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" defer></script>
 </head>
 <header>
 <nav class="navbar navbar-dark bg-dark d-flex justify-content-center" id="welcome">
-<center><a id="welcome"  class="navbar-brand"><span class="username-style"><?php echo $name; ?></span>, éstas en tu Biblioteca de Contenidos Útiles</a></center>
+<center><a id="welcome"  class="navbar-brand"><span class="username-style"><?php echo $name; ?></span><span data-i18n="header_welcome">, estás en tu Biblioteca de Contenidos Útiles</span></a></center>
 </nav>
 <?php include __DIR__ . "/social_links.php"; ?>
 
@@ -34,12 +35,13 @@ $name = $_SESSION['name'];
     <script src="https://kit.fontawesome.com/60f0db780e.js" crossorigin="anonymous"></script>
     <script>
       const headerTranslations = {
-        es: { header_add_link: 'Adicionar Enlace', header_categories: 'Categorías', header_logout: 'Salir' },
-        en: { header_add_link: 'Add Link', header_categories: 'Categories', header_logout: 'Logout' },
-        pt: { header_add_link: 'Adicionar Link', header_categories: 'Categorias', header_logout: 'Sair' }
+        es: { header_welcome: ', estás en tu Biblioteca de Contenidos Útiles', header_add_link: 'Adicionar Enlace', header_categories: 'Categorías', header_logout: 'Salir' },
+        en: { header_welcome: ', you are in your Useful Content Library', header_add_link: 'Add Link', header_categories: 'Categories', header_logout: 'Logout' },
+        pt: { header_welcome: ', você está na sua Biblioteca de Conteúdos Úteis', header_add_link: 'Adicionar Link', header_categories: 'Categorias', header_logout: 'Sair' }
       };
       function updateHeaderLang() {
-        const lang = localStorage.getItem('smartshelfLang') || 'es';
+        const savedLanguage = localStorage.getItem('smartshelfLang') || localStorage.getItem('moduleLang') || 'es';
+        const lang = headerTranslations[savedLanguage] ? savedLanguage : 'es';
         const translations = headerTranslations[lang] || headerTranslations.es;
         document.querySelectorAll('[data-i18n]').forEach(el => {
           const key = el.getAttribute('data-i18n');
@@ -48,6 +50,9 @@ $name = $_SESSION['name'];
         document.documentElement.lang = lang;
       }
       document.addEventListener('DOMContentLoaded', updateHeaderLang);
+      window.addEventListener('storage', event => {
+        if (event.key === 'smartshelfLang' || event.key === 'moduleLang') updateHeaderLang();
+      });
     </script>
 	</header>
     </html>
