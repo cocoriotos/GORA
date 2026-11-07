@@ -70,7 +70,8 @@ $name = $_SESSION['name'];
       };
 
       function updateHeaderLang() {
-        const lang = localStorage.getItem('smartshelfLang') || 'es';
+        const savedLanguage = localStorage.getItem('smartshelfLang') || localStorage.getItem('moduleLang') || 'es';
+        const lang = headerTranslations[savedLanguage] ? savedLanguage : 'es';
         const translations = headerTranslations[lang] || headerTranslations.es;
         document.querySelectorAll('[data-i18n]').forEach(el => {
           const key = el.getAttribute('data-i18n');
