@@ -1293,7 +1293,6 @@ include "header.php";
         xhr.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
                 categorySelect.innerHTML = this.responseText;
-                categorySelect.insertBefore(placeholderOption(), categorySelect.firstChild);
                 checkForm(); // Verificar el estado del formulario después de cargar las subcategorías
             }
         };
