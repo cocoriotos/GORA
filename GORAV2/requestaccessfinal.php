@@ -76,7 +76,7 @@ goraStartTabSession();
             <input type="text" name="captcha" data-i18n-placeholder="req_captcha" placeholder="Ingrese el CAPTCHA" required>
             <div class="terms">
                 <input type="checkbox" id="terms" onclick="toggleSubmitButton()" required>
-                <label for="terms" >Acepto los <a href="TermsConditions.php" target="_blank" style="color: var(--accent) !important; text-decoration: underline;">términos y condiciones</a></label>
+                <label for="terms" data-i18n="req_terms">Acepto los <a class="terms-link" href="TermsConditions.php" target="_blank" rel="noopener">términos y condiciones</a></label>
             </div>
             <button type="submit" class="btn-login" id="loginbutton" data-i18n="req_send" disabled>Enviar</button>
             <br><br>
