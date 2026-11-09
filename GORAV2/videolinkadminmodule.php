@@ -1071,7 +1071,13 @@ include "header.php";
                         <div class="module-sidebar-section">
                             <div class="module-sidebar-section-title" data-i18n="sidebar_documentation">Documentación</div>
                             <a class="module-sidebar-link" href="https://www.youtube.com/@GORAColOficial/shorts" target="_blank">
-                                <i class="fas fa-play-circle"></i><span data-i18n="header_tutorials">Tutoriales</span>
+                                <i class="fas fa-play-circle"></i><span data-i18n="header_tutorials">Tutoriales de Uso de Aplicación</span>
+                            </a>
+                            <a class="module-sidebar-link" href="https://drive.google.com/drive/folders/11mxD4lrs4YTWlgzJHWiGMOspXzmhOXkA" target="_blank">
+                                <i class="fa-brands fa-app-store"></i><span data-i18n="header_tutorials">Infografía Pasos rápidos para Crear Icono de App en Moviles y PC - </span>
+                            </a>
+                            <a class="module-sidebar-link" href="https://drive.google.com/drive/folders/1hRe03xrLOHuP0hRLlo3ZOflXUB851nkR" target="_blank">
+                                <i class="fa-solid fa-unlock-keyhole"></i><span data-i18n="header_tutorials">Infografía Pasos rápidos para Resetar la contraseña - </span>
                             </a>
                             <a class="module-sidebar-link" id="module-manual-link" href="GORAManualUsuarioES.pdf" target="_blank">
                                 <i class="fas fa-book-open"></i><span data-i18n="header_manual">Manual</span>
