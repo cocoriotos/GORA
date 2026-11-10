@@ -793,6 +793,8 @@ include "header.php";
                 sidebar_categories: 'Categorías',
                 sidebar_subscription: 'Suscripción',
                 sidebar_documentation: 'Documentación',
+                documentation_app_icon: 'Pasos para crear ícono de aplicación en móviles',
+                documentation_password_reset: 'Pasos para restablecer contraseña',
                 sidebar_exit: 'Salir',
                 sort_by: 'Ordenar por',
                 sort_date: 'Fecha',
@@ -845,6 +847,8 @@ include "header.php";
                 sidebar_categories: 'Categories',
                 sidebar_subscription: 'Subscription',
                 sidebar_documentation: 'Documentation',
+                documentation_app_icon: 'Steps to create app icon on mobile',
+                documentation_password_reset: 'Steps to reset your password',
                 sidebar_exit: 'Logout',
                 sort_by: 'Sort by',
                 sort_date: 'Date',
@@ -897,6 +901,8 @@ include "header.php";
                 sidebar_categories: 'Categorias',
                 sidebar_subscription: 'Assinatura',
                 sidebar_documentation: 'Documentação',
+                documentation_app_icon: 'Passos para criar ícone do aplicativo no celular',
+                documentation_password_reset: 'Passos para redefinir senha',
                 sidebar_exit: 'Sair',
                 sort_by: 'Ordenar por',
                 sort_date: 'Data',
@@ -977,6 +983,8 @@ include "header.php";
             document.querySelectorAll('[data-i18n="sidebar_categories"]').forEach(el => el.textContent = t('sidebar_categories'));
             document.querySelectorAll('[data-i18n="sidebar_subscription"]').forEach(el => el.textContent = t('sidebar_subscription'));
             document.querySelectorAll('[data-i18n="sidebar_documentation"]').forEach(el => el.textContent = t('sidebar_documentation'));
+            document.querySelectorAll('[data-i18n="documentation_app_icon"]').forEach(el => el.textContent = t('documentation_app_icon'));
+            document.querySelectorAll('[data-i18n="documentation_password_reset"]').forEach(el => el.textContent = t('documentation_password_reset'));
             document.querySelectorAll('[data-i18n="sidebar_exit"]').forEach(el => el.textContent = t('sidebar_exit'));
 
             const mainCategoryPlaceholder = document.querySelector('#maincategory option[data-i18n="select_category"]');
@@ -1070,9 +1078,15 @@ include "header.php";
                         </div>
                         <div class="module-sidebar-section">
                             <div class="module-sidebar-section-title" data-i18n="sidebar_documentation">Documentación</div>
-                            <!--<a class="module-sidebar-link" href="https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5" target="_blank">
-                                <i class="fas fa-play-circle"></i><span data-i18n="header_tutorials">Tutoriales</span>
-                            </a>-->
+                            <a class="module-sidebar-link" href="https://www.youtube.com/@GORAColOficial/shorts" target="_blank">
+                                <i class="fas fa-play-circle"></i><span data-i18n="header_tutorials">Tutoriales de Uso de Aplicación</span>
+                            </a>
+                            <a class="module-sidebar-link" href="https://drive.google.com/drive/folders/11mxD4lrs4YTWlgzJHWiGMOspXzmhOXkA" target="_blank">
+                                <i class="fa-brands fa-app-store"></i><span data-i18n="documentation_app_icon">Infografía: pasos rápidos para crear el ícono de la aplicación en móviles y PC</span>
+                            </a>
+                            <a class="module-sidebar-link" href="https://drive.google.com/drive/folders/1hRe03xrLOHuP0hRLlo3ZOflXUB851nkR" target="_blank">
+                                <i class="fa-solid fa-unlock-keyhole"></i><span data-i18n="documentation_password_reset">Infografía: pasos rápidos para restablecer la contraseña</span>
+                            </a>
                             <a class="module-sidebar-link" id="module-manual-link" href="GORAManualUsuarioES.pdf" target="_blank">
                                 <i class="fas fa-book-open"></i><span data-i18n="header_manual">Manual</span>
                             </a>
