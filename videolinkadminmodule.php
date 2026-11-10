@@ -957,9 +957,9 @@ include "header.php";
 
         function updateModuleText() {
             const manualPaths = {
-                es: 'GORAManualUsuarioES.pdf',
-                en: 'GORAUserManualEN.pdf',
-                pt: 'GORAManualUsuarioPT.pdf',
+                es: 'manual.php?lang=es',
+                en: 'manual.php?lang=en',
+                pt: 'manual.php?lang=pt',
             };
             const manualLink = document.getElementById('module-manual-link');
             if (manualLink) manualLink.href = manualPaths[window.currentLang] || manualPaths.es;
@@ -1087,7 +1087,7 @@ include "header.php";
                             <a class="module-sidebar-link" href="https://drive.google.com/drive/folders/1hRe03xrLOHuP0hRLlo3ZOflXUB851nkR" target="_blank">
                                 <i class="fa-solid fa-unlock-keyhole"></i><span data-i18n="documentation_password_reset">Infografía: pasos rápidos para restablecer la contraseña</span>
                             </a>
-                            <a class="module-sidebar-link" id="module-manual-link" href="GORAManualUsuarioES.pdf" target="_blank">
+                            <a class="module-sidebar-link" id="module-manual-link" href="manual.php?lang=es" target="_blank">
                                 <i class="fas fa-book-open"></i><span data-i18n="header_manual">Manual</span>
                             </a>
                         </div>

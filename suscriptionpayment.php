@@ -425,7 +425,7 @@ $suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
           <!--<a class="subscription-sidebar-link" href="https://www.youtube.com/playlist?list=PLRQ5KF9igtB2GRlHLSP6Uwx1lzy387Wz5" target="_blank">
             <i class="fas fa-play-circle"></i><span>Tutoriales</span>
           </a>-->
-          <a class="subscription-sidebar-link" id="subscription-manual-link" href="GORAManualUsuarioES.pdf" target="_blank" rel="noopener">
+          <a class="subscription-sidebar-link" id="subscription-manual-link" href="manual.php?lang=es" target="_blank" rel="noopener">
             <i class="fas fa-book-open"></i><span>Manual</span>
           </a>
         </div>
@@ -693,9 +693,9 @@ $suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
     }
 
     const manualPaths = {
-      es: 'GORAManualUsuarioES.pdf',
-      en: 'GORAUserManualEN.pdf',
-      pt: 'GORAManualUsuarioPT.pdf'
+      es: 'manual.php?lang=es',
+      en: 'manual.php?lang=en',
+      pt: 'manual.php?lang=pt'
     };
     const manualLink = document.getElementById('subscription-manual-link');
     if (manualLink) {
