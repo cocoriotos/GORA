@@ -54,6 +54,9 @@ function goraTabSessionContext(): array
 
 function goraStartTabSession(): void
 {
+    header('Referrer-Policy: no-referrer');
+    header('X-Robots-Tag: noindex, nofollow, noarchive');
+
     if (session_status() === PHP_SESSION_ACTIVE) {
         return;
     }
@@ -66,6 +69,7 @@ function goraStartTabSession(): void
     session_set_cookie_params(0, $cookiePath, '', $isSecure, true);
     ini_set('session.cookie_samesite', 'Lax');
     ini_set('session.use_only_cookies', '1');
+    ini_set('session.use_trans_sid', '0');
     ini_set('session.use_strict_mode', '1');
     session_cache_limiter('nocache');
     session_start();
