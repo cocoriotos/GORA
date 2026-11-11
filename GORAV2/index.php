@@ -55,8 +55,55 @@
     width: 20px;
     height: 20px;
   }
+  #video-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, .82);
+  }
+  #video-popup[hidden] { display: none; }
+  .video-popup-dialog {
+    width: min(900px, 100%);
+    overflow: hidden;
+    border: 1px solid var(--b2);
+    border-radius: 14px;
+    background: var(--bg2);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .65);
+  }
+  .video-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+  }
+  .video-popup-title { font-weight: 600; }
+  .video-popup-close {
+    border: 1px solid var(--b2);
+    border-radius: 8px;
+    padding: 7px 12px;
+    color: var(--t1);
+    background: var(--bg3);
+    font: inherit;
+    cursor: pointer;
+  }
+  .video-popup-close:hover { background: var(--bg4); }
+  .video-popup-frame { position: relative; aspect-ratio: 16 / 9; }
+  .video-popup-frame iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
   @media (max-width: 580px) {
     :root { --nav: 100px; }
+    #video-popup { padding: 12px; }
+    .video-popup-header { padding: 10px 12px; }
     #landing-nav .nav-brand { gap: 8px; }
     #landing-nav .nav-right { gap: 8px; }
     #landing-nav .lang-sw { gap: 2px; padding: 3px; }
@@ -85,6 +132,18 @@
 </style>
 </head>
 <body>
+
+<div id="video-popup" role="dialog" aria-modal="true" aria-labelledby="video-popup-title">
+  <div class="video-popup-dialog">
+    <div class="video-popup-header">
+      <span class="video-popup-title" id="video-popup-title">GORA Demo</span>
+      <button class="video-popup-close" type="button" onclick="closeVideoPopup()" data-i18n="video_popup_close">Cerrar video</button>
+    </div>
+    <div class="video-popup-frame">
+      <iframe src="https://www.youtube.com/embed/qEt4bgTXqYc?autoplay=1&amp;mute=1&amp;controls=1&amp;rel=0&amp;modestbranding=1&amp;playsinline=1" title="GORA Demo" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  </div>
+</div>
 
 <!-- NAV -->
 <nav id="landing-nav">
@@ -284,7 +343,7 @@
 
   <!-- Contenedor de Video -->
   <div class="video-wrap reveal">
-    <iframe src="https://www.youtube.com/embed/qEt4bgTXqYc?rel=0&modestbranding=1" title="GORA Demo" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe loading="lazy" src="https://www.youtube.com/embed/qEt4bgTXqYc?rel=0&amp;modestbranding=1" title="GORA Demo" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
   </div>
 
 <!-- Reproductor de Audio -->
@@ -441,9 +500,14 @@ en:{nav_features:"Features",nav_how:"How It Works",nav_pricing:"Pricing",nav_rev
 pt:{nav_features:"Recursos",nav_how:"Como Funciona",nav_pricing:"Preços",nav_reviews:"Depoimentos",nav_support:"Suporte",nav_login:"Entrar",nav_cta:"Teste Grátis",nav_cta_free:"Começar Grátis — 30 dias",hero_badge:"✦ Sua biblioteca digital pessoal",hero_title_1:"Salve, Organize",hero_title_2:"e Encontre",hero_title_3:" qualquer link",hero_title_4:" instantaneamente",hero_sub:"Quantos links perdidos você tem agora? GORA centraliza todos os seus conteúdos favoritos da internet em um só lugar, com busca instantânea e acesso de qualquer dispositivo.",hero_cta1:"Começar Grátis — 30 dias ›",hero_cta2:"Ver Demo",stat1:"dias grátis",stat2:"links salvos",stat3:"para encontrar algo",mock_cats:"Categorias",mock_all:"Todos",mock_tech:"Tecnologia",mock_design:"Design",mock_courses:"Cursos",mock_search:"Buscar nos meus links...",mock_link1:"Tutorial completo de React 2024",mock_link2:"10 habilidades mais demandadas em 2025",mock_link3:"Modelo de plano de projeto",prob_tag:"O problema",prob_title:"Quantos links você perdeu até agora?",prob_sub:"Informações valiosas estão em todo lugar: favoritos do navegador, chats do WhatsApp, e-mails, notas... e quando você precisa, não encontra.",pain1:"Links salvos em favoritos que você nunca mais encontra",pain2:"Vídeos enviados no WhatsApp perdidos entre milhares de mensagens",pain3:"Horas procurando um artigo que você leu há meses",pain4:"Pastas do Drive, notas, e-mails e abas abertas sem ordem",sol_title:"GORA resolve tudo",sol_desc:"Um único lugar para salvar qualquer link da internet. Categorizado, pesquisável e acessível de qualquer dispositivo.",sol_f1:"Salve links do YouTube, LinkedIn, Drive ou qualquer URL pública",sol_f2:"Categorias e subcategorias personalizadas por você",sol_f3:"Busca inteligente com palavras-chave incompletas",sol_f4:"Links privados e públicos, tudo em um só lugar",sol_f5:"Acesso rápido de qualquer dispositivo",feat_tag:"Recursos",feat_title:"Tudo que você precisa para organizar seu conhecimento",feat_sub:"GORA foi desenvolvido para que salvar e encontrar conteúdo seja simples, rápido e sem fricção.",f1_title:"Organização Inteligente",f1_desc:"Crie categorias e subcategorias totalmente personalizadas para classificar seus conteúdos exatamente como você precisa.",f2_title:"Busca Instantânea",f2_desc:"Encontre qualquer link simplesmente digitando palavras-chave. Funciona mesmo que você não lembre o título exato.",f3_title:"Multiplataforma",f3_desc:"Compatível com YouTube, LinkedIn, Google Drive, sites, blogs, repositórios e qualquer URL pública ou privada.",f4_title:"Links Privados",f4_desc:"Salve também conteúdo privado ou interno com segurança. Sua biblioteca é sua.",f5_title:"Acesso De Qualquer Lugar",f5_desc:"Acesse seus links do computador, tablet ou celular. Sua biblioteca sempre disponível onde você estiver.",f6_title:"Acesso Direto ao Conteúdo",f6_desc:"Um clique e você vai direto ao conteúdo. Sem etapas intermediárias.",how_tag:"Como Funciona",how_title:"Em 3 passos simples",how_sub:"Começar a organizar sua vida digital é mais fácil do que você imagina.",step1_title:"Cadastre-se Grátis",step1_desc:"Crie sua conta em segundos e comece seu período de avaliação gratuita de 30 dias. Sem cartão de crédito.",step2_title:"Crie suas Categorias",step2_desc:"Defina as categorias que melhor se adaptam à sua vida: trabalho, estudo, entretenimento, receitas... o que precisar.",step3_title:"Salve e Encontre",step3_desc:"Cole seus links, atribua uma categoria e use-os quando precisar com a busca inteligente.",video_tag:"Demo",video_title:"Veja em ação",video_sub:"Em menos de 3 minutos você verá exatamente como o GORA pode mudar a forma como você gerencia suas informações.",video_caption:"Tem perguntas? <a href='https://wa.me/573117592209' target='_blank' rel='noopener' style='color:var(--accent);text-decoration:none;'>Fale conosco pelo WhatsApp</a> e te ajudamos.",price_tag:"Preços",price_title:"Simples, transparente, acessível",price_sub:"Comece grátis por 30 dias. Depois escolha o plano que mais te convém.",plan1_name:"Trimestral",plan1_per:"COP · a cada 3 meses",plan1_usd:"≈ USD $5 / trimestre",plan2_name:"Semestral",plan2_per:"COP · a cada 6 meses",plan2_usd:"≈ USD $10 / semestre · Economize 17%",plan3_name:"Anual",plan3_per:"COP · por ano completo",plan3_usd:"≈ USD $15 / ano · Melhor custo-benefício",plan3_badge:"Mais popular",pfeat1:"Links ilimitados",pfeat2:"Categorias personalizadas",pfeat3:"Busca inteligente",pfeat4:"Acesso de qualquer dispositivo",pfeat5:"Tutoriais e suporte prioritário",pfeat6:"Acesso antecipado a novos recursos",plan_btn:"Começar ›",price_note:"Todos os planos incluem 30 dias de avaliação gratuita. Sem cartão de crédito.",testi_tag:"Depoimentos",testi_title:"O que nossos usuários dizem",testi_sub:"Pessoas reais que transformaram como gerenciam seu conteúdo digital.",t1_text:"Se você não quer enlouquecer com tantos links salvos por todo lado, este app ajuda a organizá-los e encontrá-los quando precisar. O buscador é incrível.",t2_text:"Permite salvar os links das páginas importantes de forma organizada e segura. Uma ferramenta que uso todos os dias.",t3_text:"Uma biblioteca digital pessoal e fácil de usar. A função de busca é essencial para qualquer pessoa que lida com grande volume de conteúdo digital.",t4_text:"Muito prático para organizar tantos links da internet, especialmente para encontrá-los de forma ágil e personalizada. Recomendo muito.",t_user:"Usuária GORA",t_user2:"Usuário GORA",cta_badge:"✦ Sem cartão de crédito · Sem compromisso",cta_title:"Pare de perder links.<br>Comece hoje, grátis.",cta_sub:"30 dias para explorar todo o GORA sem restrições. Seu conhecimento merece um lar melhor.",cta_btn1:"Criar minha conta grátis ›",cta_btn2:"Falar com suporte",f_tag:"Sua biblioteca digital inteligente. Centralize, organize e acesse todos os seus conteúdos em um só lugar.",f_product:"Produto",f_support:"Suporte",f_follow:"Siga-nos",f_trial:"Teste Grátis",f_tutorials:"Tutoriais",f_whatsapp:"WhatsApp",f_terms:"Termos e Condições",f_rights:"Todos os direitos reservados."}};
 
 T.es.f_contact="Contáctenos";T.en.f_contact="Contact Us";T.pt.f_contact="Contate-nos";
+T.es.video_popup_close="Cerrar video";T.en.video_popup_close="Close video";T.pt.video_popup_close="Fechar vídeo";
 function setLang(lang){const d=T[lang];if(!d)return;localStorage.setItem('smartshelfLang', lang);document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(d[k]!==undefined)el.innerHTML=d[k];});document.querySelectorAll('.lb').forEach(b=>{b.classList.toggle('on',b.textContent.trim()===lang.toUpperCase());});document.documentElement.lang=lang;}
 (function(){const initialLang = localStorage.getItem('smartshelfLang') || 'es';setLang(initialLang);})();
 function toggleMenu(){document.getElementById('mobNav').classList.toggle('open');}
+document.body.style.overflow='hidden';
+function closeVideoPopup(){const popup=document.getElementById('video-popup');popup.hidden=true;popup.querySelector('iframe').src='about:blank';document.body.style.overflow='';}
+document.getElementById('video-popup').addEventListener('click',event=>{if(event.target.id==='video-popup')closeVideoPopup();});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')closeVideoPopup();});
 const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1});
 document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 </script>
