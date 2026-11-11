@@ -44,6 +44,9 @@
     padding: 11px 22px;
     font-size: .95rem;
   }
+  @media (max-width: 960px) {
+    #landing-nav .nav-share { display: none; }
+  }
   #landing-nav .lang-sw { gap: 3px; padding: 4px; }
   #landing-nav .lb { padding: 5px 10px; font-size: .74rem; }
   #landing-nav .gora-social-links { gap: 10px; }
@@ -100,6 +103,22 @@
     height: 100%;
     border: 0;
   }
+  .share-status {
+    position: fixed;
+    z-index: 1100;
+    bottom: 88px;
+    left: 50%;
+    max-width: calc(100% - 32px);
+    padding: 10px 16px;
+    transform: translateX(-50%);
+    border: 1px solid var(--b2);
+    border-radius: 10px;
+    color: var(--t1);
+    background: var(--bg3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+    text-align: center;
+  }
+  .share-status[hidden] { display: none; }
   @media (max-width: 580px) {
     :root { --nav: 100px; }
     #video-popup { padding: 12px; }
@@ -146,6 +165,8 @@
   </div>
 </div>
 
+<div id="share-status" class="share-status" role="status" aria-live="polite" hidden></div>
+
 <!-- NAV -->
 <nav id="landing-nav">
   <div class="nav-brand">
@@ -173,6 +194,7 @@
       <button class="lb" onclick="setLang('en')">EN</button>
       <button class="lb" onclick="setLang('pt')">PT</button>
     </div>
+    <button type="button" class="btn btn-ghost nav-share" onclick="shareIndex()" data-i18n="nav_share">Compartir</button>
     <a href="https://solicionespro.com/GORAV2/videotrackerauth.php" target="_blank" rel="noopener" class="btn btn-ghost" data-i18n="nav_login">Ingresar</a>
     <a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary" data-i18n="nav_cta">Prueba Gratis</a>
   </div>
@@ -190,6 +212,7 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.943 3.71 1.444 5.71 1.445h.006c6.585 0 11.946-5.336 11.949-11.896.001-3.176-1.24-6.165-3.48-8.448z" fill="#25D366"/></svg>
     Soporte
   </a>
+  <button type="button" class="mob-share-button" onclick="toggleMenu();shareIndex()" data-i18n="nav_share">Compartir</button>
   <a href="https://solicionespro.com/GORAV2/videotrackerauth.php" target="_blank" rel="noopener" data-i18n="nav_login">Ingresar</a>
   <a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;" data-i18n="nav_cta_free">Comenzar Gratis — 30 días</a>
   <div class="mob-lang">
@@ -516,6 +539,10 @@ en:{nav_features:"Features",nav_how:"How It Works",nav_pricing:"Pricing",nav_rev
 pt:{nav_features:"Recursos",nav_how:"Como Funciona",nav_pricing:"Preços",nav_reviews:"Depoimentos",nav_support:"Suporte",nav_login:"Entrar",nav_cta:"Teste Grátis",nav_cta_free:"Começar Grátis — 30 dias",hero_badge:"✦ Sua biblioteca digital pessoal",hero_title_1:"Salve, Organize",hero_title_2:"e Encontre",hero_title_3:" qualquer link",hero_title_4:" instantaneamente",hero_sub:"Quantos links perdidos você tem agora? GORA centraliza todos os seus conteúdos favoritos da internet em um só lugar, com busca instantânea e acesso de qualquer dispositivo.",hero_cta1:"Começar Grátis — 30 dias ›",hero_cta2:"Ver Demo",stat1:"dias grátis",stat2:"links salvos",stat3:"para encontrar algo",mock_cats:"Categorias",mock_all:"Todos",mock_tech:"Tecnologia",mock_design:"Design",mock_courses:"Cursos",mock_search:"Buscar nos meus links...",mock_link1:"Tutorial completo de React 2024",mock_link2:"10 habilidades mais demandadas em 2025",mock_link3:"Modelo de plano de projeto",prob_tag:"O problema",prob_title:"Quantos links você perdeu até agora?",prob_sub:"Informações valiosas estão em todo lugar: favoritos do navegador, chats do WhatsApp, e-mails, notas... e quando você precisa, não encontra.",pain1:"Links salvos em favoritos que você nunca mais encontra",pain2:"Vídeos enviados no WhatsApp perdidos entre milhares de mensagens",pain3:"Horas procurando um artigo que você leu há meses",pain4:"Pastas do Drive, notas, e-mails e abas abertas sem ordem",sol_title:"GORA resolve tudo",sol_desc:"Um único lugar para salvar qualquer link da internet. Categorizado, pesquisável e acessível de qualquer dispositivo.",sol_f1:"Salve links do YouTube, LinkedIn, Drive ou qualquer URL pública",sol_f2:"Categorias e subcategorias personalizadas por você",sol_f3:"Busca inteligente com palavras-chave incompletas",sol_f4:"Links privados e públicos, tudo em um só lugar",sol_f5:"Acesso rápido de qualquer dispositivo",feat_tag:"Recursos",feat_title:"Tudo que você precisa para organizar seu conhecimento",feat_sub:"GORA foi desenvolvido para que salvar e encontrar conteúdo seja simples, rápido e sem fricção.",f1_title:"Organização Inteligente",f1_desc:"Crie categorias e subcategorias totalmente personalizadas para classificar seus conteúdos exatamente como você precisa.",f2_title:"Busca Instantânea",f2_desc:"Encontre qualquer link simplesmente digitando palavras-chave. Funciona mesmo que você não lembre o título exato.",f3_title:"Multiplataforma",f3_desc:"Compatível com YouTube, LinkedIn, Google Drive, sites, blogs, repositórios e qualquer URL pública ou privada.",f4_title:"Links Privados",f4_desc:"Salve também conteúdo privado ou interno com segurança. Sua biblioteca é sua.",f5_title:"Acesso De Qualquer Lugar",f5_desc:"Acesse seus links do computador, tablet ou celular. Sua biblioteca sempre disponível onde você estiver.",f6_title:"Acesso Direto ao Conteúdo",f6_desc:"Um clique e você vai direto ao conteúdo. Sem etapas intermediárias.",how_tag:"Como Funciona",how_title:"Em 3 passos simples",how_sub:"Começar a organizar sua vida digital é mais fácil do que você imagina.",step1_title:"Cadastre-se Grátis",step1_desc:"Crie sua conta em segundos e comece seu período de avaliação gratuita de 30 dias. Sem cartão de crédito.",step2_title:"Crie suas Categorias",step2_desc:"Defina as categorias que melhor se adaptam à sua vida: trabalho, estudo, entretenimento, receitas... o que precisar.",step3_title:"Salve e Encontre",step3_desc:"Cole seus links, atribua uma categoria e use-os quando precisar com a busca inteligente.",video_tag:"Demo",video_title:"Veja em ação",video_sub:"Em menos de 3 minutos você verá exatamente como o GORA pode mudar a forma como você gerencia suas informações.",video_caption:"Tem perguntas? <a href='https://wa.me/573117592209' target='_blank' rel='noopener' style='color:var(--accent);text-decoration:none;'>Fale conosco pelo WhatsApp</a> e te ajudamos.",price_tag:"Preços",price_title:"Simples, transparente, acessível",price_sub:"Comece grátis por 30 dias. Depois escolha o plano que mais te convém.",plan1_name:"Trimestral",plan1_per:"COP · a cada 3 meses",plan1_usd:"≈ USD $5 / trimestre",plan2_name:"Semestral",plan2_per:"COP · a cada 6 meses",plan2_usd:"≈ USD $10 / semestre · Economize 17%",plan3_name:"Anual",plan3_per:"COP · por ano completo",plan3_usd:"≈ USD $15 / ano · Melhor custo-benefício",plan3_badge:"Mais popular",pfeat1:"Links ilimitados",pfeat2:"Categorias personalizadas",pfeat3:"Busca inteligente",pfeat4:"Acesso de qualquer dispositivo",pfeat5:"Tutoriais e suporte prioritário",pfeat6:"Acesso antecipado a novos recursos",plan_btn:"Começar ›",price_note:"Todos os planos incluem 30 dias de avaliação gratuita. Sem cartão de crédito.",testi_tag:"Depoimentos",testi_title:"O que nossos usuários dizem",testi_sub:"Pessoas reais que transformaram como gerenciam seu conteúdo digital.",t1_text:"Se você não quer enlouquecer com tantos links salvos por todo lado, este app ajuda a organizá-los e encontrá-los quando precisar. O buscador é incrível.",t2_text:"Permite salvar os links das páginas importantes de forma organizada e segura. Uma ferramenta que uso todos os dias.",t3_text:"Uma biblioteca digital pessoal e fácil de usar. A função de busca é essencial para qualquer pessoa que lida com grande volume de conteúdo digital.",t4_text:"Muito prático para organizar tantos links da internet, especialmente para encontrá-los de forma ágil e personalizada. Recomendo muito.",t_user:"Usuária GORA",t_user2:"Usuário GORA",cta_badge:"✦ Sem cartão de crédito · Sem compromisso",cta_title:"Pare de perder links.<br>Comece hoje, grátis.",cta_sub:"30 dias para explorar todo o GORA sem restrições. Seu conhecimento merece um lar melhor.",cta_btn1:"Criar minha conta grátis ›",cta_btn2:"Falar com suporte",f_tag:"Sua biblioteca digital inteligente. Centralize, organize e acesse todos os seus conteúdos em um só lugar.",f_product:"Produto",f_support:"Suporte",f_follow:"Siga-nos",f_trial:"Teste Grátis",f_tutorials:"Tutoriais",f_whatsapp:"WhatsApp",f_terms:"Termos e Condições",f_rights:"Todos os direitos reservados."}};
 
 T.es.f_contact="Contáctenos";T.en.f_contact="Contact Us";T.pt.f_contact="Contate-nos";
+T.es.nav_share="Compartir";T.en.nav_share="Share";T.pt.nav_share="Compartilhar";
+T.es.share_text="Conoce GORA, tu biblioteca digital inteligente.";T.en.share_text="Discover GORA, your intelligent digital library.";T.pt.share_text="Conheça o GORA, sua biblioteca digital inteligente.";
+T.es.share_copied="Enlace copiado. Ya puedes compartirlo.";T.en.share_copied="Link copied. You can now share it.";T.pt.share_copied="Link copiado. Agora você pode compartilhá-lo.";
+T.es.share_failed="No fue posible copiar el enlace. Inténtalo de nuevo.";T.en.share_failed="Could not copy the link. Please try again.";T.pt.share_failed="Não foi possível copiar o link. Tente novamente.";
 T.es.plan_trial_name="Prueba Gratis";T.en.plan_trial_name="Free Trial";T.pt.plan_trial_name="Teste Grátis";
 T.es.plan_trial_per="COP · 30 días";T.en.plan_trial_per="COP · 30 days";T.pt.plan_trial_per="COP · 30 dias";
 T.es.plan_trial_note="Sin tarjeta de crédito";T.en.plan_trial_note="No credit card required";T.pt.plan_trial_note="Sem cartão de crédito";
@@ -524,6 +551,10 @@ T.es.video_popup_sound="Reproducir con sonido";T.en.video_popup_sound="Play with
 function setLang(lang){const d=T[lang];if(!d)return;localStorage.setItem('smartshelfLang', lang);document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(d[k]!==undefined)el.innerHTML=d[k];});document.querySelectorAll('.lb').forEach(b=>{b.classList.toggle('on',b.textContent.trim()===lang.toUpperCase());});document.documentElement.lang=lang;}
 (function(){const initialLang = localStorage.getItem('smartshelfLang') || 'es';setLang(initialLang);})();
 function toggleMenu(){document.getElementById('mobNav').classList.toggle('open');}
+let shareStatusTimeout;
+function showShareStatus(key){const language=T[document.documentElement.lang]||T.es;const status=document.getElementById('share-status');status.textContent=language[key];status.hidden=false;window.clearTimeout(shareStatusTimeout);shareStatusTimeout=window.setTimeout(()=>{status.hidden=true;},4000);}
+async function copyShareLink(url){if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(url);return;}const field=document.createElement('textarea');field.value=url;field.setAttribute('readonly','');field.style.position='fixed';field.style.opacity='0';document.body.appendChild(field);field.select();const copied=document.execCommand('copy');field.remove();if(!copied)throw new Error('Clipboard copy was rejected');}
+async function shareIndex(){const language=T[document.documentElement.lang]||T.es;const shareData={title:document.title,text:language.share_text,url:'https://solicionespro.com/GORAV2/index.php'};if(navigator.share){try{await navigator.share(shareData);return;}catch(error){if(error.name==='AbortError')return;}}try{await copyShareLink(shareData.url);showShareStatus('share_copied');}catch(error){showShareStatus('share_failed');}}
 document.body.style.overflow='hidden';
 function closeVideoPopup(){const popup=document.getElementById('video-popup');popup.hidden=true;popup.querySelector('iframe').src='about:blank';document.body.style.overflow='';}
 let videoPopupPlayer;

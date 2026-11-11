@@ -197,6 +197,19 @@ nav {
 }
 .mob-nav a        { color: var(--t2); text-decoration: none; font-size: 1rem; padding: 8px 0; border-bottom: 1px solid var(--b1); }
 .mob-nav a:hover  { color: var(--t1); }
+.mob-share-button {
+  width: 100%;
+  padding: 8px 0;
+  border: 0;
+  border-bottom: 1px solid var(--b1);
+  color: var(--t2);
+  background: transparent;
+  font: inherit;
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+}
+.mob-share-button:hover { color: var(--t1); }
 .mob-nav.open     { display: flex; }
 .mob-lang         { display: flex; gap: 6px; padding-top: 8px; }
 
