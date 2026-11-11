@@ -137,10 +137,11 @@
   <div class="video-popup-dialog">
     <div class="video-popup-header">
       <span class="video-popup-title" id="video-popup-title">GORA Demo</span>
+      <button class="video-popup-close" id="video-popup-sound" type="button" onclick="playVideoPopupWithSound()" data-i18n="video_popup_sound">Reproducir con sonido</button>
       <button class="video-popup-close" type="button" onclick="closeVideoPopup()" data-i18n="video_popup_close">Cerrar video</button>
     </div>
     <div class="video-popup-frame">
-      <iframe src="https://www.youtube.com/embed/qEt4bgTXqYc?autoplay=1&amp;mute=1&amp;controls=1&amp;rel=0&amp;modestbranding=1&amp;playsinline=1" title="GORA Demo" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <iframe id="video-popup-player" src="https://www.youtube.com/embed/qEt4bgTXqYc?autoplay=1&amp;enablejsapi=1&amp;controls=1&amp;rel=0&amp;modestbranding=1&amp;playsinline=1" title="GORA Demo" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
   </div>
 </div>
@@ -501,11 +502,17 @@ pt:{nav_features:"Recursos",nav_how:"Como Funciona",nav_pricing:"Preços",nav_re
 
 T.es.f_contact="Contáctenos";T.en.f_contact="Contact Us";T.pt.f_contact="Contate-nos";
 T.es.video_popup_close="Cerrar video";T.en.video_popup_close="Close video";T.pt.video_popup_close="Fechar vídeo";
+T.es.video_popup_sound="Reproducir con sonido";T.en.video_popup_sound="Play with sound";T.pt.video_popup_sound="Reproduzir com som";
 function setLang(lang){const d=T[lang];if(!d)return;localStorage.setItem('smartshelfLang', lang);document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(d[k]!==undefined)el.innerHTML=d[k];});document.querySelectorAll('.lb').forEach(b=>{b.classList.toggle('on',b.textContent.trim()===lang.toUpperCase());});document.documentElement.lang=lang;}
 (function(){const initialLang = localStorage.getItem('smartshelfLang') || 'es';setLang(initialLang);})();
 function toggleMenu(){document.getElementById('mobNav').classList.toggle('open');}
 document.body.style.overflow='hidden';
 function closeVideoPopup(){const popup=document.getElementById('video-popup');popup.hidden=true;popup.querySelector('iframe').src='about:blank';document.body.style.overflow='';}
+let videoPopupPlayer;
+let videoPopupSoundRequested=false;
+function playVideoPopupWithSound(){videoPopupSoundRequested=true;if(videoPopupPlayer){videoPopupPlayer.unMute();videoPopupPlayer.setVolume(100);videoPopupPlayer.playVideo();}}
+window.onYouTubeIframeAPIReady=function(){videoPopupPlayer=new YT.Player('video-popup-player',{events:{onReady:function(event){event.target.unMute();event.target.setVolume(100);if(videoPopupSoundRequested)event.target.playVideo();},onStateChange:function(event){if(event.data===YT.PlayerState.PLAYING)document.getElementById('video-popup-sound').hidden=true;},onAutoplayBlocked:function(){document.getElementById('video-popup-sound').hidden=false;}}});};
+const youtubeIframeApi=document.createElement('script');youtubeIframeApi.src='https://www.youtube.com/iframe_api';document.head.appendChild(youtubeIframeApi);
 document.getElementById('video-popup').addEventListener('click',event=>{if(event.target.id==='video-popup')closeVideoPopup();});
 document.addEventListener('keydown',event=>{if(event.key==='Escape')closeVideoPopup();});
 const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1});
