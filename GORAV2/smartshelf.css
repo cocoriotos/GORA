@@ -581,8 +581,10 @@ footer {
 }
 @media (max-width: 580px) {
   .price-grid {
-    grid-template-columns: 1fr;
-    overflow-x: visible;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-auto-flow: row;
+    overflow-x: visible !important;
+    width: 100%;
     padding: 12px 2px 16px;
   }
   :root             { --nav: 100px; }
