@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GORA — Tu Biblioteca Digital Inteligente</title>
 <link rel="icon" href="GORA.ico"/>
-<link rel="stylesheet" href="smartshelf.css?v=5"/>
+<link rel="stylesheet" href="smartshelf.css?v=6"/>
 <style>
   :root { --nav: 144px; }
   #landing-nav { height: var(--nav) !important; min-height: var(--nav); }
@@ -43,9 +43,6 @@
   #landing-nav .nav-right .btn {
     padding: 11px 22px;
     font-size: .95rem;
-  }
-  @media (max-width: 960px) {
-    #landing-nav .nav-share { display: none; }
   }
   #landing-nav .lang-sw { gap: 3px; padding: 4px; }
   #landing-nav .lb { padding: 5px 10px; font-size: .74rem; }
@@ -125,6 +122,7 @@
     .video-popup-header { padding: 10px 12px; }
     #landing-nav .nav-brand { gap: 8px; }
     #landing-nav .nav-right { gap: 8px; }
+    #landing-nav .nav-share { display: inline-flex !important; gap: 5px; padding: 7px 9px; font-size: .72rem; }
     #landing-nav .lang-sw { gap: 2px; padding: 3px; }
     #landing-nav .lb { padding: 5px 8px; font-size: .7rem; }
     #landing-nav .ham { padding: 8px; }
@@ -136,10 +134,14 @@
       flex-basis: 80px;
     }
   }
+  @media (max-width: 420px) {
+    #landing-nav .nav-qr { display: none !important; }
+  }
   @media (max-width: 360px) {
     :root { --nav: 84px; }
     #landing-nav .nav-brand { gap: 6px; }
-    #landing-nav .nav-right { gap: 6px; }
+    #landing-nav .nav-right { gap: 4px; }
+    #landing-nav .nav-share { gap: 4px; padding: 6px 7px; font-size: .68rem; }
     #landing-nav .lb { padding: 4px 6px; font-size: .66rem; }
     #landing-nav .nav-logo img,
     #landing-nav .nav-qr img {
@@ -194,7 +196,10 @@
       <button class="lb" onclick="setLang('en')">EN</button>
       <button class="lb" onclick="setLang('pt')">PT</button>
     </div>
-    <button type="button" class="btn btn-ghost nav-share" onclick="shareIndex()" data-i18n="nav_share">Compartir</button>
+    <button type="button" class="btn btn-ghost nav-share" onclick="shareIndex()">
+      <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"/></svg>
+      <span data-i18n="nav_share">Compartir</span>
+    </button>
     <a href="https://solicionespro.com/GORAV2/videotrackerauth.php" target="_blank" rel="noopener" class="btn btn-ghost" data-i18n="nav_login">Ingresar</a>
     <a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary" data-i18n="nav_cta">Prueba Gratis</a>
   </div>
@@ -212,7 +217,6 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.943 3.71 1.444 5.71 1.445h.006c6.585 0 11.946-5.336 11.949-11.896.001-3.176-1.24-6.165-3.48-8.448z" fill="#25D366"/></svg>
     Soporte
   </a>
-  <button type="button" class="mob-share-button" onclick="toggleMenu();shareIndex()" data-i18n="nav_share">Compartir</button>
   <a href="https://solicionespro.com/GORAV2/videotrackerauth.php" target="_blank" rel="noopener" data-i18n="nav_login">Ingresar</a>
   <a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;" data-i18n="nav_cta_free">Comenzar Gratis — 30 días</a>
   <div class="mob-lang">
