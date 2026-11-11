@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GORA — Tu Biblioteca Digital Inteligente</title>
 <link rel="icon" href="GORA.ico"/>
-<link rel="stylesheet" href="smartshelf.css"/>
+<link rel="stylesheet" href="smartshelf.css?v=4"/>
 <style>
   :root { --nav: 144px; }
   #landing-nav { height: var(--nav) !important; min-height: var(--nav); }

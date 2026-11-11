@@ -408,13 +408,13 @@ section { padding: 96px 6%; }
 
 /* ─── PRICING ─── */
 .price-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 22px; max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px; max-width: 1400px; margin: 0 auto;
 }
 .p-card {
   background: var(--bg2); border: 1px solid var(--b1);
   border-radius: var(--r); padding: 34px; position: relative; transition: all .3s;
-  display: flex; flex-direction: column;
+  display: flex; flex-direction: column; min-width: 0;
 }
 .p-card:hover { border-color: var(--b2); }
 .p-card.feat  { border-color: var(--acborder); background: linear-gradient(145deg, #0d1220, #111827); }
@@ -561,11 +561,10 @@ footer {
 /* ─── RESPONSIVE ─── */
 @media (max-width: 1200px) {
   .price-grid {
-    grid-template-columns: repeat(4, minmax(220px, 1fr));
-    max-width: 100%;
-    overflow-x: auto;
-    padding: 12px 2px 16px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
   }
+  .p-card { padding: 24px 18px; }
 }
 @media (max-width: 960px) {
   .nav-links        { display: none; }
@@ -581,6 +580,11 @@ footer {
   .f-grid           { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 580px) {
+  .price-grid {
+    grid-template-columns: repeat(4, minmax(220px, 1fr));
+    overflow-x: auto;
+    padding: 12px 2px 16px;
+  }
   :root             { --nav: 100px; }
   nav               { padding: 0 4%; }
   .nav-brand        { gap: 8px; }
