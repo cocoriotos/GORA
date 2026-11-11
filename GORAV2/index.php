@@ -284,7 +284,7 @@
 
   <!-- Contenedor de Video -->
   <div class="video-wrap reveal">
-    <iframe src="https://www.youtube.com/embed/qEt4bgTXqYc?rel=0&modestbranding=1" title="GORA Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe src="https://www.youtube.com/embed/qEt4bgTXqYc?rel=0&modestbranding=1" title="GORA Demo" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
   </div>
 
 <!-- Reproductor de Audio -->
