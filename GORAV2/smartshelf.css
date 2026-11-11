@@ -560,7 +560,12 @@ footer {
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 1200px) {
-  .price-grid { grid-template-columns: repeat(2, 1fr); }
+  .price-grid {
+    grid-template-columns: repeat(4, minmax(220px, 1fr));
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 12px 2px 16px;
+  }
 }
 @media (max-width: 960px) {
   .nav-links        { display: none; }
@@ -572,7 +577,6 @@ footer {
   .feat-grid        { grid-template-columns: 1fr 1fr; }
   .steps            { grid-template-columns: 1fr; gap: 36px; }
   .steps::before    { display: none; }
-  .price-grid       { grid-template-columns: 1fr; }
   .testi-grid       { grid-template-columns: 1fr; }
   .f-grid           { grid-template-columns: 1fr 1fr; }
 }
