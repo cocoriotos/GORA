@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GORA — Tu Biblioteca Digital Inteligente</title>
 <link rel="icon" href="GORA.ico"/>
-<link rel="stylesheet" href="smartshelf.css?v=8"/>
+<link rel="stylesheet" href="smartshelf.css?v=9"/>
 <style>
   :root { --nav: 144px; }
   #landing-nav { height: var(--nav) !important; min-height: var(--nav); }
@@ -42,7 +42,13 @@
   #landing-nav .nav-right { gap: 14px; }
   #landing-nav .nav-share,
   #landing-nav .nav-share:hover { color: #fff !important; }
-  #landing-nav .nav-share svg { stroke: #fff; }
+  #landing-nav .nav-share svg {
+    display: block;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    stroke: #fff !important;
+  }
   #landing-nav .nav-right .btn {
     padding: 11px 22px;
     font-size: .95rem;
@@ -221,7 +227,7 @@
       <button class="lb" onclick="setLang('pt')">PT</button>
     </div>
     <button type="button" class="btn btn-ghost nav-share" onclick="shareIndex()">
-      <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"/></svg>
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4M8.7 13.3 15.3 17.7"/></svg>
       <span data-i18n="nav_share">Compartir</span>
     </button>
     <a href="https://solicionespro.com/GORAV2/videotrackerauth.php" target="_blank" rel="noopener" class="btn btn-ghost" data-i18n="nav_login">Ingresar</a>
