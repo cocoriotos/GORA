@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GORA — Tu Biblioteca Digital Inteligente</title>
 <link rel="icon" href="GORA.ico"/>
-<link rel="stylesheet" href="smartshelf.css?v=6"/>
+<link rel="stylesheet" href="smartshelf.css?v=7"/>
 <style>
   :root { --nav: 144px; }
   #landing-nav { height: var(--nav) !important; min-height: var(--nav); }
@@ -117,10 +117,15 @@
   }
   .share-status[hidden] { display: none; }
   @media (max-width: 580px) {
-    :root { --nav: 100px; }
+    :root { --nav: 184px; }
+    #landing-nav {
+      align-items: flex-start;
+      padding: 10px 4% 0;
+    }
     #video-popup { padding: 12px; }
     .video-popup-header { padding: 10px 12px; }
-    #landing-nav .nav-brand { gap: 8px; }
+    #landing-nav .nav-brand { position: static; height: auto; gap: 8px; align-items: flex-start; }
+    #landing-nav .nav-qr { position: absolute; top: 96px; left: 50%; transform: translateX(-50%); }
     #landing-nav .nav-right { gap: 8px; }
     #landing-nav .nav-share { display: inline-flex !important; gap: 5px; padding: 7px 9px; font-size: .72rem; }
     #landing-nav .lang-sw { gap: 2px; padding: 3px; }
@@ -134,15 +139,13 @@
       flex-basis: 80px;
     }
   }
-  @media (max-width: 420px) {
-    #landing-nav .nav-qr { display: none !important; }
-  }
   @media (max-width: 360px) {
-    :root { --nav: 84px; }
+    :root { --nav: 164px; }
     #landing-nav .nav-brand { gap: 6px; }
     #landing-nav .nav-right { gap: 4px; }
     #landing-nav .nav-share { gap: 4px; padding: 6px 7px; font-size: .68rem; }
     #landing-nav .lb { padding: 4px 6px; font-size: .66rem; }
+    #landing-nav .nav-qr { top: 92px; }
     #landing-nav .nav-logo img,
     #landing-nav .nav-qr img {
       width: 64px !important;
