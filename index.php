@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GORA — Tu Biblioteca Digital Inteligente</title>
 <link rel="icon" href="GORA.ico"/>
-<link rel="stylesheet" href="smartshelf.css?v=6"/>
+<link rel="stylesheet" href="smartshelf.css?v=9"/>
 <style>
   :root { --nav: 144px; }
   #landing-nav { height: var(--nav) !important; min-height: var(--nav); }
@@ -40,6 +40,15 @@
   #landing-nav .nav-links { gap: 30px; }
   #landing-nav .nav-links a { font-size: 1.50rem; font-weight: 600; }
   #landing-nav .nav-right { gap: 14px; }
+  #landing-nav .nav-share,
+  #landing-nav .nav-share:hover { color: #fff !important; }
+  #landing-nav .nav-share svg {
+    display: block;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    stroke: #fff !important;
+  }
   #landing-nav .nav-right .btn {
     padding: 11px 22px;
     font-size: .95rem;
@@ -120,12 +129,35 @@
   }
   .share-status[hidden] { display: none; }
   @media (max-width: 580px) {
-    :root { --nav: 100px; }
+    :root { --nav: 184px; }
+    #landing-nav {
+      align-items: flex-start;
+      padding: 10px 4% 0;
+    }
     #video-popup { padding: 12px; }
     .video-popup-header { padding: 10px 12px; }
-    #landing-nav .nav-brand { gap: 8px; }
+    #landing-nav .nav-brand { position: static; height: auto; gap: 8px; align-items: flex-start; }
+    #landing-nav .nav-qr { position: absolute; top: 96px; left: 50%; transform: translateX(-50%); }
     #landing-nav .nav-right { gap: 8px; }
-    #landing-nav .nav-share { display: inline-flex !important; gap: 5px; padding: 7px 9px; font-size: .72rem; }
+    #landing-nav .nav-share {
+      display: inline-flex !important;
+      width: 40px;
+      height: 40px;
+      justify-content: center;
+      gap: 0;
+      padding: 0;
+    }
+    #landing-nav .nav-share span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     #landing-nav .lang-sw { gap: 2px; padding: 3px; }
     #landing-nav .lb { padding: 5px 8px; font-size: .7rem; }
     #landing-nav .ham { padding: 8px; }
@@ -137,15 +169,13 @@
       flex-basis: 80px;
     }
   }
-  @media (max-width: 420px) {
-    #landing-nav .nav-qr { display: none !important; }
-  }
   @media (max-width: 360px) {
-    :root { --nav: 84px; }
+    :root { --nav: 164px; }
     #landing-nav .nav-brand { gap: 6px; }
     #landing-nav .nav-right { gap: 4px; }
-    #landing-nav .nav-share { gap: 4px; padding: 6px 7px; font-size: .68rem; }
+    #landing-nav .nav-share { width: 36px; height: 36px; }
     #landing-nav .lb { padding: 4px 6px; font-size: .66rem; }
+    #landing-nav .nav-qr { top: 92px; }
     #landing-nav .nav-logo img,
     #landing-nav .nav-qr img {
       width: 64px !important;
@@ -200,7 +230,7 @@
       <button class="lb" onclick="setLang('pt')">PT</button>
     </div>
     <button type="button" class="btn btn-ghost nav-share" onclick="shareIndex()">
-      <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"/></svg>
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"/></svg>
       <span data-i18n="nav_share">Compartir</span>
     </button>
     <a href="https://solicionespro.com/videotrackerauth.php" target="_blank" rel="noopener" class="btn btn-ghost" data-i18n="nav_login">Ingresar</a>
@@ -212,6 +242,10 @@
 </nav>
 
 <div class="mob-nav" id="mobNav">
+  <div class="mob-actions">
+    <a class="mob-action-link mob-action-login" href="https://solicionespro.com/videotrackerauth.php" target="_blank" rel="noopener" onclick="toggleMenu()" data-i18n="nav_login">Ingresar</a>
+    <a class="mob-action-link mob-action-trial" href="https://solicionespro.com/requestaccessfinal.php" target="_blank" rel="noopener" onclick="toggleMenu()" data-i18n="nav_cta_free">Comenzar Gratis — 30 días</a>
+  </div>
   <a href="#features" onclick="toggleMenu()" data-i18n="nav_features">Características</a>
   <a href="#how" onclick="toggleMenu()" data-i18n="nav_how">Cómo Funciona</a>
   <a href="#pricing" onclick="toggleMenu()" data-i18n="nav_pricing">Precios</a>
@@ -220,8 +254,6 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.943 3.71 1.444 5.71 1.445h.006c6.585 0 11.946-5.336 11.949-11.896.001-3.176-1.24-6.165-3.48-8.448z" fill="#25D366"/></svg>
     Soporte
   </a>
-  <a href="https://solicionespro.com/videotrackerauth.php" target="_blank" rel="noopener" data-i18n="nav_login">Ingresar</a>
-  <a href="https://solicionespro.com/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;" data-i18n="nav_cta_free">Comenzar Gratis — 30 días</a>
   <div class="mob-lang">
     <button class="lb on" onclick="setLang('es');toggleMenu()">ES</button>
     <button class="lb" onclick="setLang('en');toggleMenu()">EN</button>
