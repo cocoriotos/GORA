@@ -40,6 +40,9 @@
   #landing-nav .nav-links { gap: 30px; }
   #landing-nav .nav-links a { font-size: 1.50rem; font-weight: 600; }
   #landing-nav .nav-right { gap: 14px; }
+  #landing-nav .nav-share,
+  #landing-nav .nav-share:hover { color: #fff !important; }
+  #landing-nav .nav-share svg { stroke: #fff; }
   #landing-nav .nav-right .btn {
     padding: 11px 22px;
     font-size: .95rem;
