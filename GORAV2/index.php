@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>GORA — Tu Biblioteca Digital Inteligente</title>
 <link rel="icon" href="GORA.ico"/>
-<link rel="stylesheet" href="smartshelf.css?v=7"/>
+<link rel="stylesheet" href="smartshelf.css?v=8"/>
 <style>
   :root { --nav: 144px; }
   #landing-nav { height: var(--nav) !important; min-height: var(--nav); }
@@ -212,6 +212,10 @@
 </nav>
 
 <div class="mob-nav" id="mobNav">
+  <div class="mob-actions">
+    <a class="mob-action-link mob-action-login" href="https://solicionespro.com/GORAV2/videotrackerauth.php" target="_blank" rel="noopener" onclick="toggleMenu()" data-i18n="nav_login">Ingresar</a>
+    <a class="mob-action-link mob-action-trial" href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" onclick="toggleMenu()" data-i18n="nav_cta_free">Comenzar Gratis — 30 días</a>
+  </div>
   <a href="#features" onclick="toggleMenu()" data-i18n="nav_features">Características</a>
   <a href="#how" onclick="toggleMenu()" data-i18n="nav_how">Cómo Funciona</a>
   <a href="#pricing" onclick="toggleMenu()" data-i18n="nav_pricing">Precios</a>
@@ -220,8 +224,6 @@
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.943 3.71 1.444 5.71 1.445h.006c6.585 0 11.946-5.336 11.949-11.896.001-3.176-1.24-6.165-3.48-8.448z" fill="#25D366"/></svg>
     Soporte
   </a>
-  <a href="https://solicionespro.com/GORAV2/videotrackerauth.php" target="_blank" rel="noopener" data-i18n="nav_login">Ingresar</a>
-  <a href="https://solicionespro.com/GORAV2/requestaccessfinal.php" target="_blank" rel="noopener" class="btn btn-primary" style="text-align:center;" data-i18n="nav_cta_free">Comenzar Gratis — 30 días</a>
   <div class="mob-lang">
     <button class="lb on" onclick="setLang('es');toggleMenu()">ES</button>
     <button class="lb" onclick="setLang('en');toggleMenu()">EN</button>
