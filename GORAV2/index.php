@@ -127,7 +127,25 @@
     #landing-nav .nav-brand { position: static; height: auto; gap: 8px; align-items: flex-start; }
     #landing-nav .nav-qr { position: absolute; top: 96px; left: 50%; transform: translateX(-50%); }
     #landing-nav .nav-right { gap: 8px; }
-    #landing-nav .nav-share { display: inline-flex !important; gap: 5px; padding: 7px 9px; font-size: .72rem; }
+    #landing-nav .nav-share {
+      display: inline-flex !important;
+      width: 40px;
+      height: 40px;
+      justify-content: center;
+      gap: 0;
+      padding: 0;
+    }
+    #landing-nav .nav-share span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     #landing-nav .lang-sw { gap: 2px; padding: 3px; }
     #landing-nav .lb { padding: 5px 8px; font-size: .7rem; }
     #landing-nav .ham { padding: 8px; }
@@ -143,7 +161,7 @@
     :root { --nav: 164px; }
     #landing-nav .nav-brand { gap: 6px; }
     #landing-nav .nav-right { gap: 4px; }
-    #landing-nav .nav-share { gap: 4px; padding: 6px 7px; font-size: .68rem; }
+    #landing-nav .nav-share { width: 36px; height: 36px; }
     #landing-nav .lb { padding: 4px 6px; font-size: .66rem; }
     #landing-nav .nav-qr { top: 92px; }
     #landing-nav .nav-logo img,
