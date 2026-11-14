@@ -13,6 +13,9 @@ goraStartTabSession();
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Login - GORA</title>
         <link rel="icon" href="GORA.ico" type="image/x-icon">
+        <link rel="manifest" href="gora.webmanifest">
+        <link rel="apple-touch-icon" href="GORA.png">
+        <meta name="theme-color" content="#050814">
         <script src="head.js?v=<?php echo time(); ?>" defer></script>
         <script src="tab-context.js?v=20261029-1" defer></script>
         <script src="password-visibility.js?v=<?php echo filemtime(__DIR__ . '/password-visibility.js'); ?>" defer></script>
@@ -72,6 +75,9 @@ goraStartTabSession();
                 <br><br>
             </form>
 
+            <button type="button" id="install-app" class="btn-login install-app-button" data-i18n="auth_install">Instalar GORA</button>
+            <p id="install-instructions" class="install-instructions" role="status" aria-live="polite" hidden></p>
+
             <form action="index.php" method="POST" autocomplete="off">
                 <button type="submit" class="btn-login" data-i18n="auth_cancel">Cancelar</button>
             </form>
@@ -95,11 +101,108 @@ const T={
     pt:{auth_title:"Biblioteca de Conteúdos Úteis",auth_login:"Entrar",auth_cancel:"Cancelar",auth_forgot:"Esqueceu sua senha?",auth_no_access:"Sem acesso?",auth_questions:"Alguma dúvida?",auth_contact_email:"Contate-nos pelo Email:",auth_email:"Email",auth_password:"Senha",auth_timeout:"Nenhuma atividade foi detectada nos últimos 10 minutos. Sua sessão foi encerrada por segurança.",auth_invalid:"Email ou senha incorretos.",auth_active:"Este usuário já tem uma sessão ativa. Encerre a outra sessão ou aguarde 10 minutos de inatividade.",auth_session_invalid:"Esta sessão não está mais ativa. Faça login novamente.",auth_session_replaced:"Esta sessão foi encerrada porque uma nova sessão foi iniciada em outra aba ou dispositivo."}
 };
 
+Object.assign(T.es, {
+    auth_install:"Instalar GORA",
+    auth_install_ios_safari:"En Safari: toca Compartir y selecciona “Añadir a pantalla de inicio”.",
+    auth_install_ios_browser:"Abre esta página en Safari, toca Compartir y selecciona “Añadir a pantalla de inicio”.",
+    auth_install_android:"Abre el menú ⋮ del navegador y selecciona “Instalar aplicación” o “Añadir a pantalla principal”.",
+    auth_install_safari_mac:"En Safari, ve a Archivo > Añadir al Dock para crear el acceso directo.",
+    auth_install_firefox:"Firefox no admite la instalación directa desde este botón. Abre GORA en Chrome o Edge y selecciona “Instalar GORA” en el menú del navegador.",
+    auth_install_desktop:"Abre el menú del navegador y selecciona “Instalar GORA” o “Crear acceso directo”.",
+    auth_install_done:"GORA se instaló correctamente."
+});
+Object.assign(T.en, {
+    auth_install:"Install GORA",
+    auth_install_ios_safari:"In Safari, tap Share and select “Add to Home Screen”.",
+    auth_install_ios_browser:"Open this page in Safari, tap Share and select “Add to Home Screen”.",
+    auth_install_android:"Open your browser’s ⋮ menu and select “Install app” or “Add to Home screen”.",
+    auth_install_safari_mac:"In Safari, go to File > Add to Dock to create the shortcut.",
+    auth_install_firefox:"Firefox does not support direct installation from this button. Open GORA in Chrome or Edge and select “Install GORA” from the browser menu.",
+    auth_install_desktop:"Open your browser menu and select “Install GORA” or “Create shortcut”.",
+    auth_install_done:"GORA was installed successfully."
+});
+Object.assign(T.pt, {
+    auth_install:"Instalar GORA",
+    auth_install_ios_safari:"No Safari, toque em Compartilhar e selecione “Adicionar à Tela de Início”.",
+    auth_install_ios_browser:"Abra esta página no Safari, toque em Compartilhar e selecione “Adicionar à Tela de Início”.",
+    auth_install_android:"Abra o menu ⋮ do navegador e selecione “Instalar aplicativo” ou “Adicionar à tela inicial”.",
+    auth_install_safari_mac:"No Safari, acesse Arquivo > Adicionar ao Dock para criar o atalho.",
+    auth_install_firefox:"O Firefox não oferece instalação direta por este botão. Abra o GORA no Chrome ou Edge e selecione “Instalar GORA” no menu do navegador.",
+    auth_install_desktop:"Abra o menu do navegador e selecione “Instalar GORA” ou “Criar atalho”.",
+    auth_install_done:"O GORA foi instalado com sucesso."
+});
+
+let deferredInstallPrompt = null;
+let installMessageKey = '';
+const installButton = document.getElementById('install-app');
+const installInstructions = document.getElementById('install-instructions');
+
+function showInstallInstructions(key){
+    installMessageKey = key;
+    const lang = localStorage.getItem('smartshelfLang') || 'es';
+    installInstructions.textContent = (T[lang] || T.es)[key];
+    installInstructions.hidden = false;
+}
+
+function getInstallInstructionsKey(){
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isAppleMobile = /iphone|ipad|ipod/.test(userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isSafari = /safari/.test(userAgent) && !/crios|fxios|edgios|opios/.test(userAgent);
+
+    if(isAppleMobile) return isSafari ? 'auth_install_ios_safari' : 'auth_install_ios_browser';
+    if(/android/.test(userAgent)) return 'auth_install_android';
+    if(/macintosh/.test(userAgent) && isSafari) return 'auth_install_safari_mac';
+    if(/firefox|fxios/.test(userAgent)) return 'auth_install_firefox';
+    return 'auth_install_desktop';
+}
+
+window.addEventListener('beforeinstallprompt', event=>{
+    event.preventDefault();
+    deferredInstallPrompt = event;
+});
+
+installButton.addEventListener('click', async ()=>{
+    if(deferredInstallPrompt){
+        const promptEvent = deferredInstallPrompt;
+        deferredInstallPrompt = null;
+        try{
+            await promptEvent.prompt();
+            const choice = await promptEvent.userChoice;
+            if(choice.outcome === 'accepted'){
+                installInstructions.hidden = true;
+                installMessageKey = '';
+            }
+        }catch(error){
+            console.error('GORA installation prompt failed:', error);
+            showInstallInstructions(getInstallInstructionsKey());
+        }
+        return;
+    }
+
+    showInstallInstructions(getInstallInstructionsKey());
+});
+
+window.addEventListener('appinstalled', ()=>{
+    installButton.hidden = true;
+    showInstallInstructions('auth_install_done');
+});
+
+if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true){
+    installButton.hidden = true;
+}
+
+if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./gora-service-worker.js')
+        .catch(error=>console.error('GORA service worker registration failed:', error));
+}
+
 function applyTranslations(lang){
     const d = T[lang] || T.es;
     document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(d[k]!==undefined)el.innerHTML=d[k];});
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const k=el.getAttribute('data-i18n-placeholder');if(d[k]!==undefined)el.placeholder=d[k];});
     document.querySelectorAll('.lb').forEach(b=>{b.classList.toggle('on',b.textContent.trim()===lang.toUpperCase());});
+    if(installMessageKey) installInstructions.textContent = d[installMessageKey];
     const timeoutMessage = document.getElementById('session-timeout-message');
     if (timeoutMessage && new URLSearchParams(window.location.search).get('timeout') === '1') {
         timeoutMessage.textContent = d.auth_timeout;
