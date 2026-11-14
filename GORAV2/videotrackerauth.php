@@ -78,9 +78,6 @@ goraStartTabSession();
             <form action="index.php" method="POST" autocomplete="off">
                 <button type="submit" class="btn-login" data-i18n="auth_cancel">Cancelar</button>
             </form>
-            <button type="button" id="install-app" class="btn-login install-app-button" data-i18n="auth_install">Instalar GORA</button>
-            <p id="install-instructions" class="install-instructions" role="status" aria-live="polite" hidden></p>
-
             <a href="recoverpassword.php" class="forgot-password" data-i18n="auth_forgot">¿Olvidaste tu contraseña?</a>
 
             <div id="request-access">
@@ -92,6 +89,8 @@ goraStartTabSession();
                     <!--<a href="mailto:adm@solicionespro.com">adm@solicionespro.com</a>-->
                 </p>
             </div>
+            <button type="button" id="install-app" class="btn-login install-app-button" data-i18n="auth_install">Instalar GORA</button>
+            <p id="install-instructions" class="install-instructions" role="status" aria-live="polite" hidden></p>
 
 
 <script>
