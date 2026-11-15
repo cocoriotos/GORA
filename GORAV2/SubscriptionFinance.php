@@ -109,14 +109,26 @@ function financeSalesCodePart(string $value): string
 {
     $ascii = function_exists('iconv') ? iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value) : false;
     if ($ascii === false) {
-        $ascii = $value;
+        $ascii = strtr($value, [
+            'À' => 'A', 'Á' => 'A', 'Â' => 'A', 'Ã' => 'A', 'Ä' => 'A', 'Å' => 'A',
+            'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a',
+            'È' => 'E', 'É' => 'E', 'Ê' => 'E', 'Ë' => 'E',
+            'è' => 'e', 'é' => 'e', 'ê' => 'e', 'ë' => 'e',
+            'Ì' => 'I', 'Í' => 'I', 'Î' => 'I', 'Ï' => 'I',
+            'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i',
+            'Ò' => 'O', 'Ó' => 'O', 'Ô' => 'O', 'Õ' => 'O', 'Ö' => 'O',
+            'ò' => 'o', 'ó' => 'o', 'ô' => 'o', 'õ' => 'o', 'ö' => 'o',
+            'Ù' => 'U', 'Ú' => 'U', 'Û' => 'U', 'Ü' => 'U',
+            'ù' => 'u', 'ú' => 'u', 'û' => 'u', 'ü' => 'u',
+            'Ç' => 'C', 'ç' => 'c', 'Ñ' => 'N', 'ñ' => 'n',
+        ]);
     }
-    $part = strtoupper((string) preg_replace('/[^A-Za-z0-9]/', '', $ascii));
-    if ($part === '') {
-        throw new InvalidArgumentException('El nombre y el apellido deben incluir letras o números.');
+    $letters = strtoupper((string) preg_replace('/[^A-Za-z]/', '', $ascii));
+    if (strlen($letters) < 3) {
+        throw new InvalidArgumentException('El nombre y el apellido deben tener al menos tres letras para generar el código.');
     }
 
-    return substr($part, 0, 16);
+    return substr($letters, 0, 3);
 }
 
 function financeRedirect(string $month, string $userEmail, string $anchor): void
@@ -150,36 +162,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($action === 'add_seller') {
             $firstName = trim((string) ($_POST['first_name'] ?? ''));
             $lastName = trim((string) ($_POST['last_name'] ?? ''));
-            $documentLast4 = trim((string) ($_POST['document_last4'] ?? ''));
+            $documentNumber = trim((string) ($_POST['document_number'] ?? ''));
             if ($firstName === '' || $lastName === '' || strlen($firstName) > 100 || strlen($lastName) > 100) {
                 throw new InvalidArgumentException('Ingrese un nombre y apellido válidos (máximo 100 caracteres cada uno).');
             }
-            if (!preg_match('/^\d{4}$/D', $documentLast4)) {
-                throw new InvalidArgumentException('Ingrese únicamente los cuatro últimos dígitos del documento.');
+            if (!preg_match('/^\d{4,50}$/D', $documentNumber)) {
+                throw new InvalidArgumentException('Ingrese el número de identificación completo, con al menos cuatro dígitos.');
             }
 
-            $baseCode = financeSalesCodePart($firstName) . '-' . financeSalesCodePart($lastName) . '-' . $documentLast4;
-            $salesCode = $baseCode;
-            $suffix = 1;
+            $documentStmt = $conn->prepare('SELECT seller_id FROM gora_finance_sellers WHERE document_number = ? LIMIT 1');
+            $documentStmt->bind_param('s', $documentNumber);
+            $documentStmt->execute();
+            $documentStmt->store_result();
+            $documentExists = $documentStmt->num_rows > 0;
+            $documentStmt->close();
+            if ($documentExists) {
+                throw new InvalidArgumentException('El número de identificación ya está registrado para otro vendedor.');
+            }
+
+            $documentLast4 = substr($documentNumber, -4);
+            $salesCode = financeSalesCodePart($firstName)
+                . financeSalesCodePart($lastName)
+                . $documentLast4;
             $codeStmt = $conn->prepare('SELECT seller_id FROM gora_finance_sellers WHERE sales_code = ? LIMIT 1');
-            do {
-                $codeStmt->bind_param('s', $salesCode);
-                $codeStmt->execute();
-                $codeStmt->store_result();
-                $codeExists = $codeStmt->num_rows > 0;
-                $codeStmt->free_result();
-                if ($codeExists) {
-                    $suffix++;
-                    $salesCode = $baseCode . '-' . $suffix;
-                }
-            } while ($codeExists);
+            $codeStmt->bind_param('s', $salesCode);
+            $codeStmt->execute();
+            $codeStmt->store_result();
+            $codeExists = $codeStmt->num_rows > 0;
             $codeStmt->close();
+            if ($codeExists) {
+                throw new InvalidArgumentException('El código generado ya existe. Verifique que el vendedor no esté registrado.');
+            }
 
             $stmt = $conn->prepare(
-                'INSERT INTO gora_finance_sellers (first_name, last_name, document_last4, sales_code, created_by)
-                 VALUES (?, ?, ?, ?, ?)'
+                'INSERT INTO gora_finance_sellers
+                    (first_name, last_name, document_number, document_last4, sales_code, created_by)
+                 VALUES (?, ?, ?, ?, ?, ?)'
             );
-            $stmt->bind_param('sssss', $firstName, $lastName, $documentLast4, $salesCode, $adminEmail);
+            $stmt->bind_param('ssssss', $firstName, $lastName, $documentNumber, $documentLast4, $salesCode, $adminEmail);
             $stmt->execute();
             $stmt->close();
 
@@ -572,7 +592,7 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
     <div class="finance-grid">
         <section class="finance-card" id="sellers">
             <h2 data-finance-i18n="seller_registration">Registro de vendedores</h2>
-            <p class="finance-note" data-finance-i18n="seller_id_note">Solo se guardan los últimos cuatro dígitos del documento. El código de ventas se genera automáticamente.</p>
+            <p class="finance-note" data-finance-i18n="seller_id_note">Se registra el número de identificación completo; el código usa las tres primeras letras del nombre, las tres del apellido y los últimos cuatro dígitos.</p>
             <form method="post">
                 <input type="hidden" name="csrf_token" value="<?php echo financeEscape($csrfToken); ?>">
                 <input type="hidden" name="action" value="add_seller">
@@ -580,7 +600,7 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
                 <input type="hidden" name="user_filter" value="<?php echo financeEscape($selectedUser); ?>">
                 <label><span data-finance-i18n="first_name">Nombre</span><input name="first_name" maxlength="100" required></label>
                 <label><span data-finance-i18n="last_name">Apellido</span><input name="last_name" maxlength="100" required></label>
-                <label><span data-finance-i18n="document_last4">Últimos 4 dígitos del documento</span><input name="document_last4" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required></label>
+                <label><span data-finance-i18n="document_number">Número de identificación completo</span><input name="document_number" inputmode="numeric" pattern="[0-9]{4,50}" maxlength="50" autocomplete="off" required></label>
                 <button class="finance-button" type="submit"><i class="fa-solid fa-user-plus"></i> <span data-finance-i18n="register_seller">Registrar vendedor</span></button>
             </form>
 
@@ -790,8 +810,8 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
 const financeTranslations = {
     es: {
         page_title:'Control financiero de suscripciones',back_admin:'Volver a administración',
-        seller_registration:'Registro de vendedores',seller_id_note:'Solo se guardan los últimos cuatro dígitos del documento. El código de ventas se genera automáticamente.',
-        first_name:'Nombre',last_name:'Apellido',document_last4:'Últimos 4 dígitos del documento',register_seller:'Registrar vendedor',
+        seller_registration:'Registro de vendedores',seller_id_note:'Se registra el número de identificación completo; el código usa las tres primeras letras del nombre, las tres del apellido y los últimos cuatro dígitos.',
+        first_name:'Nombre',last_name:'Apellido',document_number:'Número de identificación completo',register_seller:'Registrar vendedor',
         seller:'Vendedor',sales_code:'Código de ventas',document_last4_short:'Doc. (4 últimos)',seller_status:'Estado',no_sellers:'Aún no hay vendedores registrados.',
         active:'Activo',inactive:'Inactivo',register_subscription_payment:'Registro de pago de suscripción',user:'Usuario',select_user:'Seleccione usuario',
         package:'Paquete',select_package:'Seleccione paquete',quarterly:'Trimestral (90 días)',semiannual:'Semestral (185 días)',annual:'Anual (365 días)',
@@ -809,8 +829,8 @@ const financeTranslations = {
     },
     en: {
         page_title:'Subscription financial control',back_admin:'Back to administration',
-        seller_registration:'Seller registration',seller_id_note:'Only the last four digits of the ID are stored. The sales code is generated automatically.',
-        first_name:'First name',last_name:'Last name',document_last4:'Last 4 ID digits',register_seller:'Register seller',
+        seller_registration:'Seller registration',seller_id_note:'The full ID number is recorded; the code uses the first three letters of the first name, the first three of the last name, and the final four ID digits.',
+        first_name:'First name',last_name:'Last name',document_number:'Full identification number',register_seller:'Register seller',
         seller:'Seller',sales_code:'Sales code',document_last4_short:'ID (last 4)',seller_status:'Status',no_sellers:'No sellers registered yet.',
         active:'Active',inactive:'Inactive',register_subscription_payment:'Subscription payment registration',user:'User',select_user:'Select user',
         package:'Plan',select_package:'Select a plan',quarterly:'Quarterly (90 days)',semiannual:'Semiannual (185 days)',annual:'Annual (365 days)',
@@ -828,8 +848,8 @@ const financeTranslations = {
     },
     pt: {
         page_title:'Controle financeiro de assinaturas',back_admin:'Voltar à administração',
-        seller_registration:'Cadastro de vendedores',seller_id_note:'Somente os últimos quatro dígitos do documento são armazenados. O código de vendas é gerado automaticamente.',
-        first_name:'Nome',last_name:'Sobrenome',document_last4:'Últimos 4 dígitos do documento',register_seller:'Cadastrar vendedor',
+        seller_registration:'Cadastro de vendedores',seller_id_note:'O número completo de identificação é registrado; o código usa as três primeiras letras do nome, as três do sobrenome e os últimos quatro dígitos.',
+        first_name:'Nome',last_name:'Sobrenome',document_number:'Número de identificação completo',register_seller:'Cadastrar vendedor',
         seller:'Vendedor',sales_code:'Código de vendas',document_last4_short:'Doc. (últimos 4)',seller_status:'Status',no_sellers:'Ainda não há vendedores cadastrados.',
         active:'Ativo',inactive:'Inativo',register_subscription_payment:'Cadastro de pagamento da assinatura',user:'Usuário',select_user:'Selecione o usuário',
         package:'Plano',select_package:'Selecione um plano',quarterly:'Trimestral (90 dias)',semiannual:'Semestral (185 dias)',annual:'Anual (365 dias)',
