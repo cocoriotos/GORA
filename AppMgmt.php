@@ -730,6 +730,17 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                                         </div>
                                     </div>
                         </div>
+                        <div class="grid-item">
+                                    <div class="grid-item-content">
+                                        <div class="grid-item-header">
+                                            <div class="grid-item-title">Control financiero</div>
+                                        </div>
+                                        <div class="grid-item-body">
+                                            <p class="p-title">Vendedores, pagos de suscripción y repartos</p>
+                                            <a class="btn-primary" href="SubscriptionFinance.php">Abrir control financiero</a>
+                                        </div>
+                                    </div>
+                        </div>
                     </div>
             </div>
 
@@ -960,6 +971,9 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                 'Suscripciones': 'Subscriptions',
                 'Usuarios a contactar': 'Users to contact',
                 'Inactivos': 'Inactive',
+                'Control financiero': 'Financial control',
+                'Vendedores, pagos de suscripción y repartos': 'Sellers, subscription payments and allocations',
+                'Abrir control financiero': 'Open financial control',
                 'Visitas de Usuarios': 'User Visits',
                 'Visitas:': 'Visits:',
                 'Por fecha': 'By date',
@@ -1020,6 +1034,9 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                 'Suscripciones': 'Assinaturas',
                 'Usuarios a contactar': 'Usuários para contatar',
                 'Inactivos': 'Inativos',
+                'Control financiero': 'Controle financeiro',
+                'Vendedores, pagos de suscripción y repartos': 'Vendedores, pagamentos de assinatura e distribuições',
+                'Abrir control financiero': 'Abrir controle financeiro',
                 'Visitas de Usuarios': 'Visitas de Usuários',
                 'Visitas:': 'Visitas:',
                 'Por fecha': 'Por data',
