@@ -155,8 +155,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("sssssss", $name, $lastname, $email, $country, $city, $phone, $sellerCode);
         $result = $stmt->execute();
 
-        $stmt = $conn->prepare("INSERT INTO videotips_app_access_list (name, lastname, username, email, phone, password, role, active, adm_role, suscriptionactive, terms_conditions_awareness, suscriptionkind, lastsuscriptionpaymentdate, suscriptiondaysleft, trialdaysleft, suscriptionpayed) VALUES (?, ?, ?, ?, ?, ?, 'user', 1, 0, 0, 'Yes', 'Trial', CURDATE(), 0, 0, 0)");
-        $stmt->bind_param("ssssss", $name, $lastname, $email, $email, $phone, $passwordHash);
+        $stmt = $conn->prepare("INSERT INTO videotips_app_access_list (name, lastname, username, email, phone, password, role, active, adm_role, suscriptionactive, terms_conditions_awareness, suscriptionkind, lastsuscriptionpaymentdate, suscriptiondaysleft, trialdaysleft, suscriptionpayed, seller_code) VALUES (?, ?, ?, ?, ?, ?, 'user', 1, 0, 0, 'Yes', 'Trial', CURDATE(), 0, 0, 0, ?)");
+        $stmt->bind_param("sssssss", $name, $lastname, $email, $email, $phone, $passwordHash, $sellerCode);
         $result1 = $stmt->execute();
 
         if (!$result || !$result1) {
