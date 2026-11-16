@@ -12,7 +12,7 @@ goraStartTabSession();
     <script src="tab-context.js?v=20261029-1" defer></script>
     <script src="password-visibility.js?v=<?php echo filemtime(__DIR__ . '/password-visibility.js'); ?>" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="style_sheet_auth.css?v=20260917">
+    <link rel="stylesheet" href="style_sheet_auth.css?v=20261115">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -67,6 +67,11 @@ goraStartTabSession();
             <div class="input-group">
                 <i class="fas fa-phone"></i>
                 <input type="tel" name="phone" data-i18n-placeholder="req_phone" placeholder="Número telefónico" inputmode="numeric" pattern="[0-9]+" required>
+            </div>
+            <label class="seller-code-label" for="seller-code" data-i18n="req_seller_code_label">Código Promocional (Opcional)</label>
+            <div class="input-group">
+                <i class="fas fa-id-badge" aria-hidden="true"></i>
+                <input type="text" id="seller-code" name="seller_code" maxlength="50" data-i18n-placeholder="req_seller_code" placeholder="Código Promocional">
             </div>
             <div class="input-group">
                 <i class="fas fa-lock"></i>
@@ -172,9 +177,9 @@ goraStartTabSession();
     </script>
     <script>
 const T={
-    es:{req_title:"Solicitud de Acceso",req_name:"Nombre",req_lastname:"Apellido",req_email:"Correo electrónico",req_country:"País de residencia",req_city:"Ciudad de residencia",req_phone:"Número telefónico",req_password:"Contraseña",req_captcha:"Ingrese el CAPTCHA",req_terms_prefix:"Acepto los",req_terms_link:"términos y condiciones",req_send:"Enviar",req_cancel:"Cancelar",req_questions:"¿Alguna duda?",req_contact_email:"Contáctenos al Email:"},
-    en:{req_title:"Access Request",req_name:"Name",req_lastname:"Last Name",req_email:"Email",req_country:"Country of residence",req_city:"City of residence",req_phone:"Phone number",req_password:"Password",req_captcha:"Enter the CAPTCHA",req_terms_prefix:"I accept the",req_terms_link:"terms and conditions",req_send:"Send",req_cancel:"Cancel",req_questions:"Any questions?",req_contact_email:"Contact us by email:"},
-    pt:{req_title:"Solicitação de Acesso",req_name:"Nome",req_lastname:"Sobrenome",req_email:"Email",req_country:"País de residência",req_city:"Cidade de residência",req_phone:"Número de telefone",req_password:"Senha",req_captcha:"Digite o CAPTCHA",req_terms_prefix:"Aceito os",req_terms_link:"termos e condições",req_send:"Enviar",req_cancel:"Cancelar",req_questions:"Alguma dúvida?",req_contact_email:"Contate-nos pelo Email:"}
+    es:{req_title:"Solicitud de Acceso",req_name:"Nombre",req_lastname:"Apellido",req_email:"Correo electrónico",req_country:"País de residencia",req_city:"Ciudad de residencia",req_phone:"Número telefónico",req_seller_code_label:"Código Promocional (Opcional)",req_seller_code:"Código Promocional",req_password:"Contraseña",req_captcha:"Ingrese el CAPTCHA",req_terms_prefix:"Acepto los",req_terms_link:"términos y condiciones",req_send:"Enviar",req_cancel:"Cancelar",req_questions:"¿Alguna duda?",req_contact_email:"Contáctenos al Email:"},
+    en:{req_title:"Access Request",req_name:"Name",req_lastname:"Last Name",req_email:"Email",req_country:"Country of residence",req_city:"City of residence",req_phone:"Phone number",req_seller_code_label:"Promotional Code (Optional)",req_seller_code:"Promotional Code",req_password:"Password",req_captcha:"Enter the CAPTCHA",req_terms_prefix:"I accept the",req_terms_link:"terms and conditions",req_send:"Send",req_cancel:"Cancel",req_questions:"Any questions?",req_contact_email:"Contact us by email:"},
+    pt:{req_title:"Solicitação de Acesso",req_name:"Nome",req_lastname:"Sobrenome",req_email:"Email",req_country:"País de residência",req_city:"Cidade de residência",req_phone:"Número de telefone",req_seller_code_label:"Código promocional (opcional)",req_seller_code:"Código promocional",req_password:"Senha",req_captcha:"Digite o CAPTCHA",req_terms_prefix:"Aceito os",req_terms_link:"termos e condições",req_send:"Enviar",req_cancel:"Cancelar",req_questions:"Alguma dúvida?",req_contact_email:"Contate-nos pelo Email:"}
 };
 
 function applyTranslations(lang){
