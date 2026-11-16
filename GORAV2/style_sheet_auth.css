@@ -174,12 +174,6 @@ select {
   font-size: 0.9rem;
 }
 
-.seller-code-hint {
-  margin: -8px 0 16px 4px;
-  color: var(--t2);
-  font-size: 0.85rem;
-}
-
 .forgot-password {
   display: block;
   margin-top: 10px;
