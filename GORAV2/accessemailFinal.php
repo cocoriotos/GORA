@@ -1,5 +1,6 @@
 <?php 
 require_once __DIR__ . '/tab-session.php';
+require_once __DIR__ . '/whatsapp_assistant.php';
 goraStartTabSession();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -85,6 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!in_array($language, ['es', 'en', 'pt'], true)) {
         $language = 'es';
     }
+    $whatsappOptIn = ($_POST['whatsapp_opt_in'] ?? null) === '1';
     $city = trim($_POST['City']);
     $submittedCountryCode = $_POST['Country'] ?? null;
     if (!is_string($submittedCountryCode) || !preg_match('/\A[A-Za-z]{2}\z/', trim($submittedCountryCode))) {
@@ -193,7 +195,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("sssssss", $name, $lastname, $email, $email, $phone, $passwordHash, $sellerCode);
         $result1 = $stmt->execute();
 
-        if (!$result || !$result1) {
+        $stmt = $conn->prepare(
+            "INSERT INTO gora_whatsapp_contacts (app_username, phone_e164, language, opted_in_at)
+             VALUES (?, ?, ?, IF(?, UTC_TIMESTAMP(), NULL))
+             ON DUPLICATE KEY UPDATE
+                phone_e164 = VALUES(phone_e164),
+                language = VALUES(language),
+                opted_in_at = IF(VALUES(opted_in_at) IS NULL, opted_in_at, VALUES(opted_in_at)),
+                opted_out_at = IF(VALUES(opted_in_at) IS NULL, opted_out_at, NULL)"
+        );
+        $whatsappOptInValue = $whatsappOptIn ? 1 : 0;
+        $stmt->bind_param('sssi', $email, $phone, $language, $whatsappOptInValue);
+        $resultWhatsappContact = $stmt->execute();
+
+        if (!$result || !$result1 || !$resultWhatsappContact) {
             $conn->rollback();
             error_log('Registration insert failed: ' . $conn->error);
             echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
@@ -212,6 +227,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
         $conn->commit();
+
+        if ($whatsappOptIn) {
+            try {
+                goraWhatsappSendRegistrationWelcome($conn, $phone, $name, $language);
+            } catch (Throwable $exception) {
+                error_log('WhatsApp registration welcome could not be sent: ' . $exception->getMessage());
+            }
+        }
 
         $stmt = $conn->prepare("INSERT INTO videotips_suscription_payments (username, active, freeregistrationdate) SELECT email, active, registrationdate FROM videotips_app_access_list WHERE username = ?");
         $stmt->bind_param("s", $email);
