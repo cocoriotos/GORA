@@ -25,7 +25,7 @@ include "db_connection1.php";
 		<div class="col-md-4">
 		     		 
 			 <?php 
-					$query = "select id, username, active, suscriptionactive, suscriptiondaysleft, suscriptionpayed, lastsuscriptionpaymentdate, suscriptionkind, registrationdate  from videotips_app_access_list where  id='$id'";
+					$query = "select id, username, active, suscriptionactive, suscriptiondaysleft, suscriptionpayed, lastsuscriptionpaymentdate, suscriptionkind, registrationdate, seller_code from videotips_app_access_list where  id='$id'";
 					$result_tasks = mysqli_query($conn,$query);
 					$row = mysqli_fetch_array($result_tasks);
 					$query1 = "select proofofpurchasenumber, suscription_package from videotips_suscription_payments where  username='$row[username]'";
@@ -45,6 +45,10 @@ include "db_connection1.php";
                         <a>Usuario</a><br>
 						<input type="text" name="username" class="form-control" placeholder="username" autofocus value ="<?php echo $row['username'];?>" readonly></input><br>
 					</div>
+                    <div class="form-group">
+                        <a>Código de Vendedor</a><br>
+						<input type="text" class="form-control" value="<?php echo htmlspecialchars((string) ($row['seller_code'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" readonly></input><br>
+                    </div>
 					<div class="form-group">
                         <a>Usuario Activo</a><br>
 						<select name="active" class="form-control" autofocus><?php $query = "SELECT active FROM videotips_active"; $result = mysqli_query($conn, $query); while ($usuarioActivo = mysqli_fetch_assoc($result)) {$active = $usuarioActivo['active']; $selected = ($active == $row['active']) ? 'selected' : ''; echo "<option value='$active' $selected>$active</option>";}?></select>
@@ -63,7 +67,7 @@ include "db_connection1.php";
 					</div>
 					<div class="form-group">
                         <a> Fecha de Inscripción</a><br>
-						<input type="date" name="registrationdate" class="form-control" placeholder="Fecha de Inscripción" value = "<?php echo $row['registrationdate']?>" readonly></input><br>
+						<input type="date" name="registrationdate" class="form-control" placeholder="Fecha de Inscripción" value = "<?php echo htmlspecialchars((string) $row['registrationdate'], ENT_QUOTES, 'UTF-8'); ?>"></input><br>
 					</div>
 					<div class="form-group">
                         <a>Última Fecha de Pago</a><br>

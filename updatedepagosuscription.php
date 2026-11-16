@@ -7,18 +7,24 @@ $active = $_POST['active'];
 $suscriptionactive = $_POST['suscriptionactive'];
 $suscriptiondaysleft = $_POST['suscriptiondaysleft'];
 $suscriptionpayed = $_POST['suscriptionpayed'];
-$registrationdate = $_POST['registrationdate']; 
+$registrationdate = $_POST['registrationdate'] ?? '';
 $lastsuscriptionpaymentdate = $_POST['lastsuscriptionpaymentdate'];
 $suscriptionkind = $_POST['suscriptionkind'];   
 $packages = $_POST['packages'];
 $proofofpurchasenumber = $_POST['proofofpurchasenumber'];
 
+if (!is_string($registrationdate)
+    || !preg_match('/\A(\d{4})-(\d{2})-(\d{2})\z/', $registrationdate, $registrationDateParts)
+    || !checkdate((int) $registrationDateParts[2], (int) $registrationDateParts[3], (int) $registrationDateParts[1])) {
+    http_response_code(400);
+    exit('La fecha de inscripción no es válida.');
+}
 
 
 $sql = "UPDATE videotips_suscription_payments SET currentpaid = currentpaid + 1, paymentcounter = paymentcounter + 1, lastpaymentdate = '$lastsuscriptionpaymentdate', suscription_package = '$packages', proofofpurchasenumber = '$proofofpurchasenumber' WHERE username = '$username'";
 $result = $conn->query($sql);
 
-$sql1 = "UPDATE videotips_app_access_list SET active = '$active', suscriptionactive = '$suscriptionactive', suscriptionpayed = '$suscriptionpayed', lastsuscriptionpaymentdate = '$lastsuscriptionpaymentdate', suscriptionkind = '$suscriptionkind' where username = '$username'";
+$sql1 = "UPDATE videotips_app_access_list SET active = '$active', suscriptionactive = '$suscriptionactive', suscriptionpayed = '$suscriptionpayed', registrationdate = '$registrationdate', lastsuscriptionpaymentdate = '$lastsuscriptionpaymentdate', suscriptionkind = '$suscriptionkind' where username = '$username'";
 $result1 = $conn->query($sql1);
 
 if ($result && $result1) {
