@@ -380,6 +380,15 @@ input[name="captcha"]::placeholder {
   line-height: 1.4;
 }
 
+.whatsapp-consent {
+  margin: 0 0 16px;
+  text-align: left;
+}
+
+.whatsapp-consent label {
+  font-size: 0.82rem;
+}
+
 .terms a.terms-link {
   color: var(--accent) !important;
   text-decoration: underline;
