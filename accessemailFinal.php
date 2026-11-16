@@ -85,8 +85,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!in_array($language, ['es', 'en', 'pt'], true)) {
         $language = 'es';
     }
-    $country = trim($_POST['Country']);
     $city = trim($_POST['City']);
+    $submittedCountryCode = $_POST['Country'] ?? null;
+    if (!is_string($submittedCountryCode) || !preg_match('/\A[A-Za-z]{2}\z/', trim($submittedCountryCode))) {
+        http_response_code(400);
+        exit('Seleccione un país válido.');
+    }
+    $countryCode = strtoupper(trim($submittedCountryCode));
+    $countryStmt = $conn->prepare(
+        'SELECT dialing_code, country_name_es, country_name_en, country_name_pt
+         FROM gora_countries
+         WHERE country_code = ?
+         LIMIT 1'
+    );
+    $countryStmt->bind_param('s', $countryCode);
+    $countryStmt->execute();
+    $selectedCountry = $countryStmt->get_result()->fetch_assoc();
+    $countryStmt->close();
+    if (!$selectedCountry) {
+        http_response_code(400);
+        exit('Seleccione un país válido.');
+    }
+    $countryNameColumn = [
+        'es' => 'country_name_es',
+        'en' => 'country_name_en',
+        'pt' => 'country_name_pt',
+    ][$language];
+    $country = $selectedCountry[$countryNameColumn];
+    $countryCallingCode = $selectedCountry['dialing_code'];
     $sellerCode = trim((string) ($_POST['seller_code'] ?? ''));
     if ($sellerCode === '') {
         $sellerCode = 'JULGON0740';
@@ -99,14 +125,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         http_response_code(400);
         exit('La dirección de correo electrónico no es válida.');
     }
-    $phone = trim($_POST['phone']);
-    if ($phone === '' || !preg_match('/^[0-9]+$/', $phone)) {
+    $submittedPhone = $_POST['phone'] ?? null;
+    if (!is_string($submittedPhone)) {
+        http_response_code(400);
+        exit('El número telefónico no es válido.');
+    }
+    $phone = trim($submittedPhone);
+    if ($phone === ''
+        || !preg_match('/\A[0-9]{1,15}\z/', $phone)
+        || strlen($countryCallingCode) + strlen($phone) > 15) {
         echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
         echo "<script>
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
                     title: 'Mensaje',
-                    text: 'El número telefónico debe contener solo números.',
+                    text: 'El número telefónico no es válido para el país seleccionado.',
                     icon: 'error',
                     confirmButtonText: 'Aceptar'
                 }).then(() => {
@@ -116,6 +149,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </script>";
         exit();
     }
+    $phone = '+' . $countryCallingCode . $phone;
     $submittedPassword = $_POST['password1'];
     if ($submittedPassword === '') {
         http_response_code(400);

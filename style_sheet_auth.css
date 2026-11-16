@@ -167,6 +167,20 @@ select {
   color: var(--t2);
 }
 
+.input-group select {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--t1);
+  font-size: 1rem;
+  padding: 0;
+}
+
+.input-group select option {
+  color: #032642;
+}
+
 .seller-code-label {
   display: block;
   margin: 0 0 6px 4px;

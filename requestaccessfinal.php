@@ -1,6 +1,19 @@
 <?php
 require_once __DIR__ . '/tab-session.php';
 goraStartTabSession();
+require_once __DIR__ . '/db_connection1.php';
+
+$countriesResult = $conn->query(
+    'SELECT country_code, dialing_code, country_name_es, country_name_en, country_name_pt
+     FROM gora_countries
+     ORDER BY country_name_es'
+);
+if (!$countriesResult) {
+    error_log('Unable to load registration countries: ' . $conn->error);
+    http_response_code(500);
+    exit('No fue posible cargar la lista de países. Intente más tarde.');
+}
+$registrationCountries = $countriesResult->fetch_all(MYSQLI_ASSOC);
 ?>
 <html lang="us">
 <head>
@@ -12,7 +25,7 @@ goraStartTabSession();
     <script src="tab-context.js?v=20261029-1" defer></script>
     <script src="password-visibility.js?v=<?php echo filemtime(__DIR__ . '/password-visibility.js'); ?>" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="style_sheet_auth.css?v=20261115">
+    <link rel="stylesheet" href="style_sheet_auth.css?v=20261116">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -58,7 +71,19 @@ goraStartTabSession();
             </div>
             <div class="input-group">
                 <i class="fas fa-globe"></i>
-                <input type="text" name="Country" data-i18n-placeholder="req_country" placeholder="País de residencia" required>
+                <select id="registration-country" name="Country" required>
+                    <option value="" data-i18n="req_country">País de residencia</option>
+                    <?php foreach ($registrationCountries as $countryOption): ?>
+                        <option
+                            class="country-option"
+                            value="<?php echo htmlspecialchars($countryOption['country_code'], ENT_QUOTES, 'UTF-8'); ?>"
+                            data-es="<?php echo htmlspecialchars($countryOption['country_name_es'], ENT_QUOTES, 'UTF-8'); ?>"
+                            data-en="<?php echo htmlspecialchars($countryOption['country_name_en'], ENT_QUOTES, 'UTF-8'); ?>"
+                            data-pt="<?php echo htmlspecialchars($countryOption['country_name_pt'], ENT_QUOTES, 'UTF-8'); ?>"
+                            data-dialing-code="<?php echo htmlspecialchars($countryOption['dialing_code'], ENT_QUOTES, 'UTF-8'); ?>"
+                        ><?php echo htmlspecialchars($countryOption['country_name_es'] . ' (+' . $countryOption['dialing_code'] . ')', ENT_QUOTES, 'UTF-8'); ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <div class="input-group">
                 <i class="fas fa-city"></i>
@@ -66,7 +91,7 @@ goraStartTabSession();
             </div>
             <div class="input-group">
                 <i class="fas fa-phone"></i>
-                <input type="tel" name="phone" data-i18n-placeholder="req_phone" placeholder="Número telefónico" inputmode="numeric" pattern="[0-9]+" required>
+                <input type="tel" name="phone" data-i18n-placeholder="req_phone" placeholder="Número sin código de país" inputmode="numeric" pattern="[0-9]+" maxlength="15" required>
             </div>
             <label class="seller-code-label" for="seller-code" data-i18n="req_seller_code_label">Código Promocional (Opcional)</label>
             <div class="input-group">
@@ -177,9 +202,9 @@ goraStartTabSession();
     </script>
     <script>
 const T={
-    es:{req_title:"Solicitud de Acceso",req_name:"Nombre",req_lastname:"Apellido",req_email:"Correo electrónico",req_country:"País de residencia",req_city:"Ciudad de residencia",req_phone:"Número telefónico",req_seller_code_label:"Código Promocional (Opcional)",req_seller_code:"Código Promocional",req_password:"Contraseña",req_captcha:"Ingrese el CAPTCHA",req_terms_prefix:"Acepto los",req_terms_link:"términos y condiciones",req_send:"Enviar",req_cancel:"Cancelar",req_questions:"¿Alguna duda?",req_contact_email:"Contáctenos al Email:"},
-    en:{req_title:"Access Request",req_name:"Name",req_lastname:"Last Name",req_email:"Email",req_country:"Country of residence",req_city:"City of residence",req_phone:"Phone number",req_seller_code_label:"Promotional Code (Optional)",req_seller_code:"Promotional Code",req_password:"Password",req_captcha:"Enter the CAPTCHA",req_terms_prefix:"I accept the",req_terms_link:"terms and conditions",req_send:"Send",req_cancel:"Cancel",req_questions:"Any questions?",req_contact_email:"Contact us by email:"},
-    pt:{req_title:"Solicitação de Acesso",req_name:"Nome",req_lastname:"Sobrenome",req_email:"Email",req_country:"País de residência",req_city:"Cidade de residência",req_phone:"Número de telefone",req_seller_code_label:"Código promocional (opcional)",req_seller_code:"Código promocional",req_password:"Senha",req_captcha:"Digite o CAPTCHA",req_terms_prefix:"Aceito os",req_terms_link:"termos e condições",req_send:"Enviar",req_cancel:"Cancelar",req_questions:"Alguma dúvida?",req_contact_email:"Contate-nos pelo Email:"}
+    es:{req_title:"Solicitud de Acceso",req_name:"Nombre",req_lastname:"Apellido",req_email:"Correo electrónico",req_country:"País de residencia",req_city:"Ciudad de residencia",req_phone:"Número sin código de país",req_seller_code_label:"Código Promocional (Opcional)",req_seller_code:"Código Promocional",req_password:"Contraseña",req_captcha:"Ingrese el CAPTCHA",req_terms_prefix:"Acepto los",req_terms_link:"términos y condiciones",req_send:"Enviar",req_cancel:"Cancelar",req_questions:"¿Alguna duda?",req_contact_email:"Contáctenos al Email:"},
+    en:{req_title:"Access Request",req_name:"Name",req_lastname:"Last Name",req_email:"Email",req_country:"Country of residence",req_city:"City of residence",req_phone:"Number without country code",req_seller_code_label:"Promotional Code (Optional)",req_seller_code:"Promotional Code",req_password:"Password",req_captcha:"Enter the CAPTCHA",req_terms_prefix:"I accept the",req_terms_link:"terms and conditions",req_send:"Send",req_cancel:"Cancel",req_questions:"Any questions?",req_contact_email:"Contact us by email:"},
+    pt:{req_title:"Solicitação de Acesso",req_name:"Nome",req_lastname:"Sobrenome",req_email:"Email",req_country:"País de residência",req_city:"Cidade de residência",req_phone:"Número sem código do país",req_seller_code_label:"Código promocional (opcional)",req_seller_code:"Código promocional",req_password:"Senha",req_captcha:"Digite o CAPTCHA",req_terms_prefix:"Aceito os",req_terms_link:"termos e condições",req_send:"Enviar",req_cancel:"Cancelar",req_questions:"Alguma dúvida?",req_contact_email:"Contate-nos pelo Email:"}
 };
 
 function applyTranslations(lang){
@@ -187,6 +212,11 @@ function applyTranslations(lang){
     const d = T[selectedLanguage];
     document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(d[k]!==undefined)el.innerHTML=d[k];});
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el=>{const k=el.getAttribute('data-i18n-placeholder');if(d[k]!==undefined)el.placeholder=d[k];});
+    document.querySelectorAll('.country-option').forEach(option=>{
+        const countryName = option.getAttribute(`data-${selectedLanguage}`);
+        const dialingCode = option.getAttribute('data-dialing-code');
+        if(countryName && dialingCode) option.textContent = `${countryName} (+${dialingCode})`;
+    });
     document.querySelectorAll('.lb').forEach(b=>{b.classList.toggle('on',b.textContent.trim()===selectedLanguage.toUpperCase());});
     document.getElementById('registration-language').value = selectedLanguage;
     document.documentElement.lang = selectedLanguage;
