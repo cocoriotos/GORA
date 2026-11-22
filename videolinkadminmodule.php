@@ -1238,6 +1238,15 @@ include "header.php";
     </a>
 
 <script>
+    function autoResizeDescription() {
+        const description = document.getElementById("description");
+        if (!description) return;
+
+        description.style.height = "auto";
+        description.style.height = `${description.scrollHeight}px`;
+        description.style.overflowY = "hidden";
+    }
+
     function alignSidebarToWelcome() {
         const welcomeNav = document.querySelector('nav#welcome');
         if (!welcomeNav) return;
@@ -1337,6 +1346,9 @@ include "header.php";
     document.getElementById("category").addEventListener("change", checkForm);
     document.getElementById("proforpers").addEventListener("change", checkForm);
     document.getElementById("description").addEventListener("input", checkForm);
+    document.getElementById("description").addEventListener("input", autoResizeDescription);
+    window.addEventListener("resize", autoResizeDescription);
+    autoResizeDescription();
 
     window.onload = function() {
         var maincategory = document.getElementById("maincategory").value;

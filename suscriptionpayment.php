@@ -399,6 +399,13 @@ $suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
         <i class="fas fa-bars"></i>
       </button>
       <nav class="subscription-sidebar-nav">
+        <?php if ($suscriptiondue === 0): ?>
+          <div class="subscription-sidebar-section">
+            <a class="subscription-sidebar-link" href="videolinkadminmodule.php">
+              <i class="fas fa-arrow-left"></i><span data-subscription-i18n="sidebar_return_to_app">Volver a la aplicación</span>
+            </a>
+          </div>
+        <?php endif; ?>
         <!--<a class="subscription-sidebar-link" href="videolinkadminmodule.php">
           <i class="fas fa-plus-circle"></i><span>Adicionar Enlace</span>
         </a>
@@ -549,6 +556,7 @@ $suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
       'Documentación': 'Documentation',
       'Manual': 'Manual',
       sidebar_exit: 'Log out',
+      sidebar_return_to_app: 'Back to the app',
       'Condiciones y Beneficios de Uso de la Aplicación': 'Terms and Benefits of Using the Application',
       'Ventajas': 'Benefits',
       'Gracias por haber usado la herramienta por suscripción o la versión gratuita de 30 días calendario de la biblioteca de Contenidos Útiles la cuál te ayuda a:': 'Thank you for using the subscription tool or the 30-calendar-day free version of the Useful Content Library, which helps you to:',
@@ -617,6 +625,7 @@ $suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
       'Documentación': 'Documentação',
       'Manual': 'Manual',
       sidebar_exit: 'Sair',
+      sidebar_return_to_app: 'Voltar ao aplicativo',
       'Condiciones y Beneficios de Uso de la Aplicación': 'Condições e Benefícios de Uso do Aplicativo',
       'Ventajas': 'Vantagens',
       'Gracias por haber usado la herramienta por suscripción o la versión gratuita de 30 días calendario de la biblioteca de Contenidos Útiles la cuál te ayuda a:': 'Agradecemos por usar a ferramenta por assinatura ou a versão gratuita de 30 dias corridos da Biblioteca de Conteúdos Úteis, que ajuda você a:',
