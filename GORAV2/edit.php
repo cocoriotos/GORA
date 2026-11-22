@@ -206,6 +206,20 @@ include "db_connection1.php";
 </body>
 
 <script>
+    function autoResizeDescription() {
+        const description = document.getElementById("description");
+        if (!description) return;
+
+        description.style.height = "auto";
+        description.style.height = `${description.scrollHeight}px`;
+        description.style.overflowY = "hidden";
+    }
+
+    const descriptionField = document.getElementById("description");
+    descriptionField.addEventListener("input", autoResizeDescription);
+    window.addEventListener("resize", autoResizeDescription);
+    autoResizeDescription();
+
     function getSubcategories(maincategory) {
     var currentCategory = document.getElementById("category").getAttribute("data-current-category");
 
