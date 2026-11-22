@@ -392,6 +392,34 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
             gap: 8px;
         }
 
+        .admin-sidebar-submenu {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-left: 12px;
+            padding-left: 8px;
+            border-left: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .admin-sidebar-submenu[hidden] {
+            display: none;
+        }
+
+        .admin-sidebar-submenu .admin-sidebar-link {
+            padding: 10px 8px;
+            font-size: 0.92rem;
+        }
+
+        .admin-module-actions {
+            margin-bottom: 12px;
+        }
+
+        .admin-module-back {
+            border: 0;
+            font: inherit;
+            cursor: pointer;
+        }
+
         .admin-sidebar-link {
             display: flex;
             align-items: center;
@@ -610,6 +638,17 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                 <button type="button" class="admin-sidebar-link" data-admin-section="Administration" onclick="showAdminSection('Administration', this)">
                     <i class="fas fa-user-gear"></i><span data-admin-i18n="administration">Administración</span>
                 </button>
+                <div class="admin-sidebar-submenu" id="admin-admin-submenu" hidden>
+                    <button type="button" class="admin-sidebar-link admin-sidebar-module" data-admin-module="Suscriptions" onclick="showAdminModule('Suscriptions', this)">
+                        <i class="fas fa-user-clock"></i><span data-admin-i18n="users_to_contact">Usuarios a contactar</span>
+                    </button>
+                    <button type="button" class="admin-sidebar-link admin-sidebar-module" data-admin-module="adminvisits" onclick="showAdminModule('adminvisits', this)">
+                        <i class="fas fa-calendar-check"></i><span data-admin-i18n="user_visits">Visitas de Usuarios</span>
+                    </button>
+                    <a class="admin-sidebar-link" href="SubscriptionFinance.php">
+                        <i class="fas fa-wallet"></i><span data-admin-i18n="financial_control">Control financiero</span>
+                    </a>
+                </div>
                 <a class="admin-sidebar-link" href="closetaskscon.php">
                     <i class="fas fa-right-from-bracket"></i><span data-admin-i18n="logout">Salir</span>
                 </a>
@@ -696,12 +735,11 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                         <div class="grid-item">
                                 <div class="grid-item-content">
                                     <div class="grid-item-header">
-                                        <div class="grid-item-title">Suscripciones</div>
+                                        <div class="grid-item-title">Usuarios a contactar</div>
                                     </div>
                                     <div class="grid-item-body">
-                                        <p class="p-title">Usuarios a contactar</p>
-                                        <p class="p-content">Inactivos</p>
-                                        <a class="btn-primary" onclick="openTab(event, 'Suscriptions')">Listado de Usuarios</a>
+                                        <p class="p-title">Usuarios inactivos para seguimiento</p>
+                                        <a class="btn-primary" onclick="showAdminModule('Suscriptions')">Abrir usuarios a contactar</a>
                                     </div>
                                 </div>
                         </div>
@@ -724,9 +762,8 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                                             <div class="grid-item-title">Visitas de Usuarios</div>
                                         </div>
                                         <div class="grid-item-body">
-                                            <p class="p-title">Visitas:</p>
-                                            <p class="p-content">Por fecha</p>
-                                            <a class="btn-primary" onclick="openTab(event, 'adminvisits')">Listado de Usuarios</a>
+                                            <p class="p-title">Registro de visitas por fecha</p>
+                                            <a class="btn-primary" onclick="showAdminModule('adminvisits')">Abrir visitas de usuarios</a>
                                         </div>
                                     </div>
                         </div>
@@ -745,6 +782,11 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
             </div>
 
             <div id="adminvisits" class="tabcontent">
+                <div class="admin-module-actions">
+                    <button type="button" class="btn-primary admin-module-back" onclick="returnToAdminDashboard()">
+                        <i class="fas fa-arrow-left"></i> <span data-admin-i18n="back_to_administration">Volver a administración</span>
+                    </button>
+                </div>
                 <div class="grid-containeropstable">
                     <div class="grid-item1">
                         <div class="grid-item-content">
@@ -799,6 +841,11 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
 
 
             <div id="Suscriptions" class="tabcontent">
+                    <div class="admin-module-actions">
+                        <button type="button" class="btn-primary admin-module-back" onclick="returnToAdminDashboard()">
+                            <i class="fas fa-arrow-left"></i> <span data-admin-i18n="back_to_administration">Volver a administración</span>
+                        </button>
+                    </div>
                     <!--<label class="col-form-label"></label>-->
                     <div class="grid-containeropstable">
                         <div class="grid-item1">
@@ -970,11 +1017,16 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                 'Suscripciones No Pago:': 'Unpaid Subscriptions:',
                 'Suscripciones': 'Subscriptions',
                 'Usuarios a contactar': 'Users to contact',
+                'Usuarios inactivos para seguimiento': 'Inactive users to follow up',
+                'Abrir usuarios a contactar': 'Open users to contact',
                 'Inactivos': 'Inactive',
                 'Control financiero': 'Financial control',
                 'Vendedores, pagos de suscripción y repartos': 'Sellers, subscription payments and allocations',
                 'Abrir control financiero': 'Open financial control',
                 'Visitas de Usuarios': 'User Visits',
+                'Registro de visitas por fecha': 'Visit records by date',
+                'Abrir visitas de usuarios': 'Open user visits',
+                'Volver a administración': 'Back to administration',
                 'Visitas:': 'Visits:',
                 'Por fecha': 'By date',
                 'Listado de Usuarios': 'User List',
@@ -1033,11 +1085,16 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                 'Suscripciones No Pago:': 'Assinaturas Não Pagas:',
                 'Suscripciones': 'Assinaturas',
                 'Usuarios a contactar': 'Usuários para contatar',
+                'Usuarios inactivos para seguimiento': 'Usuários inativos para acompanhamento',
+                'Abrir usuarios a contactar': 'Abrir usuários para contatar',
                 'Inactivos': 'Inativos',
                 'Control financiero': 'Controle financeiro',
                 'Vendedores, pagos de suscripción y repartos': 'Vendedores, pagamentos de assinatura e distribuições',
                 'Abrir control financiero': 'Abrir controle financeiro',
                 'Visitas de Usuarios': 'Visitas de Usuários',
+                'Registro de visitas por fecha': 'Registro de visitas por data',
+                'Abrir visitas de usuarios': 'Abrir visitas de usuários',
+                'Volver a administración': 'Voltar à administração',
                 'Visitas:': 'Visitas:',
                 'Por fecha': 'Por data',
                 'Listado de Usuarios': 'Lista de Usuários',
@@ -1161,11 +1218,34 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
             document.querySelectorAll('.admin-sidebar-link[data-admin-section]').forEach(link => {
                 link.classList.toggle('active', link === button);
             });
+            document.getElementById('admin-admin-submenu').hidden = section !== 'Administration';
+            document.querySelectorAll('.admin-sidebar-module').forEach(link => link.classList.remove('active'));
             if (window.matchMedia('(max-width: 768px)').matches) {
                 const sidebar = document.getElementById('admin-sidebar');
                 sidebar.classList.add('collapsed');
                 sidebar.querySelector('.admin-sidebar-toggle').setAttribute('aria-expanded', 'false');
             }
+        }
+
+        function showAdminModule(section, button) {
+            openTab(null, section);
+            document.querySelectorAll('.admin-sidebar-link[data-admin-section]').forEach(link => {
+                link.classList.toggle('active', link.dataset.adminSection === 'Administration');
+            });
+            document.getElementById('admin-admin-submenu').hidden = false;
+            document.querySelectorAll('.admin-sidebar-module').forEach(link => {
+                link.classList.toggle('active', link === (button || document.querySelector(`[data-admin-module="${section}"]`)));
+            });
+            if (window.matchMedia('(max-width: 768px)').matches) {
+                const sidebar = document.getElementById('admin-sidebar');
+                sidebar.classList.add('collapsed');
+                sidebar.querySelector('.admin-sidebar-toggle').setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        function returnToAdminDashboard() {
+            const administrationButton = document.querySelector('.admin-sidebar-link[data-admin-section="Administration"]');
+            showAdminSection('Administration', administrationButton);
         }
 
         function openTab(evt, tabName) {
@@ -1186,7 +1266,11 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
         });
         const savedAdminLanguage = localStorage.getItem('smartshelfLang') || localStorage.getItem('moduleLang') || 'es';
         setAdminLanguage(['es', 'en', 'pt'].includes(savedAdminLanguage) ? savedAdminLanguage : 'es');
-        openTab(null, 'Ops');
+        if (new URLSearchParams(window.location.search).get('section') === 'Administration') {
+            returnToAdminDashboard();
+        } else {
+            openTab(null, 'Ops');
+        }
     </script>
         </main>
     </div>

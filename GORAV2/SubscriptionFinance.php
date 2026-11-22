@@ -579,7 +579,7 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
 <main class="finance-shell">
     <header class="finance-header">
         <h1 data-finance-i18n="page_title">Control financiero de suscripciones</h1>
-        <a href="AppMgmt.php" class="finance-button secondary"><i class="fa-solid fa-arrow-left"></i> <span data-finance-i18n="back_admin">Volver a administración</span></a>
+        <a href="AppMgmt.php?section=Administration" class="finance-button secondary"><i class="fa-solid fa-arrow-left"></i> <span data-finance-i18n="back_admin">Volver a administración</span></a>
     </header>
 
     <?php if ($flash): ?>
