@@ -84,6 +84,17 @@ include "db_connection1.php";
             }
         });
     </script>
+    <style>
+        #description {
+            box-sizing: border-box;
+            width: 100%;
+            min-height: 6rem;
+            max-height: none;
+            overflow-y: hidden;
+            resize: none;
+            field-sizing: content;
+        }
+    </style>
 </head>
 
 <body id="bodyadminmodule">	
@@ -149,9 +160,9 @@ include "db_connection1.php";
                                         ?>
                                     </select><br><br>
                                 </div>
-                                <div class="form-group col-md-2">
+                                <div class="form-group col-md-4">
                                     <label for="description" class="col-form-label" style="color: black;"><strong data-edit-i18n="description">Descripción</strong></label><br>
-                                    <textarea id="description" name="description" rows="1" class="form-control" placeholder="Descripción del Contenido" data-edit-i18n-placeholder="descriptionPlaceholder" required><?php echo $link['content']; ?></textarea><br>
+                                    <textarea id="description" name="description" rows="1" wrap="soft" class="form-control" placeholder="Descripción del Contenido" data-edit-i18n-placeholder="descriptionPlaceholder" required><?php echo $link['content']; ?></textarea><br>
                                 </div>						
                             </div>
                         </center>
@@ -211,14 +222,18 @@ include "db_connection1.php";
         if (!description) return;
 
         description.style.height = "auto";
-        description.style.height = `${description.scrollHeight}px`;
+        const styles = window.getComputedStyle(description);
+        const borderHeight = parseFloat(styles.borderTopWidth) + parseFloat(styles.borderBottomWidth);
+        description.style.height = `${description.scrollHeight + borderHeight}px`;
         description.style.overflowY = "hidden";
     }
 
     const descriptionField = document.getElementById("description");
     descriptionField.addEventListener("input", autoResizeDescription);
     window.addEventListener("resize", autoResizeDescription);
+    window.addEventListener("load", autoResizeDescription);
     autoResizeDescription();
+    requestAnimationFrame(autoResizeDescription);
 
     function getSubcategories(maincategory) {
     var currentCategory = document.getElementById("category").getAttribute("data-current-category");
