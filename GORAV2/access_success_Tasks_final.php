@@ -172,87 +172,18 @@ $active = 0;
 		};
 		
 
-				//habilitar la actualizacion masiva 
-				$query1="SET SQL_SAFE_UPDATES = 0";
-				$result1=mysqli_query($conn, $query1);
-				$query2="SET SQL_SAFE_UPDATES = 0";
-				$result2=mysqli_query($conn, $query2);
+				require_once __DIR__ . '/subscription_access.php';
+				$subscription = goraRefreshSubscriptionAccess($conn, $local_username);
+				if ($subscription === null) {
+					error_log('Authenticated user subscription record was not found.');
+					http_response_code(500);
+					exit('No fue posible cargar los datos de la cuenta.');
+				}
 
-				//actualiza los dias usados de suscripcion del usuario  
-				$result3 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate), suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), registrationdate), lastlogindate = CURDATE() WHERE username = ?");
-				
-
-				//habilitar la actualizacion masiva    
-				$query1="SET SQL_SAFE_UPDATES = 0";
-				$result1=mysqli_query($conn, $query1);
-				$query2="SET SQL_SAFE_UPDATES = 0";
-				$result2=mysqli_query($conn, $query2);
-				
-				//Asignación del valor de dias de suscripción a disfrutar para Trial   
-				$result4 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = IF(DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate)>32, 0, DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate)), suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), registrationdate) WHERE suscriptionkind = 'Trial' AND username = ?");
-
-
-				//Asignación del valor de dias de suscripción a disfrutar   
-				//$result4 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = IF(DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate) > 365, 0, DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate)) WHERE suscriptionkind IN ('Suspendida', 'Vencida', 'De Pago') AND username = ?");
-
-				//habilitar la actualizacion masiva    
-				//$query1="SET SQL_SAFE_UPDATES = 0";
-				//$result1=mysqli_query($conn, $query1);
-				//$query2="SET SQL_SAFE_UPDATES = 0";
-				//$result2=mysqli_query($conn, $query2);
-				
-				//Asignación del valor de dias de suscripción a disfrutar   
-				//$result5 = $executeUserStatement("UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate) WHERE suscriptionkind IN ('Owner', 'Partner') AND username = ?");
-
-
-				//habilitar la actualizacion masiva 
-				$query1="SET SQL_SAFE_UPDATES = 0";
-				$result1=mysqli_query($conn, $query1);
-				$query2="SET SQL_SAFE_UPDATES = 0";
-				$result2=mysqli_query($conn, $query2);
-				
-				//actualiza el estado de suscripción a trial si el tiempo de Trial no ha vencido
-				$result6 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptionkind = 'Trial' WHERE trialdaysleft < 32 AND suscriptionactive = 0 and suscriptionpayed = 0  AND username = ?");
-
-				//habilitar la actualizacion masiva 
-				$query1="SET SQL_SAFE_UPDATES = 0";
-				$result1=mysqli_query($conn, $query1);
-				$query2="SET SQL_SAFE_UPDATES = 0";
-				$result2=mysqli_query($conn, $query2);
-
-				//actualiza la suscripcion a vencida si el tiempo de suscripcion ha vencido
-				$result7 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' WHERE (suscriptionpayed = 0 and active = 1 AND suscriptiondaysleft > 365) AND (suscriptionkind = 'De Pago' OR suscriptionkind = 'Vencida' OR suscriptionkind = 'Suspendida') AND username = ?");
-				
-				//habilitar la actualizacion masiva 
-				$query1="SET SQL_SAFE_UPDATES = 0";
-				$result1=mysqli_query($conn, $query1);
-				$query2="SET SQL_SAFE_UPDATES = 0";
-				$result2=mysqli_query($conn, $query2);
-
-				//actualiza la suscripcion a vencida si el tiempo de suscripcion ha vencido
-				$result8 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' WHERE suscriptionpayed = 1 AND daystoenjoy = 0 AND active = 1 AND suscriptionactive = 1 AND suscriptionkind = 'De Pago' AND username = ?");
-				
-				//habilitar la actualizacion masiva 
-				$query1="SET SQL_SAFE_UPDATES = 0";
-				$result1=mysqli_query($conn, $query1);
-				$query2="SET SQL_SAFE_UPDATES = 0";
-				$result2=mysqli_query($conn, $query2);
-
-
-				//actualiza el estado de pago a vencido si el tiempo de trial ha vencido
-				$result9 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' WHERE (suscriptionpayed = 0 and suscriptionactive = 0 and active = 1 AND trialdaysleft > 32 and daystoenjoy = 0) AND suscriptionkind = 'Trial' AND username = ?");
-				
-
-				//deshabilitar la actualizacion masiva
-				$query4="SET SQL_SAFE_UPDATES = 1";
-				
-				
-				
-                //extracta en variables de session los datos de suscripción y del usuario
-				$stmt = $conn->prepare("SELECT suscriptionkind, daystoenjoy, active, suscriptiondaysleft, suscriptionpayed, name, adm_role, trialdaysleft FROM videotips_app_access_list WHERE username = ?");
+				$stmt = $conn->prepare("SELECT name, adm_role FROM videotips_app_access_list WHERE username = ?");
 				$stmt->bind_param("s", $local_username);
 				$stmt->execute();
-				$stmt->bind_result($suscriptionkind, $daystoenjoy, $active, $suscriptiondaysleft, $suscriptionpayed, $name, $admrole, $trialdaysleft);
+				$stmt->bind_result($name, $admrole);
 				if (!$stmt->fetch()) {
 					error_log('Authenticated user subscription record was not found.');
 					http_response_code(500);
@@ -261,124 +192,30 @@ $active = 0;
 				$stmt->close();
 				$_SESSION['name'] = $name;
 
-				//consulta si el usuario y contraseña son correctos y si esta activa la cuenta
-				//actuzaliza la fecha de ultimo acceso del usuario 
-				$result13 = $executeUserStatement("UPDATE videotips_suscription_payments SET currentdate = CURDATE() WHERE username = ?");
-
-				//actualiza los dias restantes de suscripcion de pago 
-				$result14 = $executeUserStatement("UPDATE videotips_suscription_payments SET suscriptiondaysleft = (365 - (DATEDIFF(CURDATE(), lastpaymentdate))) WHERE username = ?");
-
 				//si el usuario es administrador lo redirecciona a la pagina de administracion de usuarios
 				if ($admrole > 0){
-					$admrole = 0;
-					$result17 = $executeUserStatement("UPDATE videotips_app_access_list SET lastlogindate = CURDATE() WHERE username = ?");
+					$adminLoginStmt = $executeUserStatement(
+						"UPDATE videotips_app_access_list SET lastlogindate = CURDATE() WHERE username = ?"
+					);
+					$adminLoginStmt->close();
 					header("Location: AppMgmt.php", true, 303);
 					exit();
 				}
-				
-				if ($active == 1 && $daystoenjoy > 365 && $suscriptionpayed == 1 && $suscriptionkind == 'De Pago') {
-			      $_SESSION['suscriptiondue']=1;
-			      header("Location: videolinkadminmodule.php", true, 303);
-			  	  exit();
-			  	  }
 
-				if ($daystoenjoy > 31 && $suscriptionpayed == 0 && $suscriptionkind == 'Trial') {
-			      $_SESSION['suscriptiondue']=1;
-			      header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
-			  	exit();
-			  	  }
+				if (!goraCanAccessVideoModule($subscription)) {
+					$_SESSION['suscriptiondue'] = 1;
+					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
+					exit();
+				}
 
-				  if ($active == 0 && $suscriptionkind == 'De Pago') {
-			      $_SESSION['suscriptiondue']=1;
-			      header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
-			  	  exit();
-			  	  }
-
-				  if ($daystoenjoy == 0 &&  $suscriptionkind == 'De Pago') {
-			      $_SESSION['suscriptiondue']=1;
-			      header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
-			  	  exit();
-			  	  }
-
-				  if ($daystoenjoy < 366 &&  $suscriptionkind == 'De Pago' && $active == 0) {
-			      $_SESSION['suscriptiondue']=1;
-			      header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
-			  	  exit();
-			  	  }
-				
-			 	  if ($daystoenjoy > 31 && $suscriptionkind == 'Trial') {
-					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
-					exit();
-				  }		
-				if ($daystoenjoy < 31 && $suscriptionkind == 'Trial' && $active == 0) {
-					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
-					exit();
-				  }  
-				  
-				if ($active == 0 && $suscriptionkind == 'Owner') {
-					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
-					exit();
-				  }
-				if ($active == 0 && $suscriptionkind == 'Partner') {
-					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
-					exit();
-				  }
-				if ($suscriptionkind == 'Suspendida') {
-					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
-					exit();
-				  }
-				if ($active == 0 && $suscriptionkind == 'Test') {
-					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
-					exit();
-				  }
-				if ($suscriptionkind == 'Vencida') {
-					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
-					exit();
-				  }
-
-
-				  if ($daystoenjoy > 365  && $suscriptionkind == 'De Pago' ) {
-					$_SESSION['suscriptiondue']=1;
-					header("Location: suscriptionpayment.php?subscription_due=1", true, 303);
-					exit();
-				  }    
-				  else{	
-						if ($is_authenticated)
-							{	
-								$_SESSION['LAST_ACTIVITY'] = time();
-								$result18 = $executeUserStatement("UPDATE videotips_app_access_list SET suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), visits = visits+1, lastlogindate = CURDATE() WHERE username = ?");
-								header("Location: videolinkadminmodule.php", true, 303);
-								exit();
-							}
-							else 
-							{
-					echo "<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>";
-					echo "<script>
-						document.addEventListener('DOMContentLoaded', function() {
-							Swal.fire({
-								title: 'Mensaje',
-								text: 'Su usuario o contraseña son incorrectos, por favor intentar nuevamente si está registrado de lo contrario solicite la opción de Solicitud de Acceso',
-								icon: 'error',
-								confirmButtonText: 'Aceptar',
-								customClass: {
-									popup: 'custom-swal-popup',
-									title: 'custom-swal-title',
-									content: 'custom-swal-content',
-									confirmButton: 'custom-swal-confirm-button'
-								}
-							}).then(() => {
-							window.location.href = 'videotrackerauth.php';
-						});
-						});
-					</script>";	
-							}
-						}		
+				$_SESSION['LAST_ACTIVITY'] = time();
+				$visitStmt = $executeUserStatement(
+					"UPDATE videotips_app_access_list
+					 SET visits = visits + 1, lastlogindate = CURDATE()
+					 WHERE username = ?"
+				);
+				$visitStmt->close();
+				header("Location: videolinkadminmodule.php", true, 303);
+				exit();
 }
 ?>	

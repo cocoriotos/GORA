@@ -324,39 +324,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $allocationStmt->close();
 
-            $subscriptionUpdate = $conn->prepare(
-                "UPDATE videotips_app_access_list
-                 SET active = 1, suscriptionactive = 1, suscriptionpayed = 1,
-                     lastsuscriptionpaymentdate = ?, suscriptionkind = 'De Pago',
-                     suscription_package = ?
-                 WHERE username = ?"
-            );
-            $subscriptionUpdate->bind_param('sss', $paymentDate, $packageName, $userEmail);
-            $subscriptionUpdate->execute();
-            $subscriptionUpdate->close();
-
-            $existingPaymentUpdate = $conn->prepare(
-                'UPDATE videotips_suscription_payments
-                 SET currentpaid = currentpaid + 1,
-                     paymentcounter = paymentcounter + 1,
-                     lastpaymentdate = ?,
-                     suscription_package = ?,
-                     proofofpurchasenumber = ?
-                 WHERE username = ?'
-            );
-            $existingPaymentUpdate->bind_param(
-                'ssss',
-                $paymentDate,
+            goraApplyPaidSubscription(
+                $conn,
+                $userEmail,
                 $packageName,
-                $legacyPaymentReference,
-                $userEmail
+                $paymentDate,
+                $legacyPaymentReference
             );
-            $existingPaymentUpdate->execute();
-            if ($existingPaymentUpdate->affected_rows !== 1) {
-                $existingPaymentUpdate->close();
-                throw new RuntimeException('No fue posible actualizar la suscripción existente. El pago no se guardó.');
-            }
-            $existingPaymentUpdate->close();
 
             if (goraRefreshSubscriptionAccess($conn, $userEmail) === null) {
                 throw new RuntimeException('No fue posible verificar el acceso actualizado. El pago no se guardó.');
@@ -579,6 +553,7 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
 <main class="finance-shell">
     <header class="finance-header">
         <h1 data-finance-i18n="page_title">Control financiero de suscripciones</h1>
+        <a href="SubscriptionPaymentReview.php" class="finance-button secondary"><i class="fa-solid fa-receipt"></i> Revisar reportes de pago</a>
         <a href="AppMgmt.php?section=Administration" class="finance-button secondary"><i class="fa-solid fa-arrow-left"></i> <span data-finance-i18n="back_admin">Volver a administración</span></a>
     </header>
 

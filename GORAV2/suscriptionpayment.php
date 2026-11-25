@@ -1,30 +1,207 @@
 <?php
 require_once __DIR__ . '/tab-session.php';
 goraStartTabSession();
+require_once __DIR__ . '/sessions.php';
+require_once __DIR__ . '/sessionvalidation.php';
+require_once __DIR__ . '/db_connection1.php';
+require_once __DIR__ . '/subscription_payment_requests.php';
+
+$name = (string) ($_SESSION['name'] ?? '');
+$local_username = (string) ($_SESSION['email'] ?? '');
+$suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
+  || ($_GET['subscription_due'] ?? '') === '1') ? 1 : 0;
+$paymentRequestNotice = $_SESSION['subscription_payment_request_notice'] ?? null;
+unset($_SESSION['subscription_payment_request_notice']);
+$paymentRequestError = '';
+if (empty($_SESSION['subscription_payment_request_csrf'])) {
+    $_SESSION['subscription_payment_request_csrf'] = bin2hex(random_bytes(32));
+}
+$paymentRequestCsrf = (string) $_SESSION['subscription_payment_request_csrf'];
+if (!isset($_SESSION['subscription_payment_quotes']) || !is_array($_SESSION['subscription_payment_quotes'])) {
+    $_SESSION['subscription_payment_quotes'] = [];
+}
+$activeQuote = null;
+$postedQuoteId = (string) ($_POST['quote_id'] ?? $_GET['quote'] ?? '');
+if ($postedQuoteId !== '' && isset($_SESSION['subscription_payment_quotes'][$postedQuoteId])) {
+    $activeQuote = $_SESSION['subscription_payment_quotes'][$postedQuoteId];
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $storedProofFile = null;
+    $transactionStarted = false;
+    try {
+        $postedCsrf = (string) ($_POST['csrf_token'] ?? '');
+        if (!hash_equals($paymentRequestCsrf, $postedCsrf)) {
+            throw new InvalidArgumentException('La solicitud expiró. Recargue la página e inténtelo de nuevo.');
+        }
+
+        $action = (string) ($_POST['payment_action'] ?? '');
+        if ($action === 'create_quote') {
+            $pendingStmt = $conn->prepare(
+                "SELECT request_id
+                 FROM gora_subscription_payment_requests
+                 WHERE username = ? AND status = 'pending'
+                 LIMIT 1"
+            );
+            $pendingStmt->bind_param('s', $local_username);
+            $pendingStmt->execute();
+            $hasPendingRequest = $pendingStmt->get_result()->fetch_assoc();
+            $pendingStmt->close();
+            if ($hasPendingRequest) {
+                throw new InvalidArgumentException('Ya tiene un reporte de pago pendiente de revisión.');
+            }
+
+            $package = trim((string) ($_POST['package_name'] ?? ''));
+            $paymentCountry = trim((string) ($_POST['payment_country'] ?? ''));
+            if (!in_array($paymentCountry, ['CO', 'international'], true)) {
+                throw new InvalidArgumentException('Seleccione el país desde donde realizará el pago.');
+            }
+            $paymentMethod = $paymentCountry === 'CO' ? 'Nequi' : 'PayPal';
+            $paymentDate = trim((string) ($_POST['payment_date'] ?? ''));
+            $activeQuote = goraBuildSubscriptionPaymentQuote($conn, $package, $paymentMethod, $paymentDate);
+            $_SESSION['subscription_payment_quotes'][$activeQuote['id']] = $activeQuote;
+            header('Location: suscriptionpayment.php?quote=' . rawurlencode($activeQuote['id']), true, 303);
+            exit();
+        } elseif ($action === 'submit_payment_request') {
+            $quoteId = (string) ($_POST['quote_id'] ?? '');
+            $quote = $_SESSION['subscription_payment_quotes'][$quoteId] ?? null;
+            if (!is_array($quote) || !hash_equals((string) ($quote['id'] ?? ''), $quoteId)) {
+                throw new InvalidArgumentException('La cotización ya no está disponible. Genere una cotización nueva.');
+            }
+
+            $amountInput = trim((string) ($_POST['amount_paid'] ?? ''));
+            if (!preg_match('/^\d{1,10}(?:\.\d{1,2})?$/D', $amountInput) || (float) $amountInput <= 0) {
+                throw new InvalidArgumentException('Ingrese el valor enviado en el pago, con máximo dos decimales.');
+            }
+            $amountPaid = number_format((float) $amountInput, 2, '.', '');
+            $paymentReference = trim((string) ($_POST['payment_reference'] ?? ''));
+            if (strlen($paymentReference) > 150) {
+                throw new InvalidArgumentException('La referencia no puede superar 150 caracteres.');
+            }
+            $paymentReferenceValue = $paymentReference === '' ? null : $paymentReference;
+
+            $conn->begin_transaction();
+            $transactionStarted = true;
+            $accountLock = $conn->prepare(
+                'SELECT username
+                 FROM videotips_app_access_list
+                 WHERE username = ?
+                 LIMIT 1
+                 FOR UPDATE'
+            );
+            $accountLock->bind_param('s', $local_username);
+            $accountLock->execute();
+            $accountExists = $accountLock->get_result()->fetch_assoc();
+            $accountLock->close();
+            if (!$accountExists) {
+                throw new RuntimeException('No se encontró la cuenta asociada a esta sesión.');
+            }
+
+            $pendingStmt = $conn->prepare(
+                "SELECT request_id
+                 FROM gora_subscription_payment_requests
+                 WHERE username = ? AND status = 'pending'
+                 LIMIT 1"
+            );
+            $pendingStmt->bind_param('s', $local_username);
+            $pendingStmt->execute();
+            $hasPendingRequest = $pendingStmt->get_result()->fetch_assoc();
+            $pendingStmt->close();
+            if ($hasPendingRequest) {
+                throw new InvalidArgumentException('Ya tiene un reporte de pago pendiente de revisión.');
+            }
+
+            if ($paymentReferenceValue !== null) {
+                $referenceStmt = $conn->prepare(
+                    'SELECT request_id
+                     FROM gora_subscription_payment_requests
+                     WHERE payment_method = ? AND payment_reference = ?
+                     LIMIT 1'
+                );
+                $referenceStmt->bind_param('ss', $quote['payment_method'], $paymentReferenceValue);
+                $referenceStmt->execute();
+                $referenceExists = $referenceStmt->get_result()->fetch_assoc();
+                $referenceStmt->close();
+                if ($referenceExists) {
+                    throw new InvalidArgumentException('Esa referencia de pago ya fue reportada.');
+                }
+            }
+
+            $storedProofFile = goraStorePaymentProof($_FILES['payment_proof'] ?? []);
+            $exchangeRate = $quote['exchange_rate'];
+            $paypalFeePercent = $quote['paypal_fee_percent'];
+            $paypalFixedFee = $quote['paypal_fixed_fee_usd'];
+            $priceCop = number_format((float) $quote['price_cop'], 2, '.', '');
+            $quotedAmount = (string) $quote['quoted_amount'];
+            $insert = $conn->prepare(
+                "INSERT INTO gora_subscription_payment_requests
+                    (username, package_name, payment_method, payment_date, amount_paid, currency,
+                     price_cop, exchange_rate, paypal_fee_percent, paypal_fixed_fee_usd,
+                     quoted_amount, payment_reference, proof_file)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            );
+            $insert->bind_param(
+                'sssssssssssss',
+                $local_username,
+                $quote['package'],
+                $quote['payment_method'],
+                $quote['payment_date'],
+                $amountPaid,
+                $quote['currency'],
+                $priceCop,
+                $exchangeRate,
+                $paypalFeePercent,
+                $paypalFixedFee,
+                $quotedAmount,
+                $paymentReferenceValue,
+                $storedProofFile
+            );
+            $insert->execute();
+            $insert->close();
+            $conn->commit();
+            $transactionStarted = false;
+            unset($_SESSION['subscription_payment_quotes'][$quoteId]);
+            $_SESSION['subscription_payment_request_notice'] = 'Reporte recibido. El acceso se actualizará cuando el administrador confirme el pago.';
+            $redirectQuery = $suscriptiondue === 1 ? '?subscription_due=1' : '';
+            header('Location: suscriptionpayment.php' . $redirectQuery, true, 303);
+            exit();
+        } else {
+            throw new InvalidArgumentException('La acción solicitada no es válida.');
+        }
+    } catch (Throwable $exception) {
+        if ($transactionStarted) {
+            $conn->rollback();
+        }
+        if ($storedProofFile !== null) {
+            $proofPath = goraPrivatePaymentProofDirectory() . DIRECTORY_SEPARATOR . $storedProofFile;
+            if (is_file($proofPath) && !unlink($proofPath)) {
+                error_log('Could not remove an unclaimed subscription payment proof.');
+            }
+        }
+        error_log('Subscription payment request failed: ' . $exception->getMessage());
+        $paymentRequestError = !($exception instanceof mysqli_sql_exception)
+            && ($exception instanceof InvalidArgumentException || $exception instanceof RuntimeException)
+            ? $exception->getMessage()
+            : 'No fue posible registrar la solicitud. Inténtelo nuevamente.';
+    }
+}
+
+$requestStmt = $conn->prepare(
+    'SELECT package_name, payment_method, payment_date, amount_paid, currency,
+            status, rejection_reason, created_at
+     FROM gora_subscription_payment_requests
+     WHERE username = ?
+     ORDER BY request_id DESC
+     LIMIT 5'
+);
+$requestStmt->bind_param('s', $local_username);
+$requestStmt->execute();
+$paymentRequests = $requestStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$requestStmt->close();
+$todayForPayment = goraSubscriptionToday()->format('Y-m-d');
 ?>
 <!DOCTYPE html>
 <html lang="es">
-<?php 
-include "sessions.php";
-include "sessionvalidation.php";
-include "db_connection1.php";
-$name = $_SESSION['name'];
-$local_username=$_SESSION['email'];
-$suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
-  || ($_GET['subscription_due'] ?? '') === '1') ? 1 : 0;
-//include "SessionTimeOut.php";
-/*include "SessionTimeOut.php";*/
-
-// Verificar si el usuario está autenticado (si $_SESSION['email'] está definido)
-//if (!isset($_SESSION['email'])) {
-    // Si no hay sesión, redirigir a la página de autenticación
-//    header('Location: closetaskcon.php');
-//    exit(); // Detener la ejecución del script
-//}
-
-// Si el usuario está autenticado, continuar con el resto del código
-//$local_username = $_SESSION['email']; // Obtener el email del usuario desde la sesión
-?>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="GORA.ico" type="image/x-icon">
@@ -479,9 +656,9 @@ $suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
                     <p> 5. Al momento de no renovación de suscripción y no querer continuar con el servicios, dispondrá de máximos 3 meses calendario para solicitar sean enviados sus enlaces e información asociados a ellos en archivo CSV. Hacer la solicitud al correo al correo <a href="mailto:adm@solicionespro.com">adm@solicionespro.com</a> y recibirá la información al correo registrado del usuario en la página</p>
                     <br>
                     <center><p style="color: blue; font-weight: bold; font-size: 24px;"> Forma de Pago de Suscripción y Subcategorías</p></center>
-                    <p> 1. Pago por Nequi al número +57 305 4293185 o PayPal al YSXRZMT2AAG4G.</p> 
-                    <p> 2. Tomar una imagen por cada uno de los pagos realizados y convertirlas a formato PDF</p>
-                    <p> 3. Al realizar el pago dar click en el botón de abajo para enviar correo el archivo PDF o una imagen del pago realizado.</p>
+                    <p> 1. Colombia: Nequi al número +57 305 4293185. Otros países: PayPal a YSXRZMT2AAG4G.</p>
+                    <p> 2. Selecciona tu plan, país y fecha del pago. En PayPal se aplica el TRM oficial vigente en esa fecha y la comisión configurada.</p>
+                    <p> 3. Después de pagar, registra el pago en el formulario y adjunta obligatoriamente el comprobante en PDF o imagen. El acceso se activa cuando el administrador confirme el pago.</p>
                     <p> 4. Si tiene alguna duda, enviar correo al administrador: adm@solicionespro.com o WhatsApp: +57 311 7592209</p>
 				        </div>
                 <a href="https://wa.me/573117592209" target="_blank" class="whatsapp-fab">
@@ -493,6 +670,111 @@ $suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
           <hr>
       </div>    
   </div>
+
+      <div class="col-md-12">
+        <div class="card card-body">
+          <h2 data-subscription-i18n="Reportar pago de suscripción">Reportar pago de suscripción</h2>
+          <?php if ($paymentRequestNotice !== null): ?>
+            <div class="alert alert-success" role="status"><?php echo htmlspecialchars($paymentRequestNotice, ENT_QUOTES, 'UTF-8'); ?></div>
+          <?php endif; ?>
+          <?php if ($paymentRequestError !== ''): ?>
+            <div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($paymentRequestError, ENT_QUOTES, 'UTF-8'); ?></div>
+          <?php endif; ?>
+          <form method="post" class="row g-3">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($paymentRequestCsrf, ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="hidden" name="payment_action" value="create_quote">
+            <div class="col-md-4">
+              <label class="form-label" for="subscription-package" data-subscription-i18n="Plan">Plan</label>
+              <select class="form-select" id="subscription-package" name="package_name" required>
+                <option value="Trimestral">Trimestral (90 días) — COP 20.000</option>
+                <option value="Semestral">Semestral (185 días) — COP 40.000</option>
+                <option value="Anual">Anual (365 días) — COP 60.000</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="payment-country" data-subscription-i18n="País desde donde pagas">País desde donde pagas</label>
+              <select class="form-select" id="payment-country" name="payment_country" required>
+                <option value="CO" data-subscription-i18n="Colombia — Nequi">Colombia — Nequi</option>
+                <option value="international" data-subscription-i18n="Otro país — PayPal">Otro país — PayPal</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label" for="payment-date" data-subscription-i18n="Fecha del pago">Fecha del pago</label>
+              <input class="form-control" id="payment-date" name="payment_date" type="date"
+                max="<?php echo htmlspecialchars($todayForPayment, ENT_QUOTES, 'UTF-8'); ?>"
+                value="<?php echo htmlspecialchars($todayForPayment, ENT_QUOTES, 'UTF-8'); ?>" required>
+              <small data-subscription-i18n="Indica el día en que realizaste el pago.">Indica el día en que realizaste el pago.</small>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <button type="submit" class="btn btn-primary" data-subscription-i18n="Calcular valor">Calcular valor</button>
+            </div>
+          </form>
+
+          <?php if ($activeQuote !== null): ?>
+            <div class="alert alert-info mt-4">
+              <strong data-subscription-i18n="Cotización para pago">Cotización para pago</strong>
+              <div><?php echo htmlspecialchars($activeQuote['package'], ENT_QUOTES, 'UTF-8'); ?> —
+                <?php echo htmlspecialchars($activeQuote['payment_date'], ENT_QUOTES, 'UTF-8'); ?></div>
+              <div>Precio base: COP <?php echo number_format((float) $activeQuote['price_cop'], 0, ',', '.'); ?></div>
+              <?php if ($activeQuote['payment_method'] === 'PayPal'): ?>
+                <div>TRM oficial: COP <?php echo number_format((float) $activeQuote['exchange_rate'], 4, ',', '.'); ?> por USD</div>
+                <div>Valor base: USD <?php echo htmlspecialchars($activeQuote['base_amount_usd'], ENT_QUOTES, 'UTF-8'); ?></div>
+                <div>Comisión estimada de PayPal: USD <?php echo htmlspecialchars($activeQuote['estimated_fee_usd'], ENT_QUOTES, 'UTF-8'); ?></div>
+              <?php endif; ?>
+              <div class="fs-5 fw-bold">Total a pagar: <?php echo htmlspecialchars($activeQuote['currency'], ENT_QUOTES, 'UTF-8'); ?>
+                <?php echo htmlspecialchars($activeQuote['quoted_amount'], ENT_QUOTES, 'UTF-8'); ?></div>
+              <?php if ($activeQuote['payment_method'] === 'Nequi'): ?>
+                <p class="mb-0">Envía el valor exacto al Nequi +57 305 429 3185.</p>
+              <?php else: ?>
+                <p class="mb-0">Envía el total exacto a PayPal: YSXRZMT2AAG4G. La cotización corresponde al TRM vigente de esta fecha.</p>
+              <?php endif; ?>
+            </div>
+            <form method="post" enctype="multipart/form-data" class="row g-3">
+              <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($paymentRequestCsrf, ENT_QUOTES, 'UTF-8'); ?>">
+              <input type="hidden" name="payment_action" value="submit_payment_request">
+              <input type="hidden" name="quote_id" value="<?php echo htmlspecialchars($activeQuote['id'], ENT_QUOTES, 'UTF-8'); ?>">
+              <div class="col-md-4">
+                <label class="form-label" for="amount-paid" data-subscription-i18n="Valor enviado">Valor enviado</label>
+                <input class="form-control" id="amount-paid" name="amount_paid" type="number" min="0.01" step="0.01"
+                  value="<?php echo htmlspecialchars($activeQuote['quoted_amount'], ENT_QUOTES, 'UTF-8'); ?>" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="payment-reference" data-subscription-i18n="Referencia de pago (opcional)">Referencia de pago (opcional)</label>
+                <input class="form-control" id="payment-reference" name="payment_reference" maxlength="150">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="payment-proof" data-subscription-i18n="Comprobante (obligatorio, máximo 5 MB)">Comprobante (obligatorio, máximo 5 MB)</label>
+                <input class="form-control" id="payment-proof" name="payment_proof" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" required>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-success" data-subscription-i18n="Enviar reporte para revisión">Enviar reporte para revisión</button>
+                <span class="ms-2" data-subscription-i18n="El comprobante será revisado antes de activar el acceso.">El comprobante será revisado antes de activar el acceso.</span>
+              </div>
+            </form>
+          <?php endif; ?>
+
+          <?php if ($paymentRequests): ?>
+            <h3 class="mt-4" data-subscription-i18n="Mis reportes de pago">Mis reportes de pago</h3>
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead><tr><th>Fecha</th><th>Plan</th><th>Medio</th><th>Valor reportado</th><th>Estado</th><th>Observación</th></tr></thead>
+                <tbody>
+                  <?php foreach ($paymentRequests as $request): ?>
+                    <tr>
+                      <td><?php echo htmlspecialchars($request['payment_date'], ENT_QUOTES, 'UTF-8'); ?></td>
+                      <td><?php echo htmlspecialchars($request['package_name'], ENT_QUOTES, 'UTF-8'); ?></td>
+                      <td><?php echo htmlspecialchars($request['payment_method'], ENT_QUOTES, 'UTF-8'); ?></td>
+                      <td><?php echo htmlspecialchars($request['currency'] . ' ' . $request['amount_paid'], ENT_QUOTES, 'UTF-8'); ?></td>
+                      <td><?php echo $request['status'] === 'pending' ? 'Pendiente' : ($request['status'] === 'approved' ? 'Aprobado' : 'Rechazado'); ?></td>
+                      <td><?php echo htmlspecialchars($request['rejection_reason'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                    </tr>
+                  <?php endforeach; ?>
+                </tbody>
+              </table>
+            </div>
+          <?php endif; ?>
+        </div>
+      </div>
 
   <div class="col-md-12">
 					<br>
@@ -509,34 +791,35 @@ $suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
                     <th>Fecha Registro</th>
                     <th>Suscripcion</th>
                     <th>Paquete</th>
-                    <th>Días disfrutados de la suscripción</th>
+                    <th>Días de acceso restantes</th>
                     <!--<th>Descargar Documento</th>-->
                   </tr>
                   </thead>
                   <tbody>
-                    <?php 
-                    $query1 = "select * from videotips_app_access_list where username ='$local_username'";
-                    //$query1 = "select * from videotips_app_access_list where active = '1' and username ='$local_username'";
-                    $result_links = mysqli_query($conn,$query1);
-                    while($links = mysqli_fetch_array($result_links)) { ?>
+                    <?php
+                    $accountStmt = $conn->prepare(
+                        'SELECT username, active, lastsuscriptionpaymentdate, registrationdate,
+                                suscriptionkind, suscription_package, daystoenjoy
+                         FROM videotips_app_access_list
+                         WHERE username = ?'
+                    );
+                    $accountStmt->bind_param('s', $local_username);
+                    $accountStmt->execute();
+                    $accountResult = $accountStmt->get_result();
+                    while ($links = $accountResult->fetch_assoc()) { ?>
                     <tr>
-                      <td align="center"><?php echo $links['username']?></td>
-                      <td align="center"><?php echo $links['active']?></td>
-                      <td align="center"><?php echo $links['lastsuscriptionpaymentdate']?></td>
-                      <td align="center"><?php echo $links['registrationdate']?></td>
-                      <td align="center"><?php echo $links['suscriptionkind']?></td>
-                      <td align="center"><?php echo $links['suscription_package']?></td>
-                      <td align="center"><?php echo $links['daystoenjoy']?></td>
-                      </td>
+                      <td align="center"><?php echo htmlspecialchars($links['username'], ENT_QUOTES, 'UTF-8'); ?></td>
+                      <td align="center"><?php echo (int) $links['active']; ?></td>
+                      <td align="center"><?php echo htmlspecialchars((string) $links['lastsuscriptionpaymentdate'], ENT_QUOTES, 'UTF-8'); ?></td>
+                      <td align="center"><?php echo htmlspecialchars((string) $links['registrationdate'], ENT_QUOTES, 'UTF-8'); ?></td>
+                      <td align="center"><?php echo htmlspecialchars($links['suscriptionkind'], ENT_QUOTES, 'UTF-8'); ?></td>
+                      <td align="center"><?php echo htmlspecialchars((string) $links['suscription_package'], ENT_QUOTES, 'UTF-8'); ?></td>
+                      <td align="center"><?php echo (int) $links['daystoenjoy']; ?></td>
                     </tr>
-                    <?php }?>
-                  <tbody>
+                    <?php }
+                    $accountStmt->close(); ?>
+                  </tbody>
                 </table>
-                <br>
-                <center><a id="payment-proof-link" data-username="<?php echo htmlspecialchars($local_username, ENT_QUOTES, 'UTF-8'); ?>" href="mailto:adm@solicionespro.com?subject=Evidencia%20Pago%20Suscripción.&body=Hola,%20adjunto%20evidencia%20del%20pago%20de%20la%20suscripción%20a%20nombre%20de%20<?php echo urlencode($local_username); ?>.">
-                <input id="payment-proof-button" type="button" class="btn btn-success btn-block" style="color: white; font-weight: bold; font-size: 24px;" value="Enviar Constancia de Pago por Correo"></a></center>
-
-                <!--<center><input type="submit" class="btn btn-success btn-block" name="save_link" value="Agregar Constancia de Pago"></input></center>-->
         </div>
   </div>
 </div>
@@ -577,9 +860,9 @@ $suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
       '5. Al momento de no renovación de suscripción y no querer continuar con el servicios, dispondrá de máximos 3 meses calendario para solicitar sean enviados sus enlaces e información asociados a ellos en archivo CSV. Hacer la solicitud al correo al correo': '5. If you do not renew and no longer wish to continue the service, you have up to 3 calendar months to request your links and related information as a CSV file. Send your request by email to',
       'y recibirá la información al correo registrado del usuario en la página': 'and the information will be sent to the email address registered on the site.',
       'Forma de Pago de Suscripción y Subcategorías': 'Subscription and Subcategory Payment Methods',
-      '1. Pago por Nequi al número +57 305 4293185 o PayPal al YSXRZMT2AAG4G.': '1. Pay with Nequi at +57 305 4293185 or with PayPal at YSXRZMT2AAG4G.',
-      '2. Tomar una imagen por cada uno de los pagos realizados y convertirlas a formato PDF': '2. Take a picture of each payment and convert the images to PDF.',
-      '3. Al realizar el pago dar click en el botón de abajo para enviar correo el archivo PDF o una imagen del pago realizado.': '3. After making the payment, click the button below to email the PDF or an image of the payment.',
+      '1. Colombia: Nequi al número +57 305 4293185. Otros países: PayPal a YSXRZMT2AAG4G.': '1. Colombia: Nequi at +57 305 4293185. Other countries: PayPal at YSXRZMT2AAG4G.',
+      '2. Selecciona tu plan, país y fecha del pago. En PayPal se aplica el TRM oficial vigente en esa fecha y la comisión configurada.': '2. Select your plan, country and payment date. PayPal uses the official TRM for that date and the configured fee.',
+      '3. Después de pagar, registra el pago en el formulario y adjunta obligatoriamente el comprobante en PDF o imagen. El acceso se activa cuando el administrador confirme el pago.': '3. After paying, submit the payment form and attach the required PDF or image receipt. Access is activated after the administrator confirms the payment.',
       '4. Si tiene alguna duda, enviar correo al administrador:': '4. If you have any questions, email the administrator at:',
       'o WhatsApp: +57 311 7592209': 'or WhatsApp: +57 311 7592209',
       Soporte: 'Support',
@@ -590,8 +873,27 @@ $suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
       'Fecha Registro': 'Registration Date',
       Suscripcion: 'Subscription',
       Paquete: 'Package',
-      'Días disfrutados de la suscripción': 'Subscription Days Enjoyed',
-      'Enviar Constancia de Pago por Correo': 'Email Payment Receipt',
+      'Días de acceso restantes': 'Subscription Access Days Remaining',
+      'Reportar pago de suscripción': 'Report a subscription payment',
+      Plan: 'Plan',
+      'País desde donde pagas': 'Country you are paying from',
+      'Colombia — Nequi': 'Colombia — Nequi',
+      'Otro país — PayPal': 'Other country — PayPal',
+      'Fecha del pago': 'Payment date',
+      'Indica el día en que realizaste el pago.': 'Enter the date you made the payment.',
+      'Calcular valor': 'Calculate amount',
+      'Cotización para pago': 'Payment quote',
+      'Precio base:': 'Base price:',
+      'TRM oficial:': 'Official TRM:',
+      'Valor base:': 'Base amount:',
+      'Comisión estimada de PayPal:': 'Estimated PayPal fee:',
+      'Total a pagar:': 'Total due:',
+      'Valor enviado': 'Amount sent',
+      'Referencia de pago (opcional)': 'Payment reference (optional)',
+      'Comprobante (obligatorio, máximo 5 MB)': 'Receipt (required, maximum 5 MB)',
+      'Enviar reporte para revisión': 'Submit report for review',
+      'El comprobante será revisado antes de activar el acceso.': 'The receipt will be reviewed before access is activated.',
+      'Mis reportes de pago': 'My payment reports',
       'Mensaje': 'Message',
       'Has alcanzado el límite de 30 días Calendario de uso gratuito y/o tu Suscripción está vencida. Te invitamos a renovarla por medio nuestros canales de Nequi  para Colombia o Paypayl para Internacional': 'You have reached the 30-calendar-day free trial limit and/or your subscription has expired. Please renew using Nequi in Colombia or PayPal internationally.',
       'Aceptar': 'OK',
@@ -646,9 +948,9 @@ $suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
       '5. Al momento de no renovación de suscripción y no querer continuar con el servicios, dispondrá de máximos 3 meses calendario para solicitar sean enviados sus enlaces e información asociados a ellos en archivo CSV. Hacer la solicitud al correo al correo': '5. Se não renovar a assinatura e não quiser continuar com o serviço, você terá até 3 meses corridos para solicitar seus links e as informações relacionadas em um arquivo CSV. Envie a solicitação por email para',
       'y recibirá la información al correo registrado del usuario en la página': 'e as informações serão enviadas ao endereço de email cadastrado no site.',
       'Forma de Pago de Suscripción y Subcategorías': 'Formas de Pagamento da Assinatura e das Subcategorias',
-      '1. Pago por Nequi al número +57 305 4293185 o PayPal al YSXRZMT2AAG4G.': '1. Pague pelo Nequi no número +57 305 4293185 ou pelo PayPal em YSXRZMT2AAG4G.',
-      '2. Tomar una imagen por cada uno de los pagos realizados y convertirlas a formato PDF': '2. Tire uma foto de cada pagamento e converta as imagens para PDF.',
-      '3. Al realizar el pago dar click en el botón de abajo para enviar correo el archivo PDF o una imagen del pago realizado.': '3. Após efetuar o pagamento, clique no botão abaixo para enviar por email o arquivo PDF ou uma imagem do pagamento.',
+      '1. Colombia: Nequi al número +57 305 429 3185. Otros países: PayPal a YSXRZMT2AAG4G.': '1. Colômbia: Nequi no número +57 305 429 3185. Outros países: PayPal em YSXRZMT2AAG4G.',
+      '2. Selecciona tu plan, país y fecha del pago. En PayPal se aplica el TRM oficial vigente en esa fecha y la comisión configurada.': '2. Selecione seu plano, país e data do pagamento. O PayPal usa a TRM oficial dessa data e a comissão configurada.',
+      '3. Después de pagar, registra el pago en el formulario y adjunta obligatoriamente el comprobante en PDF o imagen. El acceso se activa cuando el administrador confirme el pago.': '3. Após pagar, informe o pagamento no formulário e anexe o comprovante obrigatório em PDF ou imagem. O acesso é ativado após a confirmação do administrador.',
       '4. Si tiene alguna duda, enviar correo al administrador:': '4. Se tiver dúvidas, envie um email ao administrador:',
       'o WhatsApp: +57 311 7592209': 'ou WhatsApp: +57 311 7592209',
       Soporte: 'Suporte',
@@ -659,8 +961,27 @@ $suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
       'Fecha Registro': 'Data de cadastro',
       Suscripcion: 'Assinatura',
       Paquete: 'Pacote',
-      'Días disfrutados de la suscripción': 'Dias de assinatura disfrutados',
-      'Enviar Constancia de Pago por Correo': 'Enviar comprovante de pagamento por email',
+      'Días de acceso restantes': 'Dias restantes de acesso',
+      'Reportar pago de suscripción': 'Informar pagamento da assinatura',
+      Plan: 'Plano',
+      'País desde donde pagas': 'País de onde você paga',
+      'Colombia — Nequi': 'Colômbia — Nequi',
+      'Otro país — PayPal': 'Outro país — PayPal',
+      'Fecha del pago': 'Data do pagamento',
+      'Indica el día en que realizaste el pago.': 'Informe o dia em que fez o pagamento.',
+      'Calcular valor': 'Calcular valor',
+      'Cotización para pago': 'Cotação de pagamento',
+      'Precio base:': 'Preço base:',
+      'TRM oficial:': 'TRM oficial:',
+      'Valor base:': 'Valor base:',
+      'Comisión estimada de PayPal:': 'Comissão estimada do PayPal:',
+      'Total a pagar:': 'Total a pagar:',
+      'Valor enviado': 'Valor enviado',
+      'Referencia de pago (opcional)': 'Referência de pagamento (opcional)',
+      'Comprobante (obligatorio, máximo 5 MB)': 'Comprovante (obrigatório, máximo 5 MB)',
+      'Enviar reporte para revisión': 'Enviar solicitação para análise',
+      'El comprobante será revisado antes de activar el acceso.': 'O comprovante será verificado antes da ativação do acesso.',
+      'Mis reportes de pago': 'Meus comprovantes de pagamento',
       'Mensaje': 'Mensagem',
       'Has alcanzado el límite de 30 días Calendario de uso gratuito y/o tu Suscripción está vencida. Te invitamos a renovarla por medio nuestros canales de Nequi  para Colombia o Paypayl para Internacional': 'Você atingiu o limite de 30 dias corridos de uso gratuito e/ou sua assinatura expirou. Renove pelo Nequi na Colômbia ou pelo PayPal para pagamentos internacionais.',
       'Aceptar': 'OK',
@@ -757,30 +1078,6 @@ $suscriptiondue = (($_SESSION['suscriptiondue'] ?? 0) == 1
     const languageSwitcher = document.querySelector('.subscription-language-switcher');
     if (languageSwitcher) {
       languageSwitcher.setAttribute('aria-label', subscriptionLanguageLabels[language].group);
-    }
-
-    const paymentButton = document.getElementById('payment-proof-button');
-    if (paymentButton) {
-      paymentButton.value = subscriptionTranslation('Enviar Constancia de Pago por Correo', language);
-    }
-
-    const paymentLink = document.getElementById('payment-proof-link');
-    if (paymentLink) {
-      const subjects = {
-        es: 'Evidencia Pago Suscripción.',
-        en: 'Subscription Payment Proof.',
-        pt: 'Comprovante de Pagamento da Assinatura.'
-      };
-      const bodies = {
-        es: `Hola, adjunto evidencia del pago de la suscripción a nombre de ${paymentLink.dataset.username}.`,
-        en: `Hello, attached is proof of the subscription payment for ${paymentLink.dataset.username}.`,
-        pt: `Olá, segue o comprovante do pagamento da assinatura em nome de ${paymentLink.dataset.username}.`
-      };
-      const params = new URLSearchParams({
-        subject: subjects[language],
-        body: bodies[language]
-      });
-      paymentLink.href = `mailto:adm@solicionespro.com?${params.toString()}`;
     }
 
     window.dispatchEvent(new Event('languageChanged'));
