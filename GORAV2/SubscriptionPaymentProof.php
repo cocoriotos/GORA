@@ -26,28 +26,38 @@ if (!goraCanAccessAppManagement($admin)) {
     exit('No tiene autorización para ver comprobantes.');
 }
 
-$requestId = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT);
-if ($requestId === false || $requestId <= 0) {
+$proofType = (string) ($_GET['type'] ?? 'request');
+$recordId = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT);
+if (!in_array($proofType, ['request', 'sale'], true) || $recordId === false || $recordId <= 0) {
     http_response_code(400);
-    exit('El reporte indicado no es válido.');
+    exit('El comprobante indicado no es válido.');
 }
 
-$stmt = $conn->prepare(
-    'SELECT proof_file
-     FROM gora_subscription_payment_requests
-     WHERE request_id = ?
-     LIMIT 1'
-);
-$stmt->bind_param('i', $requestId);
+if ($proofType === 'sale') {
+    $stmt = $conn->prepare(
+        'SELECT proof_file
+         FROM gora_subscription_sales
+         WHERE payment_id = ?
+         LIMIT 1'
+    );
+} else {
+    $stmt = $conn->prepare(
+        'SELECT proof_file
+         FROM gora_subscription_payment_requests
+         WHERE request_id = ?
+         LIMIT 1'
+    );
+}
+$stmt->bind_param('i', $recordId);
 $stmt->execute();
-$request = $stmt->get_result()->fetch_assoc();
+$payment = $stmt->get_result()->fetch_assoc();
 $stmt->close();
-if (!$request) {
+if (!$payment || empty($payment['proof_file'])) {
     http_response_code(404);
     exit('No se encontró el comprobante.');
 }
 
-$fileName = (string) $request['proof_file'];
+$fileName = (string) $payment['proof_file'];
 if (!preg_match('/\A[a-f0-9]{48}\.(pdf|jpg|png|webp)\z/D', $fileName)) {
     error_log('Invalid stored subscription payment proof filename.');
     http_response_code(500);

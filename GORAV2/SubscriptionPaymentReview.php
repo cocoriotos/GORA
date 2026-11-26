@@ -4,6 +4,7 @@ goraStartTabSession();
 require_once __DIR__ . '/sessions.php';
 require_once __DIR__ . '/db_connection1.php';
 require_once __DIR__ . '/subscription_payment_requests.php';
+require_once __DIR__ . '/subscription_finance_helpers.php';
 
 if (empty($_SESSION['email'])) {
     header('Location: videotrackerauth.php');
@@ -95,7 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn->begin_transaction();
             $transactionStarted = true;
             $requestStmt = $conn->prepare(
-                "SELECT username, package_name, payment_date, payment_reference
+                "SELECT username, package_name, payment_method, payment_date,
+                        amount_paid, currency, payment_reference, proof_file
                  FROM gora_subscription_payment_requests
                  WHERE request_id = ? AND status = 'pending'
                  LIMIT 1
@@ -108,6 +110,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$request) {
                 throw new InvalidArgumentException('El reporte ya fue revisado o no existe.');
             }
+
+            if (empty($request['proof_file'])) {
+                throw new InvalidArgumentException('El reporte no tiene un comprobante adjunto y no puede aprobarse.');
+            }
+
+            $userStmt = $conn->prepare(
+                'SELECT seller_code
+                 FROM videotips_app_access_list
+                 WHERE username = ?
+                 LIMIT 1
+                 FOR UPDATE'
+            );
+            $userStmt->bind_param('s', $request['username']);
+            $userStmt->execute();
+            $user = $userStmt->get_result()->fetch_assoc();
+            $userStmt->close();
+            if (!$user) {
+                throw new InvalidArgumentException('No se encontró el usuario asociado al reporte.');
+            }
+
+            $sellerCode = trim((string) ($user['seller_code'] ?? ''));
+            $sellerStmt = $conn->prepare(
+                'SELECT seller_id
+                 FROM gora_finance_sellers
+                 WHERE sales_code = ? AND active = 1
+                 LIMIT 1
+                 FOR UPDATE'
+            );
+            $sellerStmt->bind_param('s', $sellerCode);
+            $sellerStmt->execute();
+            $seller = $sellerStmt->get_result()->fetch_assoc();
+            $sellerStmt->close();
+
+            if ($seller) {
+                $sellerId = (int) $seller['seller_id'];
+            } else {
+                $selectedSellerId = filter_var($_POST['seller_id'] ?? null, FILTER_VALIDATE_INT);
+                if ($selectedSellerId === false || $selectedSellerId <= 0) {
+                    throw new InvalidArgumentException('El usuario no tiene un vendedor activo asignado. Seleccione uno para aprobar el pago.');
+                }
+
+                $selectedSellerStmt = $conn->prepare(
+                    'SELECT seller_id
+                     FROM gora_finance_sellers
+                     WHERE seller_id = ? AND active = 1
+                     LIMIT 1
+                     FOR UPDATE'
+                );
+                $selectedSellerStmt->bind_param('i', $selectedSellerId);
+                $selectedSellerStmt->execute();
+                $selectedSeller = $selectedSellerStmt->get_result()->fetch_assoc();
+                $selectedSellerStmt->close();
+                if (!$selectedSeller) {
+                    throw new InvalidArgumentException('El vendedor seleccionado no existe o está inactivo.');
+                }
+                $sellerId = (int) $selectedSeller['seller_id'];
+            }
+
+            if (financeFindDuplicateSubscriptionSale(
+                $conn,
+                (string) $request['username'],
+                (string) $request['package_name'],
+                (string) $request['payment_date'],
+                (string) $request['amount_paid'],
+                (string) $request['currency'],
+                (string) $request['payment_method']
+            ) !== null) {
+                throw new InvalidArgumentException('Este pago ya está registrado en el control financiero; no se duplicó.');
+            }
+
+            financeRecordSaleWithAllocations(
+                $conn,
+                (string) $request['username'],
+                (string) $request['package_name'],
+                (string) $request['payment_date'],
+                (string) $request['amount_paid'],
+                (string) $request['currency'],
+                (string) $request['payment_method'],
+                $request['payment_reference'] === null ? null : (string) $request['payment_reference'],
+                $sellerId,
+                $adminEmail,
+                $requestId,
+                (string) $request['proof_file']
+            );
 
             goraApplyPaidSubscription(
                 $conn,
@@ -181,17 +267,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $feeSettings = goraGetPaypalFeeSettings($conn);
 $requestsStmt = $conn->prepare(
-    'SELECT request_id, username, package_name, payment_method, payment_date,
-            amount_paid, currency, price_cop, exchange_rate, paypal_fee_percent,
-            paypal_fixed_fee_usd, quoted_amount, payment_reference, status,
-            rejection_reason, reviewed_by, reviewed_at, created_at
-     FROM gora_subscription_payment_requests
-     ORDER BY status = \'pending\' DESC, request_id DESC
+    'SELECT r.request_id, r.username, r.package_name, r.payment_method, r.payment_date,
+            r.amount_paid, r.currency, r.price_cop, r.exchange_rate, r.paypal_fee_percent,
+            r.paypal_fixed_fee_usd, r.quoted_amount, r.payment_reference, r.status,
+            r.rejection_reason, r.reviewed_by, r.reviewed_at, r.created_at, a.seller_code
+     FROM gora_subscription_payment_requests r
+     LEFT JOIN videotips_app_access_list a ON a.username = r.username
+     ORDER BY r.status = \'pending\' DESC, r.request_id DESC
      LIMIT 100'
 );
 $requestsStmt->execute();
 $requests = $requestsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $requestsStmt->close();
+
+$activeSellers = [];
+$sellerByCode = [];
+$sellerOptionsStmt = $conn->prepare(
+    'SELECT seller_id, first_name, last_name, sales_code
+     FROM gora_finance_sellers
+     WHERE active = 1
+     ORDER BY last_name, first_name'
+);
+$sellerOptionsStmt->execute();
+$sellerOptions = $sellerOptionsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$sellerOptionsStmt->close();
+foreach ($sellerOptions as $sellerOption) {
+    $activeSellers[] = $sellerOption;
+    $sellerByCode[(string) $sellerOption['sales_code']] = $sellerOption;
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -303,7 +406,28 @@ $requestsStmt->close();
                                 <form method="post" class="actions">
                                     <input type="hidden" name="csrf_token" value="<?php echo subscriptionReviewEscape($csrfToken); ?>">
                                     <input type="hidden" name="request_id" value="<?php echo (int) $request['request_id']; ?>">
-                                    <button type="submit" name="action" value="approve_payment">Confirmar pago y activar</button>
+                                    <?php
+                                    $requestSellerCode = trim((string) ($request['seller_code'] ?? ''));
+                                    $assignedSeller = $sellerByCode[$requestSellerCode] ?? null;
+                                    ?>
+                                    <?php if ($assignedSeller): ?>
+                                        <p>Vendedor asignado: <?php echo subscriptionReviewEscape($assignedSeller['sales_code'] . ' — ' . $assignedSeller['first_name'] . ' ' . $assignedSeller['last_name']); ?></p>
+                                    <?php else: ?>
+                                        <label>Vendedor (obligatorio)
+                                            <select name="seller_id" required>
+                                                <option value="">Seleccione vendedor</option>
+                                                <?php foreach ($activeSellers as $sellerOption): ?>
+                                                    <option value="<?php echo (int) $sellerOption['seller_id']; ?>">
+                                                        <?php echo subscriptionReviewEscape($sellerOption['sales_code'] . ' — ' . $sellerOption['first_name'] . ' ' . $sellerOption['last_name']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </label>
+                                        <?php if (!$activeSellers): ?>
+                                            <p class="notice error">No hay vendedores activos. Registre o active un vendedor en el control financiero antes de aprobar.</p>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                    <button type="submit" name="action" value="approve_payment" <?php echo (!$assignedSeller && !$activeSellers) ? 'disabled' : ''; ?>>Confirmar pago y activar</button>
                                     <textarea name="rejection_reason" maxlength="500" placeholder="Motivo obligatorio para rechazar"></textarea>
                                     <button class="reject" type="submit" name="action" value="reject_payment">Rechazar reporte</button>
                                 </form>
