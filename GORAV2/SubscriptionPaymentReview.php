@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($action === 'save_paypal_fee') {
             $feeInput = trim((string) ($_POST['fee_percent'] ?? ''));
             $fixedInput = trim((string) ($_POST['fixed_fee_usd'] ?? ''));
-            if (!preg_match('/^\d{1,2}(?:\.\d{1,4})?$/D', $feeInput)
+            if (!preg_match('/^\d{1,2}(?:\.\d{1,2})?$/D', $feeInput)
                 || !preg_match('/^\d{1,8}(?:\.\d{1,2})?$/D', $fixedInput)
             ) {
                 throw new InvalidArgumentException('Ingrese una comisión porcentual y un cargo fijo válidos.');
@@ -245,8 +245,8 @@ $requestsStmt->close();
             <input type="hidden" name="csrf_token" value="<?php echo subscriptionReviewEscape($csrfToken); ?>">
             <input type="hidden" name="action" value="save_paypal_fee">
             <label>Comisión porcentual (%)
-                <input type="number" name="fee_percent" min="0" max="99.9999" step="0.0001"
-                    value="<?php echo subscriptionReviewEscape($feeSettings['fee_percent'] ?? ''); ?>" required>
+                <input type="number" name="fee_percent" min="0" max="99.99" step="0.01"
+                    value="<?php echo $feeSettings ? number_format((float) $feeSettings['fee_percent'], 2, '.', '') : ''; ?>" required>
             </label>
             <label>Cargo fijo por transacción (USD)
                 <input type="number" name="fixed_fee_usd" min="0" step="0.01"
@@ -255,7 +255,7 @@ $requestsStmt->close();
             <button type="submit">Guardar tarifa</button>
         </form>
         <?php if ($feeSettings): ?>
-            <p>Configurada: <?php echo subscriptionReviewEscape($feeSettings['fee_percent']); ?>% + USD <?php echo goraFormatSubscriptionMoney($feeSettings['fixed_fee_usd'], 'USD'); ?></p>
+            <p>Configurada: <?php echo number_format((float) $feeSettings['fee_percent'], 2, '.', ''); ?>% + USD <?php echo goraFormatSubscriptionMoney($feeSettings['fixed_fee_usd'], 'USD'); ?></p>
         <?php else: ?>
             <p class="notice error">Hasta guardar la comisión, no se podrán generar cotizaciones PayPal.</p>
         <?php endif; ?>
@@ -284,7 +284,7 @@ $requestsStmt->close();
                             <?php if ($request['payment_method'] === 'PayPal'): ?>
                                 TRM: COP <?php echo number_format((float) $request['exchange_rate'], 4, ',', '.'); ?> por USD<br>
                                 Cotizado: USD <?php echo goraFormatSubscriptionMoney($request['quoted_amount'], 'USD'); ?><br>
-                                Comisión: <?php echo subscriptionReviewEscape($request['paypal_fee_percent']); ?>% + USD <?php echo goraFormatSubscriptionMoney($request['paypal_fixed_fee_usd'], 'USD'); ?>
+                                Comisión: <?php echo number_format((float) $request['paypal_fee_percent'], 2, '.', ''); ?>% + USD <?php echo goraFormatSubscriptionMoney($request['paypal_fixed_fee_usd'], 'USD'); ?>
                             <?php endif; ?>
                         </td>
                         <td><?php echo subscriptionReviewEscape($request['payment_reference'] ?? '—'); ?></td>

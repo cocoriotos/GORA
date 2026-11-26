@@ -322,18 +322,56 @@ function goraApplyPaidSubscription(
         $paymentRecordInsert->close();
     }
 
+    $paymentCountersStmt = $conn->prepare(
+        'SELECT COUNT(*) AS record_count,
+                COALESCE(MAX(currentpaid), 0) AS currentpaid,
+                COALESCE(MAX(paymentcounter), 0) AS paymentcounter
+         FROM videotips_suscription_payments
+         WHERE username = ?'
+    );
+    $paymentCountersStmt->bind_param('s', $username);
+    $paymentCountersStmt->execute();
+    $paymentCounters = $paymentCountersStmt->get_result()->fetch_assoc();
+    $paymentCountersStmt->close();
+    if (!is_array($paymentCounters) || (int) $paymentCounters['record_count'] < 1) {
+        throw new RuntimeException('No se encontró el registro de pagos del usuario después de prepararlo.');
+    }
+
+    if ((int) $paymentCounters['record_count'] > 1) {
+        error_log(
+            'Duplicate subscription payment rows found for account '
+            . hash('sha256', $username)
+            . '; normalizing their counters.'
+        );
+    }
+
+    $currentPaidCount = (int) $paymentCounters['currentpaid'] + 1;
+    $paymentCounter = (int) $paymentCounters['paymentcounter'] + 1;
     $paymentUpdate = $conn->prepare(
         "UPDATE videotips_suscription_payments
-         SET currentpaid = COALESCE(currentpaid, 0) + 1,
-             paymentcounter = COALESCE(paymentcounter, 0) + 1,
+         SET currentpaid = ?,
+             paymentcounter = ?,
              lastpaymentdate = ?,
              suscription_package = ?,
              proofofpurchasenumber = ?
          WHERE username = ?"
     );
-    $paymentUpdate->bind_param('ssss', $paymentDate, $package, $paymentReference, $username);
+    $paymentUpdate->bind_param(
+        'iissss',
+        $currentPaidCount,
+        $paymentCounter,
+        $paymentDate,
+        $package,
+        $paymentReference,
+        $username
+    );
     $paymentUpdate->execute();
-    if ($paymentUpdate->affected_rows !== 1) {
+    if ($paymentUpdate->affected_rows < 1) {
+        error_log(
+            'Subscription payment update affected no rows for account '
+            . hash('sha256', $username)
+            . ': ' . $paymentUpdate->error
+        );
         $paymentUpdate->close();
         throw new RuntimeException('No fue posible actualizar el registro de pagos del usuario.');
     }

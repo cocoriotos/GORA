@@ -184,7 +184,7 @@ function goraBuildSubscriptionPaymentQuote(
             throw new RuntimeException('PayPal no está configurado todavía. Contacte al administrador.');
         }
 
-        $feePercent = (string) $settings['fee_percent'];
+        $feePercent = number_format((float) $settings['fee_percent'], 2, '.', '');
         $fixedFeeUsd = (string) $settings['fixed_fee_usd'];
         $feePercentScaled = goraDecimalToScaledInteger($feePercent, 4);
         $fixedFeeCents = goraDecimalToScaledInteger($fixedFeeUsd, 2);
@@ -204,7 +204,7 @@ function goraBuildSubscriptionPaymentQuote(
         $quote['base_amount_usd'] = number_format($baseUsdCents / 100, 2, '.', '');
         $quote['estimated_fee_usd'] = number_format(($grossUsdCents - $baseUsdCents) / 100, 2, '.', '');
         $quote['exchange_rate'] = $trm['rate_text'];
-        $quote['paypal_fee_percent'] = number_format($feePercentScaled / 10000, 4, '.', '');
+        $quote['paypal_fee_percent'] = number_format($feePercentScaled / 10000, 2, '.', '');
         $quote['paypal_fixed_fee_usd'] = number_format($fixedFeeCents / 100, 2, '.', '');
     }
 
