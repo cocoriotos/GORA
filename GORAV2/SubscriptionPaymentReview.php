@@ -255,7 +255,7 @@ $requestsStmt->close();
             <button type="submit">Guardar tarifa</button>
         </form>
         <?php if ($feeSettings): ?>
-            <p>Configurada: <?php echo subscriptionReviewEscape($feeSettings['fee_percent']); ?>% + USD <?php echo subscriptionReviewEscape($feeSettings['fixed_fee_usd']); ?></p>
+            <p>Configurada: <?php echo subscriptionReviewEscape($feeSettings['fee_percent']); ?>% + USD <?php echo goraFormatSubscriptionMoney($feeSettings['fixed_fee_usd'], 'USD'); ?></p>
         <?php else: ?>
             <p class="notice error">Hasta guardar la comisión, no se podrán generar cotizaciones PayPal.</p>
         <?php endif; ?>
@@ -279,12 +279,12 @@ $requestsStmt->close();
                         <td><?php echo subscriptionReviewEscape($request['package_name']); ?></td>
                         <td>
                             <?php echo subscriptionReviewEscape($request['payment_method']); ?><br>
-                            Reportado: <?php echo subscriptionReviewEscape($request['currency'] . ' ' . $request['amount_paid']); ?><br>
-                            Precio COP: <?php echo subscriptionReviewEscape($request['price_cop']); ?><br>
+                            Reportado: <?php echo subscriptionReviewEscape($request['currency']); ?> <?php echo goraFormatSubscriptionMoney($request['amount_paid'], $request['currency']); ?><br>
+                            Precio COP: COP <?php echo goraFormatSubscriptionMoney($request['price_cop'], 'COP'); ?><br>
                             <?php if ($request['payment_method'] === 'PayPal'): ?>
-                                TRM: <?php echo subscriptionReviewEscape($request['exchange_rate']); ?><br>
-                                Cotizado: USD <?php echo subscriptionReviewEscape($request['quoted_amount']); ?><br>
-                                Comisión: <?php echo subscriptionReviewEscape($request['paypal_fee_percent']); ?>% + USD <?php echo subscriptionReviewEscape($request['paypal_fixed_fee_usd']); ?>
+                                TRM: COP <?php echo number_format((float) $request['exchange_rate'], 4, ',', '.'); ?> por USD<br>
+                                Cotizado: USD <?php echo goraFormatSubscriptionMoney($request['quoted_amount'], 'USD'); ?><br>
+                                Comisión: <?php echo subscriptionReviewEscape($request['paypal_fee_percent']); ?>% + USD <?php echo goraFormatSubscriptionMoney($request['paypal_fixed_fee_usd'], 'USD'); ?>
                             <?php endif; ?>
                         </td>
                         <td><?php echo subscriptionReviewEscape($request['payment_reference'] ?? '—'); ?></td>

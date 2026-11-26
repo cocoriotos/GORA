@@ -293,6 +293,35 @@ function goraApplyPaidSubscription(
     $accessUpdate->execute();
     $accessUpdate->close();
 
+    $paymentRecordLookup = $conn->prepare(
+        'SELECT username
+         FROM videotips_suscription_payments
+         WHERE username = ?
+         LIMIT 1
+         FOR UPDATE'
+    );
+    $paymentRecordLookup->bind_param('s', $username);
+    $paymentRecordLookup->execute();
+    $paymentRecord = $paymentRecordLookup->get_result()->fetch_assoc();
+    $hasPaymentRecord = is_array($paymentRecord);
+    $paymentRecordLookup->close();
+
+    if (!$hasPaymentRecord) {
+        $paymentRecordInsert = $conn->prepare(
+            'INSERT INTO videotips_suscription_payments (username, active, freeregistrationdate)
+             SELECT username, active, registrationdate
+             FROM videotips_app_access_list
+             WHERE username = ?'
+        );
+        $paymentRecordInsert->bind_param('s', $username);
+        $paymentRecordInsert->execute();
+        if ($paymentRecordInsert->affected_rows !== 1) {
+            $paymentRecordInsert->close();
+            throw new RuntimeException('No fue posible crear el registro de pagos del usuario.');
+        }
+        $paymentRecordInsert->close();
+    }
+
     $paymentUpdate = $conn->prepare(
         "UPDATE videotips_suscription_payments
          SET currentpaid = COALESCE(currentpaid, 0) + 1,

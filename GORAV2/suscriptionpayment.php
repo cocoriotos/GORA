@@ -69,8 +69,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new InvalidArgumentException('La cotización ya no está disponible. Genere una cotización nueva.');
             }
 
-            $amountInput = trim((string) ($_POST['amount_paid'] ?? ''));
-            if (!preg_match('/^\d{1,10}(?:\.\d{1,2})?$/D', $amountInput) || (float) $amountInput <= 0) {
+            $amountInput = goraNormalizeSubscriptionAmount((string) ($_POST['amount_paid'] ?? ''));
+            if ($amountInput === null
+                || !preg_match('/^\d{1,10}(?:\.\d{1,2})?$/D', $amountInput)
+                || (float) $amountInput <= 0
+            ) {
                 throw new InvalidArgumentException('Ingrese el valor enviado en el pago, con máximo dos decimales.');
             }
             $amountPaid = number_format((float) $amountInput, 2, '.', '');
@@ -157,11 +160,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $storedProofFile
             );
             $insert->execute();
+            $requestId = (int) $conn->insert_id;
             $insert->close();
             $conn->commit();
             $transactionStarted = false;
+
+            try {
+                $notificationSent = goraSendSubscriptionPaymentNotification($requestId, [
+                    'username' => $local_username,
+                    'package_name' => $quote['package'],
+                    'payment_method' => $quote['payment_method'],
+                    'payment_date' => $quote['payment_date'],
+                    'amount_paid' => $amountPaid,
+                    'currency' => $quote['currency'],
+                    'payment_reference' => $paymentReferenceValue,
+                ]);
+            } catch (Throwable $exception) {
+                error_log('Subscription payment notification failed: ' . $exception->getMessage());
+                $notificationSent = false;
+            }
+            if (!$notificationSent) {
+                error_log('Subscription payment notification could not be handed to the mail server for request ' . $requestId . '.');
+            }
+
             unset($_SESSION['subscription_payment_quotes'][$quoteId]);
-            $_SESSION['subscription_payment_request_notice'] = 'Reporte recibido. El acceso se actualizará cuando el administrador confirme el pago.';
+            $_SESSION['subscription_payment_request_notice'] = $notificationSent
+                ? 'Reporte recibido. El acceso se actualizará cuando el administrador confirme el pago.'
+                : 'El reporte quedó registrado, pero no se pudo enviar el aviso por correo. No lo envíe de nuevo; contacte al administrador.';
             $redirectQuery = $suscriptiondue === 1 ? '?subscription_due=1' : '';
             header('Location: suscriptionpayment.php' . $redirectQuery, true, 303);
             exit();
@@ -715,14 +740,14 @@ $todayForPayment = goraSubscriptionToday()->format('Y-m-d');
               <strong data-subscription-i18n="Cotización para pago">Cotización para pago</strong>
               <div><?php echo htmlspecialchars($activeQuote['package'], ENT_QUOTES, 'UTF-8'); ?> —
                 <?php echo htmlspecialchars($activeQuote['payment_date'], ENT_QUOTES, 'UTF-8'); ?></div>
-              <div>Precio base: COP <?php echo number_format((float) $activeQuote['price_cop'], 0, ',', '.'); ?></div>
+              <div>Precio base: COP <?php echo goraFormatSubscriptionMoney($activeQuote['price_cop'], 'COP'); ?></div>
               <?php if ($activeQuote['payment_method'] === 'PayPal'): ?>
                 <div>TRM oficial: COP <?php echo number_format((float) $activeQuote['exchange_rate'], 4, ',', '.'); ?> por USD</div>
-                <div>Valor base: USD <?php echo htmlspecialchars($activeQuote['base_amount_usd'], ENT_QUOTES, 'UTF-8'); ?></div>
-                <div>Comisión estimada de PayPal: USD <?php echo htmlspecialchars($activeQuote['estimated_fee_usd'], ENT_QUOTES, 'UTF-8'); ?></div>
+                <div>Valor base: USD <?php echo goraFormatSubscriptionMoney($activeQuote['base_amount_usd'], 'USD'); ?></div>
+                <div>Comisión estimada de PayPal: USD <?php echo goraFormatSubscriptionMoney($activeQuote['estimated_fee_usd'], 'USD'); ?></div>
               <?php endif; ?>
               <div class="fs-5 fw-bold">Total a pagar: <?php echo htmlspecialchars($activeQuote['currency'], ENT_QUOTES, 'UTF-8'); ?>
-                <?php echo htmlspecialchars($activeQuote['quoted_amount'], ENT_QUOTES, 'UTF-8'); ?></div>
+                <?php echo goraFormatSubscriptionMoney($activeQuote['quoted_amount'], $activeQuote['currency']); ?></div>
               <?php if ($activeQuote['payment_method'] === 'Nequi'): ?>
                 <p class="mb-0">Envía el valor exacto al Nequi +57 305 429 3185.</p>
               <?php else: ?>
@@ -735,8 +760,8 @@ $todayForPayment = goraSubscriptionToday()->format('Y-m-d');
               <input type="hidden" name="quote_id" value="<?php echo htmlspecialchars($activeQuote['id'], ENT_QUOTES, 'UTF-8'); ?>">
               <div class="col-md-4">
                 <label class="form-label" for="amount-paid" data-subscription-i18n="Valor enviado">Valor enviado</label>
-                <input class="form-control" id="amount-paid" name="amount_paid" type="number" min="0.01" step="0.01"
-                  value="<?php echo htmlspecialchars($activeQuote['quoted_amount'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                <input class="form-control" id="amount-paid" name="amount_paid" type="text" inputmode="decimal"
+                  value="<?php echo goraFormatSubscriptionMoney($activeQuote['quoted_amount'], $activeQuote['currency']); ?>" required>
               </div>
               <div class="col-md-4">
                 <label class="form-label" for="payment-reference" data-subscription-i18n="Referencia de pago (opcional)">Referencia de pago (opcional)</label>
@@ -764,7 +789,8 @@ $todayForPayment = goraSubscriptionToday()->format('Y-m-d');
                       <td><?php echo htmlspecialchars($request['payment_date'], ENT_QUOTES, 'UTF-8'); ?></td>
                       <td><?php echo htmlspecialchars($request['package_name'], ENT_QUOTES, 'UTF-8'); ?></td>
                       <td><?php echo htmlspecialchars($request['payment_method'], ENT_QUOTES, 'UTF-8'); ?></td>
-                      <td><?php echo htmlspecialchars($request['currency'] . ' ' . $request['amount_paid'], ENT_QUOTES, 'UTF-8'); ?></td>
+                      <td><?php echo htmlspecialchars($request['currency'], ENT_QUOTES, 'UTF-8'); ?>
+                        <?php echo goraFormatSubscriptionMoney($request['amount_paid'], $request['currency']); ?></td>
                       <td><?php echo $request['status'] === 'pending' ? 'Pendiente' : ($request['status'] === 'approved' ? 'Aprobado' : 'Rechazado'); ?></td>
                       <td><?php echo htmlspecialchars($request['rejection_reason'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
                     </tr>

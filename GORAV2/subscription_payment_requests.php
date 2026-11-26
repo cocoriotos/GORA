@@ -2,6 +2,59 @@
 
 require_once __DIR__ . '/subscription_access.php';
 
+function goraFormatSubscriptionMoney($amount, string $currency): string
+{
+    $amountString = (string) $amount;
+    $decimals = $currency === 'COP' && preg_match('/\.0{1,2}$/D', $amountString) ? 0 : 2;
+    return number_format((float) $amountString, $decimals, ',', '.');
+}
+
+function goraNormalizeSubscriptionAmount(string $value): ?string
+{
+    $value = trim($value);
+    if (strpos($value, ',') !== false) {
+        if (!preg_match('/^(?:\d{1,3}(?:\.\d{3})+|\d+)(?:,\d{1,2})?$/D', $value)) {
+            return null;
+        }
+        return str_replace(',', '.', str_replace('.', '', $value));
+    }
+
+    if (preg_match('/^\d{1,3}(?:\.\d{3})+$/D', $value)) {
+        return str_replace('.', '', $value);
+    }
+
+    return preg_match('/^\d+(?:\.\d{1,2})?$/D', $value) ? $value : null;
+}
+
+function goraSendSubscriptionPaymentNotification(int $requestId, array $request): bool
+{
+    if (!function_exists('mail')) {
+        return false;
+    }
+
+    $subject = 'Nuevo reporte de pago de suscripcion GORA #' . $requestId;
+    $body = implode("\n", [
+        'Se recibió un nuevo reporte de pago de suscripción en GORA.',
+        '',
+        'Número de reporte: ' . $requestId,
+        'Usuario: ' . (string) ($request['username'] ?? ''),
+        'Plan: ' . (string) ($request['package_name'] ?? ''),
+        'Medio de pago: ' . (string) ($request['payment_method'] ?? ''),
+        'Fecha del pago: ' . (string) ($request['payment_date'] ?? ''),
+        'Valor reportado: ' . (string) ($request['currency'] ?? '')
+            . ' ' . goraFormatSubscriptionMoney($request['amount_paid'] ?? '0', (string) ($request['currency'] ?? '')),
+        'Referencia: ' . (string) ($request['payment_reference'] ?? 'No indicada'),
+        '',
+        'El comprobante está disponible en el panel de revisión de pagos. Confirme el pago antes de activar el acceso.',
+    ]);
+    $headers = "From: GORA <adm@solicionespro.com>\r\n"
+        . "Cc: cocoriotos1@gmail.com, goracoloficial@gmail.com\r\n"
+        . "Reply-To: adm@solicionespro.com\r\n"
+        . "Content-Type: text/plain; charset=UTF-8\r\n";
+
+    return mail('adm@solicionespro.com', $subject, $body, $headers);
+}
+
 function goraDecimalToScaledInteger(string $value, int $decimalPlaces): int
 {
     $pattern = '/^\d+(?:\.\d{1,' . $decimalPlaces . '})?$/D';
