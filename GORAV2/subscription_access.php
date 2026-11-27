@@ -230,7 +230,7 @@ function goraApplyPaidSubscription(
     $stmt = $conn->prepare(
         "SELECT active, suscriptionactive, suscriptionpayed, suscriptionkind,
                 subscription_expires_on, subscription_counting_starts_on,
-                lastsuscriptionpaymentdate
+                lastsuscriptionpaymentdate, registrationdate
          FROM videotips_app_access_list
          WHERE username = ?
          LIMIT 1
@@ -245,7 +245,8 @@ function goraApplyPaidSubscription(
         $kind,
         $expiryValue,
         $countStartValue,
-        $previousPaymentDateValue
+        $previousPaymentDateValue,
+        $registrationDateValue
     );
     if (!$stmt->fetch()) {
         $stmt->close();
@@ -256,6 +257,7 @@ function goraApplyPaidSubscription(
     $previousExpiry = goraSubscriptionDate($expiryValue);
     $previousCounterStart = goraSubscriptionDate($countStartValue);
     $previousPaymentDate = goraSubscriptionDate($previousPaymentDateValue);
+    $trialRegistrationDate = goraSubscriptionDate($registrationDateValue);
     $isRenewal = $previousExpiry !== null
         && $previousExpiry >= $paidOn
         && (int) $active === 1
@@ -263,11 +265,31 @@ function goraApplyPaidSubscription(
         && (int) $subscriptionPaid === 1
         && in_array((string) $kind, ['De Pago', 'Vencida', 'Suspendida'], true);
 
-    $expiryBase = $isRenewal ? $previousExpiry : $paidOn;
+    $trialElapsedDaysAtPayment = $trialRegistrationDate !== null && $trialRegistrationDate <= $paidOn
+        ? (int) $trialRegistrationDate->diff($paidOn)->days
+        : null;
+    $trialDaysRemainingAtPayment = $trialElapsedDaysAtPayment === null
+        ? 0
+        : max(30 - $trialElapsedDaysAtPayment, 0);
+    $preserveTrial = !$isRenewal
+        && $previousExpiry === null
+        && (int) $active === 1
+        && (int) $subscriptionActive === 0
+        && (int) $subscriptionPaid === 0
+        && in_array((string) $kind, ['Trial', 'Vencida'], true)
+        && $trialDaysRemainingAtPayment > 0;
+
+    $expiryBase = $isRenewal
+        ? $previousExpiry
+        : ($preserveTrial
+            ? $trialRegistrationDate->modify('+29 days')
+            : $paidOn);
     $newExpiry = $expiryBase->modify('+' . $termDays . ' days');
     if ($isRenewal) {
         $counterStarts = $previousCounterStart
             ?? ($previousPaymentDate !== null ? $previousPaymentDate->modify('+1 day') : $paidOn->modify('+1 day'));
+    } elseif ($preserveTrial) {
+        $counterStarts = $trialRegistrationDate->modify('+30 days');
     } else {
         $counterStarts = $paidOn->modify('+1 day');
     }
