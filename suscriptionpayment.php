@@ -211,6 +211,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+if (goraRefreshSubscriptionAccess($conn, $local_username) === null && $paymentRequestError === '') {
+    $paymentRequestError = 'No fue posible consultar el estado de acceso de la cuenta.';
+}
+
 $requestStmt = $conn->prepare(
     'SELECT package_name, payment_method, payment_date, amount_paid, currency,
             status, rejection_reason, created_at

@@ -71,9 +71,37 @@ function financeSalesCodePart(string $value): string
     return substr($letters, 0, 3);
 }
 
-function financeRedirect(string $month, string $userEmail, string $anchor): void
+function financeNormalizeBeneficiaryFilter(string $filter): string
 {
-    $query = http_build_query(['month' => $month, 'user' => $userEmail]);
+    $filter = trim($filter);
+    if (preg_match('/^seller-([1-9]\d*)$/D', $filter, $matches)) {
+        return 'seller-' . (int) $matches[1];
+    }
+
+    return in_array($filter, ['all', 'investment', 'sellers', 'owners', 'fedsal', 'julgon'], true)
+        ? $filter
+        : 'all';
+}
+
+function financeNormalizeAllocationStatus(string $status): string
+{
+    return in_array($status, ['all', 'pending', 'paid'], true) ? $status : 'all';
+}
+
+function financeRedirect(
+    string $month,
+    string $userEmail,
+    string $anchor,
+    string $beneficiary,
+    string $allocationStatus
+): void
+{
+    $query = http_build_query([
+        'month' => $month,
+        'user' => $userEmail,
+        'beneficiary' => $beneficiary,
+        'allocation_status' => $allocationStatus,
+    ]);
     header('Location: SubscriptionFinance.php?' . $query . '#' . $anchor, true, 303);
     exit();
 }
@@ -84,6 +112,8 @@ if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/D', $selectedMonth)) {
     $selectedMonth = date('Y-m');
 }
 $selectedUser = trim((string) ($_GET['user'] ?? ''));
+$selectedBeneficiary = financeNormalizeBeneficiaryFilter((string) ($_GET['beneficiary'] ?? 'all'));
+$selectedAllocationStatus = financeNormalizeAllocationStatus((string) ($_GET['allocation_status'] ?? 'all'));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postedMonth = (string) ($_POST['month'] ?? $selectedMonth);
@@ -91,6 +121,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $postedMonth = $selectedMonth;
     }
     $postedUser = trim((string) ($_POST['user_filter'] ?? $selectedUser));
+    $postedBeneficiary = financeNormalizeBeneficiaryFilter((string) ($_POST['beneficiary_filter'] ?? $selectedBeneficiary));
+    $postedAllocationStatus = financeNormalizeAllocationStatus((string) ($_POST['allocation_status_filter'] ?? $selectedAllocationStatus));
 
     try {
         $postedToken = (string) ($_POST['csrf_token'] ?? '');
@@ -144,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->close();
 
             $_SESSION['subscription_finance_flash'] = ['type' => 'success', 'message' => 'Vendedor registrado. Código: ' . $salesCode];
-            financeRedirect($postedMonth, $postedUser, 'sellers');
+            financeRedirect($postedMonth, $postedUser, 'sellers', $postedBeneficiary, $postedAllocationStatus);
         }
 
         if ($action === 'add_subscription_payment') {
@@ -289,7 +321,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ? 'Pago registrado, comprobante guardado y suscripción actualizada.'
                     : 'Pago registrado en control financiero; el reporte pendiente quedó confirmado y vinculado.',
             ];
-            financeRedirect($paymentMonth, $userEmail, 'subscription-payments');
+            financeRedirect($paymentMonth, $userEmail, 'subscription-payments', $postedBeneficiary, $postedAllocationStatus);
         }
 
         if ($action === 'mark_allocation_paid') {
@@ -313,7 +345,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $_SESSION['subscription_finance_flash'] = ['type' => 'success', 'message' => 'Cuota marcada como pagada.'];
-            financeRedirect($postedMonth, $postedUser, 'monthly-distributions');
+            financeRedirect($postedMonth, $postedUser, 'monthly-distributions', $postedBeneficiary, $postedAllocationStatus);
         }
 
         throw new InvalidArgumentException('La acción solicitada no es válida.');
@@ -363,6 +395,31 @@ while ($row = $sellerResult->fetch_assoc()) {
 }
 $sellerResult->free();
 
+$allocationFilterSql = '1 = 1';
+switch ($selectedBeneficiary) {
+    case 'investment':
+        $allocationFilterSql = "a.allocation_type = 'investment'";
+        break;
+    case 'sellers':
+        $allocationFilterSql = "a.allocation_type = 'seller'";
+        break;
+    case 'owners':
+        $allocationFilterSql = "a.allocation_type IN ('fedsal', 'julgon')";
+        break;
+    case 'fedsal':
+    case 'julgon':
+        $allocationFilterSql = "a.allocation_type = '" . $selectedBeneficiary . "'";
+        break;
+    default:
+        if (preg_match('/^seller-([1-9]\d*)$/D', $selectedBeneficiary, $sellerMatch)) {
+            $allocationFilterSql = "a.allocation_type = 'seller' AND p.seller_id = " . (int) $sellerMatch[1];
+        }
+        break;
+}
+$allocationStatusSql = $selectedAllocationStatus === 'all'
+    ? ''
+    : " AND a.status = '" . $selectedAllocationStatus . "'";
+
 $paymentStmt = $conn->prepare(
     'SELECT p.payment_id, p.user_email, p.package_name, p.payment_date, p.amount, p.currency,
             p.payment_method, p.payment_reference, p.proof_file, s.first_name, s.last_name, s.sales_code,
@@ -386,6 +443,7 @@ $allocationStmt = $conn->prepare(
      JOIN gora_subscription_sales p ON p.payment_id = a.payment_id
      JOIN gora_finance_sellers s ON s.seller_id = p.seller_id
      WHERE a.payment_month = ? AND (? = \'\' OR p.user_email = ?)
+       AND (' . $allocationFilterSql . ')' . $allocationStatusSql . '
      ORDER BY a.status = \'pending\' DESC, p.payment_date, a.payment_id, a.allocation_id'
 );
 $allocationStmt->bind_param('sss', $selectedMonth, $selectedUser, $selectedUser);
@@ -406,12 +464,19 @@ $totals = $totalsStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $totalsStmt->close();
 
 $allocationTotalsStmt = $conn->prepare(
-    'SELECT a.allocation_type, a.currency, a.status, SUM(a.amount) AS total_amount
+    'SELECT a.allocation_type, a.currency, a.status, SUM(a.amount) AS total_amount,
+            MAX(CASE WHEN a.allocation_type = \'seller\' THEN s.sales_code END) AS sales_code,
+            MAX(CASE WHEN a.allocation_type = \'seller\' THEN s.first_name END) AS first_name,
+            MAX(CASE WHEN a.allocation_type = \'seller\' THEN s.last_name END) AS last_name
      FROM gora_subscription_allocations a
      JOIN gora_subscription_sales p ON p.payment_id = a.payment_id
+     JOIN gora_finance_sellers s ON s.seller_id = p.seller_id
      WHERE a.payment_month = ? AND a.status <> \'not_applicable\'
        AND (? = \'\' OR p.user_email = ?)
-     GROUP BY a.allocation_type, a.currency, a.status
+       AND (' . $allocationFilterSql . ')' . $allocationStatusSql . '
+     GROUP BY a.allocation_type,
+              CASE WHEN a.allocation_type = \'seller\' THEN p.seller_id ELSE 0 END,
+              a.currency, a.status
      ORDER BY a.allocation_type, a.currency, a.status'
 );
 $allocationTotalsStmt->bind_param('sss', $selectedMonth, $selectedUser, $selectedUser);
@@ -529,6 +594,8 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
                 <input type="hidden" name="action" value="add_seller">
                 <input type="hidden" name="month" value="<?php echo financeEscape($selectedMonth); ?>">
                 <input type="hidden" name="user_filter" value="<?php echo financeEscape($selectedUser); ?>">
+                <input type="hidden" name="beneficiary_filter" value="<?php echo financeEscape($selectedBeneficiary); ?>">
+                <input type="hidden" name="allocation_status_filter" value="<?php echo financeEscape($selectedAllocationStatus); ?>">
                 <label><span data-finance-i18n="first_name">Nombre</span><input name="first_name" maxlength="100" required></label>
                 <label><span data-finance-i18n="last_name">Apellido</span><input name="last_name" maxlength="100" required></label>
                 <label><span data-finance-i18n="document_number">Número de identificación completo</span><input name="document_number" inputmode="numeric" pattern="[0-9]{4,50}" maxlength="50" autocomplete="off" required></label>
@@ -566,6 +633,8 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
                 <input type="hidden" name="action" value="add_subscription_payment">
                 <input type="hidden" name="month" value="<?php echo financeEscape($selectedMonth); ?>">
                 <input type="hidden" name="user_filter" value="<?php echo financeEscape($selectedUser); ?>">
+                <input type="hidden" name="beneficiary_filter" value="<?php echo financeEscape($selectedBeneficiary); ?>">
+                <input type="hidden" name="allocation_status_filter" value="<?php echo financeEscape($selectedAllocationStatus); ?>">
                 <label><span data-finance-i18n="user">Usuario</span>
                     <select name="user_email" required>
                         <option value="" data-finance-i18n="select_user">Seleccione usuario</option>
@@ -631,6 +700,29 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
                         <?php endforeach; ?>
                     </select>
                 </label>
+                <label><span data-finance-i18n="filter_beneficiary">Beneficiario (distribuciones)</span>
+                    <select name="beneficiary">
+                        <option value="all" <?php echo $selectedBeneficiary === 'all' ? 'selected' : ''; ?> data-finance-i18n="all_beneficiaries">Todos</option>
+                        <option value="investment" <?php echo $selectedBeneficiary === 'investment' ? 'selected' : ''; ?> data-finance-i18n="investment">Fondo de inversión</option>
+                        <option value="sellers" <?php echo $selectedBeneficiary === 'sellers' ? 'selected' : ''; ?> data-finance-i18n="all_sellers">Todos los vendedores</option>
+                        <?php foreach ($sellers as $seller): ?>
+                            <?php $sellerFilter = 'seller-' . (int) $seller['seller_id']; ?>
+                            <option value="<?php echo financeEscape($sellerFilter); ?>" <?php echo $selectedBeneficiary === $sellerFilter ? 'selected' : ''; ?>>
+                                <?php echo financeEscape($seller['sales_code'] . ' — ' . $seller['first_name'] . ' ' . $seller['last_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                        <option value="owners" <?php echo $selectedBeneficiary === 'owners' ? 'selected' : ''; ?> data-finance-i18n="all_owners">Ambos propietarios</option>
+                        <option value="fedsal" <?php echo $selectedBeneficiary === 'fedsal' ? 'selected' : ''; ?>>FedSal</option>
+                        <option value="julgon" <?php echo $selectedBeneficiary === 'julgon' ? 'selected' : ''; ?>>JulGon</option>
+                    </select>
+                </label>
+                <label><span data-finance-i18n="filter_allocation_status">Estado de distribución</span>
+                    <select name="allocation_status">
+                        <option value="all" <?php echo $selectedAllocationStatus === 'all' ? 'selected' : ''; ?> data-finance-i18n="all_statuses">Todos</option>
+                        <option value="pending" <?php echo $selectedAllocationStatus === 'pending' ? 'selected' : ''; ?> data-finance-i18n="pending">Pendiente</option>
+                        <option value="paid" <?php echo $selectedAllocationStatus === 'paid' ? 'selected' : ''; ?> data-finance-i18n="paid">Pagado</option>
+                    </select>
+                </label>
                 <button class="finance-button secondary" type="submit"><i class="fa-solid fa-filter"></i> <span data-finance-i18n="apply_filter">Aplicar filtro</span></button>
             </form>
         </div>
@@ -676,10 +768,15 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
         </div>
 
         <h2 id="monthly-distributions" data-finance-i18n="monthly_distributions">Comisiones y distribuciones del mes</h2>
+        <p class="finance-note" data-finance-i18n="allocation_filter_note">Los totales respetan los filtros seleccionados y mantienen COP y USD separados.</p>
         <div class="finance-summary">
             <?php foreach ($allocationTotals as $total): ?>
                 <span>
-                    <span data-finance-i18n="<?php echo financeEscape($total['allocation_type'] === 'investment' ? 'investment' : ($total['allocation_type'] === 'seller' ? 'seller' : $total['allocation_type'])); ?>"><?php echo financeEscape($allocationLabels[$total['allocation_type']] ?? $total['allocation_type']); ?></span>
+                    <?php if ($total['allocation_type'] === 'seller'): ?>
+                        <?php echo financeEscape($total['sales_code'] . ' — ' . $total['first_name'] . ' ' . $total['last_name']); ?>
+                    <?php else: ?>
+                        <span data-finance-i18n="<?php echo financeEscape($total['allocation_type'] === 'investment' ? 'investment' : $total['allocation_type']); ?>"><?php echo financeEscape($allocationLabels[$total['allocation_type']] ?? $total['allocation_type']); ?></span>
+                    <?php endif; ?>
                     — <?php echo financeEscape($total['currency']); ?>
                     — <span data-finance-i18n="<?php echo financeEscape($total['status']); ?>"><?php echo financeEscape($statusLabels[$total['status']] ?? $total['status']); ?></span>:
                     <?php echo financeEscape(number_format((float) $total['total_amount'], 2)); ?>
@@ -722,6 +819,8 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
                                     <input type="hidden" name="allocation_id" value="<?php echo (int) $allocation['allocation_id']; ?>">
                                     <input type="hidden" name="month" value="<?php echo financeEscape($selectedMonth); ?>">
                                     <input type="hidden" name="user_filter" value="<?php echo financeEscape($selectedUser); ?>">
+                                    <input type="hidden" name="beneficiary_filter" value="<?php echo financeEscape($selectedBeneficiary); ?>">
+                                    <input type="hidden" name="allocation_status_filter" value="<?php echo financeEscape($selectedAllocationStatus); ?>">
                                     <input type="text" name="paid_reference" maxlength="150" data-finance-i18n-placeholder="paid_reference_placeholder" placeholder="Referencia del pago (opcional)">
                                     <button class="finance-button small" type="submit"><span data-finance-i18n="mark_paid">Marcar pagado</span></button>
                                 </form>
@@ -752,6 +851,9 @@ const financeTranslations = {
         bank_transfer:'Transferencia',cash:'Efectivo',other:'Otro',payment_reference:'Referencia de pago (opcional)',payment_proof:'Comprobante (obligatorio, máximo 5 MB)',payment_proof_short:'Comprobante',view_proof:'Ver comprobante',select_seller:'Seleccione vendedor',
         save_payment:'Guardar pago y actualizar acceso',split_note:'El importe se reparte automáticamente: 10% inversión, 10% vendedor, 40% FedSal y 40% JulGon. Se redondea al centavo y el reparto siempre suma el pago total. Las cuotas se registran pendientes para el mes del pago; los importes se mantienen separados por moneda.',
         monthly_reports:'Reportes por mes o usuario',month:'Mes',filter_user:'Usuario (opcional)',all_users:'Todos los usuarios',apply_filter:'Aplicar filtro',
+        filter_beneficiary:'Beneficiario (distribuciones)',all_beneficiaries:'Todos los beneficiarios',all_sellers:'Todos los vendedores',
+        all_owners:'Ambos propietarios',filter_allocation_status:'Estado de distribución',all_statuses:'Todos los estados',
+        allocation_filter_note:'Los totales respetan los filtros seleccionados y mantienen COP y USD separados.',
         no_month_payments:'Sin pagos registrados para este filtro.',subscription_payments:'Pagos de suscripción',payment_reference_short:'Referencia',recorded_by:'Registrado por',
         monthly_distributions:'Comisiones y distribuciones del mes',beneficiary:'Beneficiario / reparto',percentage:'Porcentaje',payout_status:'Estado de pago',
         paid_date:'Fecha pagado',payout_action:'Registro de pago',no_month_allocations:'Sin comisiones o distribuciones para este filtro.',
@@ -771,6 +873,9 @@ const financeTranslations = {
         bank_transfer:'Bank transfer',cash:'Cash',other:'Other',payment_reference:'Payment reference (optional)',payment_proof:'Receipt (required, maximum 5 MB)',payment_proof_short:'Receipt',view_proof:'View receipt',select_seller:'Select seller',
         save_payment:'Save payment and update access',split_note:'The amount is automatically allocated: 10% investment, 10% seller, 40% FedSal and 40% JulGon. Allocations are rounded to the cent and always add up to the full payment. They are pending in the payment month; amounts remain separated by currency.',
         monthly_reports:'Reports by month or user',month:'Month',filter_user:'User (optional)',all_users:'All users',apply_filter:'Apply filter',
+        filter_beneficiary:'Beneficiary (allocations)',all_beneficiaries:'All beneficiaries',all_sellers:'All sellers',
+        all_owners:'Both owners',filter_allocation_status:'Allocation status',all_statuses:'All statuses',
+        allocation_filter_note:'Totals follow the selected filters and keep COP and USD separate.',
         no_month_payments:'No payments for this filter.',subscription_payments:'Subscription payments',payment_reference_short:'Reference',recorded_by:'Recorded by',
         monthly_distributions:'Monthly commissions and allocations',beneficiary:'Beneficiary / allocation',percentage:'Percentage',payout_status:'Payment status',
         paid_date:'Date paid',payout_action:'Payment record',no_month_allocations:'No commissions or allocations for this filter.',
@@ -790,6 +895,9 @@ const financeTranslations = {
         bank_transfer:'Transferência',cash:'Dinheiro',other:'Outro',payment_reference:'Referência de pagamento (opcional)',payment_proof:'Comprovante (obrigatório, máximo 5 MB)',payment_proof_short:'Comprovante',view_proof:'Ver comprovante',select_seller:'Selecione o vendedor',
         save_payment:'Salvar pagamento e atualizar acesso',split_note:'O valor é distribuído automaticamente: 10% investimento, 10% vendedor, 40% FedSal e 40% JulGon. Os valores são arredondados ao centavo e sempre somam o total pago. As parcelas ficam pendentes no mês do pagamento; os valores permanecem separados por moeda.',
         monthly_reports:'Relatórios por mês ou usuário',month:'Mês',filter_user:'Usuário (opcional)',all_users:'Todos os usuários',apply_filter:'Aplicar filtro',
+        filter_beneficiary:'Beneficiário (distribuições)',all_beneficiaries:'Todos os beneficiários',all_sellers:'Todos os vendedores',
+        all_owners:'Ambos os proprietários',filter_allocation_status:'Status da distribuição',all_statuses:'Todos os status',
+        allocation_filter_note:'Os totais respeitam os filtros selecionados e mantêm COP e USD separados.',
         no_month_payments:'Não há pagamentos para este filtro.',subscription_payments:'Pagamentos de assinatura',payment_reference_short:'Referência',recorded_by:'Registrado por',
         monthly_distributions:'Comissões e distribuições do mês',beneficiary:'Beneficiário / distribuição',percentage:'Percentual',payout_status:'Status do pagamento',
         paid_date:'Data do pagamento',payout_action:'Registro do pagamento',no_month_allocations:'Não há comissões ou distribuições para este filtro.',
