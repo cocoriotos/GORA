@@ -42,7 +42,7 @@ $result = mysqli_query($conn, $query);
 $query2 = "SELECT COUNT(*) as suscriptionstodue FROM videotips_app_access_list
            WHERE active = 1 AND suscriptionactive = 1 AND suscriptionpayed = 1
              AND suscriptionkind = 'De Pago'
-             AND DATEDIFF(subscription_expires_on, CURDATE()) BETWEEN 0 AND 30";
+             AND suscriptiondaysleft BETWEEN 1 AND 30";
 $result2 = mysqli_query($conn, $query2);
 
 $query3 = "SELECT COUNT(*) as pendingaccess FROM videotips_accessrequests WHERE (processed = 'No'and granted = 'No')";
@@ -54,12 +54,12 @@ $result17 = mysqli_query($conn, $query17);
 $query18 = "UPDATE videotips_app_access_list a JOIN (SELECT username, COUNT(*) AS link_count FROM videotips_videotips GROUP BY username) v ON a.username = v.username SET a.linksquantity = v.link_count";
 $result18 = mysqli_query($conn, $query18);
 
-$paidExpiryDaysSql = 'DATEDIFF(subscription_expires_on, CURDATE())';
-$trialExpiryDaysSql = 'DATEDIFF(DATE_ADD(DATE(registrationdate), INTERVAL 29 DAY), CURDATE())';
+$paidRemainingDaysSql = 'suscriptiondaysleft';
+$trialRemainingDaysSql = 'daystoenjoy';
 $paidSubscriptionFilterSql = "active = 1 AND suscriptionactive = 1 AND suscriptionpayed = 1 AND suscriptionkind = 'De Pago'";
 $unpaidSubscriptionFilterSql = "active = 1 AND suscriptionactive = 0 AND suscriptionpayed = 0 AND suscriptionkind = 'Trial'";
 $monthRanges = [
-    [0, 30], [31, 60], [61, 90], [91, 120], [121, 150], [151, 180],
+    [1, 30], [31, 60], [61, 90], [91, 120], [121, 150], [151, 180],
     [181, 210], [211, 240], [241, 270], [271, 300], [301, 330], [331, 366],
 ];
 $paidMonthAliases = [
@@ -74,11 +74,11 @@ $unpaidMonthAliases = [
     'tensuscriptionsnopayed', 'elevensuscriptionsnopayed', 'twelvesuscriptionsnopayed',
 ];
 $monthlySummaryColumns = [
-    "SUM(CASE WHEN $unpaidSubscriptionFilterSql AND $trialExpiryDaysSql BETWEEN 0 AND 366 THEN 1 ELSE 0 END) AS active_users",
+    "SUM(CASE WHEN $unpaidSubscriptionFilterSql AND $trialRemainingDaysSql BETWEEN 1 AND 366 THEN 1 ELSE 0 END) AS active_users",
 ];
 foreach ($monthRanges as $index => [$minimumDays, $maximumDays]) {
-    $monthlySummaryColumns[] = "SUM(CASE WHEN $paidSubscriptionFilterSql AND $paidExpiryDaysSql BETWEEN $minimumDays AND $maximumDays THEN 1 ELSE 0 END) AS " . $paidMonthAliases[$index];
-    $monthlySummaryColumns[] = "SUM(CASE WHEN $unpaidSubscriptionFilterSql AND $trialExpiryDaysSql BETWEEN $minimumDays AND $maximumDays THEN 1 ELSE 0 END) AS " . $unpaidMonthAliases[$index];
+    $monthlySummaryColumns[] = "SUM(CASE WHEN $paidSubscriptionFilterSql AND $paidRemainingDaysSql BETWEEN $minimumDays AND $maximumDays THEN 1 ELSE 0 END) AS " . $paidMonthAliases[$index];
+    $monthlySummaryColumns[] = "SUM(CASE WHEN $unpaidSubscriptionFilterSql AND $trialRemainingDaysSql BETWEEN $minimumDays AND $maximumDays THEN 1 ELSE 0 END) AS " . $unpaidMonthAliases[$index];
 }
 $query1 = 'SELECT ' . implode(', ', $monthlySummaryColumns) . ' FROM videotips_app_access_list';
 $result1 = mysqli_query($conn, $query1);
