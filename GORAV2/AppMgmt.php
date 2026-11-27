@@ -39,53 +39,14 @@ $subscriptionUsersResult->free();
 $query = "SELECT COUNT(suscriptionpayed) as total_suscriptions FROM videotips_app_access_list WHERE suscriptionpayed = 1 and suscriptionkind = 'De Pago'";
 $result = mysqli_query($conn, $query);
 
-/*$query1 = "SELECT COUNT(active) as active_users FROM videotips_app_access_list WHERE active = 1 and suscriptionpayed = 1 and suscriptiondaysleft > 0 and suscriptionkind <> 'De Pago'";
-$result1 = mysqli_query($conn, $query1);*/
-
-$query1 = "SELECT COUNT(active) as active_users FROM videotips_app_access_list WHERE suscriptionkind <> 'De Pago'";
-$result1 = mysqli_query($conn, $query1);
-
-$query2 = "SELECT COUNT(*) as suscriptionstodue FROM videotips_app_access_list WHERE (active = 1 and suscriptionpayed = 1 and suscriptiondaysleft BETWEEN 0 AND 30 and suscriptionkind = 'De Pago')";
+$query2 = "SELECT COUNT(*) as suscriptionstodue FROM videotips_app_access_list
+           WHERE active = 1 AND suscriptionactive = 1 AND suscriptionpayed = 1
+             AND suscriptionkind = 'De Pago'
+             AND DATEDIFF(subscription_expires_on, CURDATE()) BETWEEN 0 AND 30";
 $result2 = mysqli_query($conn, $query2);
 
 $query3 = "SELECT COUNT(*) as pendingaccess FROM videotips_accessrequests WHERE (processed = 'No'and granted = 'No')";
 $result3 = mysqli_query($conn, $query3);
-
-$query5 = "SELECT COUNT(*) as monthsuscriptions FROM videotips_app_access_list  WHERE  suscriptionkind = 'De Pago' and (suscriptiondaysleft between 0 and 30)";
-$result5 = mysqli_query($conn, $query5);
-
-$query6 = "SELECT COUNT(*) as twosuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 31 and 60)";
-$result6 = mysqli_query($conn, $query6);
-
-$query7 = "SELECT COUNT(*) as threesuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 61 and 90)";
-$result7 = mysqli_query($conn, $query7);
-
-$query8 = "SELECT COUNT(*) as foursuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 91 and 120)";
-$result8 = mysqli_query($conn, $query8);
-
-$query9 = "SELECT COUNT(*) as fivesuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 121 and 150)";
-$result9 = mysqli_query($conn, $query9);
-
-$query10 = "SELECT COUNT(*) as sixsuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 151 and 180)";
-$result10 = mysqli_query($conn, $query10);
-
-$query11 = "SELECT COUNT(*) as sevensuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 181 and 210)";
-$result11 = mysqli_query($conn, $query11);
-
-$query12 = "SELECT COUNT(*) as eightsuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 211 and 240)";
-$result12 = mysqli_query($conn, $query12);
-
-$query13 = "SELECT COUNT(*) as ninesuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 241 and 270)";
-$result13 = mysqli_query($conn, $query13);
-
-$query14 = "SELECT COUNT(*) as tensuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 271 and 300)";
-$result14 = mysqli_query($conn, $query14);
-
-$query15 = "SELECT COUNT(*) as elevensuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 301 and 330)";
-$result15 = mysqli_query($conn, $query15);
-
-$query16 = "SELECT COUNT(*) as twelvesuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 331 and 366)";
-$result16 = mysqli_query($conn, $query16);
 
 $query17 = "UPDATE videotips_app_access_list SET suscriptionpayed = 0 WHERE trialdaysleft  > 31 and suscriptionkind = 'Trial'";
 $result17 = mysqli_query($conn, $query17);
@@ -93,104 +54,75 @@ $result17 = mysqli_query($conn, $query17);
 $query18 = "UPDATE videotips_app_access_list a JOIN (SELECT username, COUNT(*) AS link_count FROM videotips_videotips GROUP BY username) v ON a.username = v.username SET a.linksquantity = v.link_count";
 $result18 = mysqli_query($conn, $query18);
 
-$query19 = "SELECT COUNT(*) as monthsuscriptionsnopayed FROM videotips_app_access_list  WHERE  suscriptionkind <> 'De Pago' and (365-suscriptiondaysleft between 0 and 30)";
-$result19 = mysqli_query($conn, $query19);
+$paidExpiryDaysSql = 'DATEDIFF(subscription_expires_on, CURDATE())';
+$trialExpiryDaysSql = 'DATEDIFF(DATE_ADD(DATE(registrationdate), INTERVAL 29 DAY), CURDATE())';
+$paidSubscriptionFilterSql = "active = 1 AND suscriptionactive = 1 AND suscriptionpayed = 1 AND suscriptionkind = 'De Pago'";
+$unpaidSubscriptionFilterSql = "active = 1 AND suscriptionactive = 0 AND suscriptionpayed = 0 AND suscriptionkind = 'Trial'";
+$monthRanges = [
+    [0, 30], [31, 60], [61, 90], [91, 120], [121, 150], [151, 180],
+    [181, 210], [211, 240], [241, 270], [271, 300], [301, 330], [331, 366],
+];
+$paidMonthAliases = [
+    'monthsuscriptions', 'twosuscriptions', 'threesuscriptions', 'foursuscriptions',
+    'fivesuscriptions', 'sixsuscriptions', 'sevensuscriptions', 'eightsuscriptions',
+    'ninesuscriptions', 'tensuscriptions', 'elevensuscriptions', 'twelvesuscriptions',
+];
+$unpaidMonthAliases = [
+    'monthsuscriptionsnopayed', 'twosuscriptionsnopayed', 'threesuscriptionsnopayed',
+    'foursuscriptionsnopayed', 'fivesuscriptionsnopayed', 'sixsuscriptionsnopayed',
+    'sevensuscriptionsnopayed', 'eightsuscriptionsnopayed', 'ninesuscriptionsnopayed',
+    'tensuscriptionsnopayed', 'elevensuscriptionsnopayed', 'twelvesuscriptionsnopayed',
+];
+$monthlySummaryColumns = [
+    "SUM(CASE WHEN $unpaidSubscriptionFilterSql AND $trialExpiryDaysSql BETWEEN 0 AND 366 THEN 1 ELSE 0 END) AS active_users",
+];
+foreach ($monthRanges as $index => [$minimumDays, $maximumDays]) {
+    $monthlySummaryColumns[] = "SUM(CASE WHEN $paidSubscriptionFilterSql AND $paidExpiryDaysSql BETWEEN $minimumDays AND $maximumDays THEN 1 ELSE 0 END) AS " . $paidMonthAliases[$index];
+    $monthlySummaryColumns[] = "SUM(CASE WHEN $unpaidSubscriptionFilterSql AND $trialExpiryDaysSql BETWEEN $minimumDays AND $maximumDays THEN 1 ELSE 0 END) AS " . $unpaidMonthAliases[$index];
+}
+$query1 = 'SELECT ' . implode(', ', $monthlySummaryColumns) . ' FROM videotips_app_access_list';
+$result1 = mysqli_query($conn, $query1);
+if ($result1 === false) {
+    error_log('Operations subscription expiry summary failed: ' . mysqli_error($conn));
+    throw new RuntimeException('No fue posible calcular los vencimientos de suscripción por mes.');
+}
 
-$query21 = "SELECT COUNT(*) as twosuscriptionsnopayed FROM videotips_app_access_list  WHERE suscriptionkind <> 'De Pago' and (365-suscriptiondaysleft between 31 and 60)";
-$result21 = mysqli_query($conn, $query21);
-
-$query22 = "SELECT COUNT(*) as threesuscriptionsnopayed FROM videotips_app_access_list  WHERE suscriptionkind <> 'De Pago' and (365-suscriptiondaysleft between 61 and 90)";
-$result22 = mysqli_query($conn, $query22);
-
-$query23 = "SELECT COUNT(*) as foursuscriptionsnopayed FROM videotips_app_access_list  WHERE suscriptionkind <> 'De Pago' and (365-suscriptiondaysleft between 91 and 120)";
-$result23= mysqli_query($conn, $query23);
-
-$query24 = "SELECT COUNT(*) as fivesuscriptionsnopayed FROM videotips_app_access_list  WHERE suscriptionkind <> 'De Pago' and (365-suscriptiondaysleft between 121 and 150)";
-$result24 = mysqli_query($conn, $query24);
-
-$query25 = "SELECT COUNT(*) as sixsuscriptionsnopayed FROM videotips_app_access_list  WHERE suscriptionkind <> 'De Pago' and (365-suscriptiondaysleft between 151 and 180)";
-$result25 = mysqli_query($conn, $query25);
-
-$query26 = "SELECT COUNT(*) as sevensuscriptionsnopayed FROM videotips_app_access_list  WHERE suscriptionkind <> 'De Pago' and (365-suscriptiondaysleft between 181 and 210)";
-$result26 = mysqli_query($conn, $query26);
-
-$query27 = "SELECT COUNT(*) as eightsuscriptionsnopayed FROM videotips_app_access_list  WHERE suscriptionkind <> 'De Pago' and (365-suscriptiondaysleft between 211 and 240)";
-$result27 = mysqli_query($conn, $query27);
-
-$query28 = "SELECT COUNT(*) as ninesuscriptionsnopayed FROM videotips_app_access_list  WHERE suscriptionkind <> 'De Pago' and (365-suscriptiondaysleft between 241 and 270)";
-$result28 = mysqli_query($conn, $query28);
-
-$query29 = "SELECT COUNT(*) as tensuscriptionsnopayed FROM videotips_app_access_list  WHERE suscriptionkind <> 'De Pago' and (365-suscriptiondaysleft between 271 and 300)";
-$result29 = mysqli_query($conn, $query29);
-
-$query30 = "SELECT COUNT(*) as elevensuscriptionsnopayed FROM videotips_app_access_list  WHERE suscriptionkind <> 'De Pago' and (365-suscriptiondaysleft between 301 and 330)";
-$result30 = mysqli_query($conn, $query30);
-
-$query20 = "SELECT COUNT(*) as twelvesuscriptionsnopayed FROM videotips_app_access_list  WHERE suscriptionkind <> 'De Pago' and (365-suscriptiondaysleft between 331 and 366)";
-$result20 = mysqli_query($conn, $query20);
-
-if (($result) && ($result1)) {
+if (($result) && ($result1) && ($result2) && ($result3)) {
     $row = mysqli_fetch_assoc($result);
     $total_suscriptions = $row['total_suscriptions'];
-    $row1 = mysqli_fetch_assoc($result1);
-    $active_users = $row1['active_users'];
     $row2 = mysqli_fetch_assoc($result2);
     $suscriptionstodue = $row2['suscriptionstodue'];
     $row3 = mysqli_fetch_assoc($result3);
     $pendingaccess = $row3['pendingaccess'];
-    $row5 = mysqli_fetch_assoc($result5);
-    $monthsuscriptions = $row5['monthsuscriptions'];
-    $row6 = mysqli_fetch_assoc($result6);
-    $twosuscriptions = $row6['twosuscriptions'];
-    $row7 = mysqli_fetch_assoc($result7);
-    $threesuscriptions = $row7['threesuscriptions'];
-    $row8 = mysqli_fetch_assoc($result8);
-    $foursuscriptions = $row8['foursuscriptions'];
-    $row9 = mysqli_fetch_assoc($result9);
-    $fivesuscriptions = $row9['fivesuscriptions'];
-    $row10 = mysqli_fetch_assoc($result10);
-    $sixsuscriptions = $row10['sixsuscriptions'];
-    $row11 = mysqli_fetch_assoc($result11);
-    $sevensuscriptions = $row11['sevensuscriptions'];
-    $row12 = mysqli_fetch_assoc($result12);
-    $eightsuscriptions = $row12['eightsuscriptions'];
-    $row13 = mysqli_fetch_assoc($result13);
-    $ninesuscriptions = $row13['ninesuscriptions'];
-    $row14 = mysqli_fetch_assoc($result14);
-    $tensuscriptions = $row14['tensuscriptions'];
-    $row15 = mysqli_fetch_assoc($result15);
-    $elevensuscriptions = $row15['elevensuscriptions'];
-    $row16 = mysqli_fetch_assoc($result16);
-    $twelvesuscriptions = $row16['twelvesuscriptions'];
-    $row19 = mysqli_fetch_assoc($result19);
-    $monthsuscriptionsnopayed = $row19['monthsuscriptionsnopayed'];
-    $row21 = mysqli_fetch_assoc($result21);
-    $twosuscriptionsnopayed = $row21['twosuscriptionsnopayed'];
-    $row22 = mysqli_fetch_assoc($result22);
-    $threesuscriptionsnopayed = $row22['threesuscriptionsnopayed'];
-    $row23 = mysqli_fetch_assoc($result23);
-    $foursuscriptionsnopayed = $row23['foursuscriptionsnopayed'];
-    $row24 = mysqli_fetch_assoc($result24);
-    $fivesuscriptionsnopayed = $row24['fivesuscriptionsnopayed'];
-    $row25 = mysqli_fetch_assoc($result25); 
-    $sixsuscriptionsnopayed = $row25['sixsuscriptionsnopayed'];
-    $row26 = mysqli_fetch_assoc($result26);
-    $sevensuscriptionsnopayed = $row26['sevensuscriptionsnopayed'];
-    $row27 = mysqli_fetch_assoc($result27);
-    $eightsuscriptionsnopayed = $row27['eightsuscriptionsnopayed'];
-    $row28 = mysqli_fetch_assoc($result28);
-    $ninesuscriptionsnopayed = $row28['ninesuscriptionsnopayed'];
-    $row29 = mysqli_fetch_assoc($result29);
-    $tensuscriptionsnopayed = $row29['tensuscriptionsnopayed'];
-    $row30 = mysqli_fetch_assoc($result30);
-    $elevensuscriptionsnopayed = $row30['elevensuscriptionsnopayed'];
-    $row20 = mysqli_fetch_assoc($result20);
-    $twelvesuscriptionsnopayed = $row20['twelvesuscriptionsnopayed'];
-
-    
+    $monthlySummary = mysqli_fetch_assoc($result1);
+    $active_users = (int) ($monthlySummary['active_users'] ?? 0);
+    $monthsuscriptions = (int) ($monthlySummary['monthsuscriptions'] ?? 0);
+    $twosuscriptions = (int) ($monthlySummary['twosuscriptions'] ?? 0);
+    $threesuscriptions = (int) ($monthlySummary['threesuscriptions'] ?? 0);
+    $foursuscriptions = (int) ($monthlySummary['foursuscriptions'] ?? 0);
+    $fivesuscriptions = (int) ($monthlySummary['fivesuscriptions'] ?? 0);
+    $sixsuscriptions = (int) ($monthlySummary['sixsuscriptions'] ?? 0);
+    $sevensuscriptions = (int) ($monthlySummary['sevensuscriptions'] ?? 0);
+    $eightsuscriptions = (int) ($monthlySummary['eightsuscriptions'] ?? 0);
+    $ninesuscriptions = (int) ($monthlySummary['ninesuscriptions'] ?? 0);
+    $tensuscriptions = (int) ($monthlySummary['tensuscriptions'] ?? 0);
+    $elevensuscriptions = (int) ($monthlySummary['elevensuscriptions'] ?? 0);
+    $twelvesuscriptions = (int) ($monthlySummary['twelvesuscriptions'] ?? 0);
+    $monthsuscriptionsnopayed = (int) ($monthlySummary['monthsuscriptionsnopayed'] ?? 0);
+    $twosuscriptionsnopayed = (int) ($monthlySummary['twosuscriptionsnopayed'] ?? 0);
+    $threesuscriptionsnopayed = (int) ($monthlySummary['threesuscriptionsnopayed'] ?? 0);
+    $foursuscriptionsnopayed = (int) ($monthlySummary['foursuscriptionsnopayed'] ?? 0);
+    $fivesuscriptionsnopayed = (int) ($monthlySummary['fivesuscriptionsnopayed'] ?? 0);
+    $sixsuscriptionsnopayed = (int) ($monthlySummary['sixsuscriptionsnopayed'] ?? 0);
+    $sevensuscriptionsnopayed = (int) ($monthlySummary['sevensuscriptionsnopayed'] ?? 0);
+    $eightsuscriptionsnopayed = (int) ($monthlySummary['eightsuscriptionsnopayed'] ?? 0);
+    $ninesuscriptionsnopayed = (int) ($monthlySummary['ninesuscriptionsnopayed'] ?? 0);
+    $tensuscriptionsnopayed = (int) ($monthlySummary['tensuscriptionsnopayed'] ?? 0);
+    $elevensuscriptionsnopayed = (int) ($monthlySummary['elevensuscriptionsnopayed'] ?? 0);
+    $twelvesuscriptionsnopayed = (int) ($monthlySummary['twelvesuscriptionsnopayed'] ?? 0);
 } else {
-    $total_suscriptores = 0; // En caso de error, mostrar 0
-    $usuarios_activos = 0;
+    $total_suscriptions = 0;
+    $active_users = 0;
     $suscriptionstodue = 0;
     $pendingaccess = 0;
     $monthsuscriptions = 0;
@@ -632,7 +564,7 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                                     <div class="grid-item-title">Listado de Suscripciones</div>
                                 </div>
                                 <div class="grid-item-body">
-                                    <p class="p-title">Total Suscripciones De No Pago:</p>
+                                    <p class="p-title">Total Suscripciones No Pagadas Por Vencer (12 meses):</p>
                                     <center><p class="p-content" style="font-size: 42px;"><?php echo $active_users; ?></p></center>
                                     <a class="btn-primary" onclick="openTab(event, 'opsactives')">Ver Detalles</a>
                                 </div>
@@ -946,7 +878,7 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                 'Salir': 'Log out',
                 'Listado de Suscripciones': 'Subscription Summary',
                 'Total Suscripciones De Pago:': 'Total Paid Subscriptions:',
-                'Total Suscripciones De No Pago:': 'Total Unpaid Subscriptions:',
+                'Total Suscripciones No Pagadas Por Vencer (12 meses):': 'Unpaid Subscriptions Due (12 months):',
                 'Ver Detalles': 'View Details',
                 'Suscripciones De Pago:': 'Paid Subscriptions:',
                 'Suscripciones No Pago:': 'Unpaid Subscriptions:',
@@ -1014,7 +946,7 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                 'Salir': 'Sair',
                 'Listado de Suscripciones': 'Resumo de Assinaturas',
                 'Total Suscripciones De Pago:': 'Total de Assinaturas Pagas:',
-                'Total Suscripciones De No Pago:': 'Total de Assinaturas Não Pagas:',
+                'Total Suscripciones No Pagadas Por Vencer (12 meses):': 'Assinaturas Não Pagas a Vencer (12 meses):',
                 'Ver Detalles': 'Ver detalhes',
                 'Suscripciones De Pago:': 'Assinaturas Pagas:',
                 'Suscripciones No Pago:': 'Assinaturas Não Pagas:',

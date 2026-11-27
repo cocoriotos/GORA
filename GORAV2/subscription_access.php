@@ -110,12 +110,24 @@ function goraRefreshSubscriptionAccess(mysqli $conn, string $username): ?array
         $effectiveExpiry = goraSubscriptionDate($effectiveLastPaymentDate)->modify('+' . $termDays . ' days');
         $counterStarts = goraSubscriptionDate($effectiveLastPaymentDate)->modify('+1 day');
     }
+    $registration = goraSubscriptionDate($registrationDate);
+    $trialCountingStarts = $registration !== null
+        ? $registration->modify('+30 days')
+        : null;
+    $lastPaidOn = goraSubscriptionDate($effectiveLastPaymentDate);
+    $hasDeferredTrial = $registration !== null
+        && $trialCountingStarts !== null
+        && $counterStarts !== null
+        && $counterStarts->format('Y-m-d') === $trialCountingStarts->format('Y-m-d')
+        && $lastPaidOn !== null
+        && $lastPaidOn >= $registration
+        && $lastPaidOn < $trialCountingStarts;
     $isPaidSubscription = $hasPaidSubscriptionRecord;
 
     if ($isPaidSubscription && $termDays > 0) {
         if ($effectiveExpiry !== null && $effectiveExpiry >= $today) {
             $remainingDays = (int) $today->diff($effectiveExpiry)->days + 1;
-            if ($counterStarts !== null && $counterStarts > $today) {
+            if ($counterStarts !== null && $counterStarts > $today && !$hasDeferredTrial) {
                 $remainingDays = max(
                     0,
                     $remainingDays - (int) $today->diff($counterStarts)->days
