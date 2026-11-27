@@ -200,7 +200,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 (string) $request['username'],
                 (string) $request['package_name'],
                 (string) $request['payment_date'],
-                (string) ($request['payment_reference'] ?? '')
+                (string) ($request['payment_reference'] ?? ''),
+                $requestId
             );
             if (goraRefreshSubscriptionAccess($conn, (string) $request['username']) === null) {
                 throw new RuntimeException('No fue posible verificar la actualización del acceso.');

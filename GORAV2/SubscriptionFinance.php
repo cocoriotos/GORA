@@ -228,6 +228,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new InvalidArgumentException('El usuario seleccionado ya no existe.');
             }
 
+            if (financeFindMatchingRejectedPaymentRequest(
+                $conn,
+                $userEmail,
+                $packageName,
+                $paymentDate,
+                $amount,
+                $currency,
+                $paymentMethod,
+                $paymentReferenceValue
+            ) !== null) {
+                throw new InvalidArgumentException('Este reporte fue rechazado y no se puede registrar como pago recibido.');
+            }
+
             if (financeFindDuplicateSubscriptionSale(
                 $conn,
                 $userEmail,
@@ -289,7 +302,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $userEmail,
                 $packageName,
                 $paymentDate,
-                $legacyPaymentReference
+                $legacyPaymentReference,
+                $paymentRequestId
             );
 
             if (goraRefreshSubscriptionAccess($conn, $userEmail) === null) {
@@ -419,6 +433,11 @@ switch ($selectedBeneficiary) {
 $allocationStatusSql = $selectedAllocationStatus === 'all'
     ? ''
     : " AND a.status = '" . $selectedAllocationStatus . "'";
+$confirmedPaymentRequestSql = " AND (p.payment_request_id IS NULL OR EXISTS (
+    SELECT 1
+    FROM gora_subscription_payment_requests r
+    WHERE r.request_id = p.payment_request_id AND r.status = 'approved'
+))";
 
 $paymentStmt = $conn->prepare(
     'SELECT p.payment_id, p.user_email, p.package_name, p.payment_date, p.amount, p.currency,
@@ -427,6 +446,7 @@ $paymentStmt = $conn->prepare(
      FROM gora_subscription_sales p
      JOIN gora_finance_sellers s ON s.seller_id = p.seller_id
      WHERE p.payment_month = ? AND (? = \'\' OR p.user_email = ?)
+       ' . $confirmedPaymentRequestSql . '
      ORDER BY p.payment_date DESC, p.payment_id DESC'
 );
 $paymentStmt->bind_param('sss', $selectedMonth, $selectedUser, $selectedUser);
@@ -443,6 +463,7 @@ $allocationStmt = $conn->prepare(
      JOIN gora_subscription_sales p ON p.payment_id = a.payment_id
      JOIN gora_finance_sellers s ON s.seller_id = p.seller_id
      WHERE a.payment_month = ? AND (? = \'\' OR p.user_email = ?)
+       ' . $confirmedPaymentRequestSql . '
        AND (' . $allocationFilterSql . ')' . $allocationStatusSql . '
      ORDER BY a.status = \'pending\' DESC, p.payment_date, a.payment_id, a.allocation_id'
 );
@@ -452,11 +473,12 @@ $allocations = $allocationStmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $allocationStmt->close();
 
 $totalsStmt = $conn->prepare(
-    'SELECT currency, SUM(amount) AS total_amount, COUNT(*) AS payment_count
-     FROM gora_subscription_sales
-     WHERE payment_month = ? AND (? = \'\' OR user_email = ?)
-     GROUP BY currency
-     ORDER BY currency'
+    'SELECT p.currency, SUM(p.amount) AS total_amount, COUNT(*) AS payment_count
+     FROM gora_subscription_sales p
+     WHERE p.payment_month = ? AND (? = \'\' OR p.user_email = ?)
+       ' . $confirmedPaymentRequestSql . '
+     GROUP BY p.currency
+     ORDER BY p.currency'
 );
 $totalsStmt->bind_param('sss', $selectedMonth, $selectedUser, $selectedUser);
 $totalsStmt->execute();
@@ -473,6 +495,7 @@ $allocationTotalsStmt = $conn->prepare(
      JOIN gora_finance_sellers s ON s.seller_id = p.seller_id
      WHERE a.payment_month = ? AND a.status <> \'not_applicable\'
        AND (? = \'\' OR p.user_email = ?)
+       ' . $confirmedPaymentRequestSql . '
        AND (' . $allocationFilterSql . ')' . $allocationStatusSql . '
      GROUP BY a.allocation_type,
               CASE WHEN a.allocation_type = \'seller\' THEN p.seller_id ELSE 0 END,
