@@ -5,6 +5,8 @@ require_once __DIR__ . '/sessions.php';
 require_once __DIR__ . '/db_connection1.php';
 require_once __DIR__ . '/sessionvalidation.php';
 require_once __DIR__ . '/subscription_access.php';
+require_once __DIR__ . '/subscription_payment_requests.php';
+require_once __DIR__ . '/subscription_finance_helpers.php';
 
 if (empty($_SESSION['email'])) {
     header('Location: videotrackerauth.php');
@@ -36,73 +38,11 @@ $flash = $_SESSION['subscription_finance_flash'] ?? null;
 unset($_SESSION['subscription_finance_flash']);
 $errorMessage = '';
 $transactionStarted = false;
+$storedProofFile = null;
 
 function financeEscape($value): string
 {
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-}
-
-function financeAmountFromInput(string $input): array
-{
-    if (!preg_match('/^\d{1,11}(?:\.\d{1,2})?$/D', $input)) {
-        throw new InvalidArgumentException('El importe debe ser positivo y tener hasta dos decimales.');
-    }
-
-    $parts = explode('.', $input, 2);
-    $whole = (int) $parts[0];
-    $fraction = isset($parts[1]) ? (int) str_pad($parts[1], 2, '0') : 0;
-    $cents = $whole * 100 + $fraction;
-    if ($cents <= 0) {
-        throw new InvalidArgumentException('El importe debe ser mayor que cero.');
-    }
-
-    return [$cents, $whole . '.' . str_pad((string) $fraction, 2, '0', STR_PAD_LEFT)];
-}
-
-function financeAmountFromCents(int $cents): string
-{
-    return intdiv($cents, 100) . '.' . str_pad((string) ($cents % 100), 2, '0', STR_PAD_LEFT);
-}
-
-function financeSplitAmount(int $amountCents): array
-{
-    $percentages = [
-        'investment' => ['percentage' => '10.00', 'whole_percent' => 10],
-        'seller' => ['percentage' => '10.00', 'whole_percent' => 10],
-        'fedsal' => ['percentage' => '40.00', 'whole_percent' => 40],
-        'julgon' => ['percentage' => '40.00', 'whole_percent' => 40],
-    ];
-    $shares = [];
-    $allocatedCents = 0;
-    foreach ($percentages as $type => $details) {
-        $numerator = $amountCents * $details['whole_percent'];
-        $shares[$type] = [
-            'percentage' => $details['percentage'],
-            'amount_cents' => intdiv($numerator, 100),
-            'remainder' => $numerator % 100,
-        ];
-        $allocatedCents += $shares[$type]['amount_cents'];
-    }
-
-    $types = array_keys($shares);
-    usort($types, static function (string $left, string $right) use ($shares, $percentages): int {
-        $remainderComparison = $shares[$right]['remainder'] <=> $shares[$left]['remainder'];
-        return $remainderComparison !== 0
-            ? $remainderComparison
-            : array_search($left, array_keys($percentages), true) <=> array_search($right, array_keys($percentages), true);
-    });
-
-    $remainingCents = $amountCents - $allocatedCents;
-    for ($index = 0; $index < $remainingCents; $index++) {
-        $shares[$types[$index]]['amount_cents']++;
-    }
-
-    $allocations = [];
-    foreach ($percentages as $type => $details) {
-        $allocations[] = [$type, $details['percentage'], $shares[$type]['amount_cents']];
-    }
-
-    return $allocations;
 }
 
 function financeSalesCodePart(string $value): string
@@ -239,10 +179,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (strlen($paymentReference) > 150) {
                 throw new InvalidArgumentException('La referencia no puede superar 150 caracteres.');
             }
-            [$amountCents, $amount] = financeAmountFromInput(trim((string) ($_POST['amount'] ?? '')));
+            [, $amount] = financeAmountFromInput(trim((string) ($_POST['amount'] ?? '')));
             $paymentMonth = substr($paymentDate, 0, 7);
             $paymentReferenceValue = $paymentReference === '' ? null : $paymentReference;
-            $legacyPaymentReference = $paymentReference;
 
             $conn->begin_transaction();
             $transactionStarted = true;
@@ -257,6 +196,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new InvalidArgumentException('El usuario seleccionado ya no existe.');
             }
 
+            if (financeFindDuplicateSubscriptionSale(
+                $conn,
+                $userEmail,
+                $packageName,
+                $paymentDate,
+                $amount,
+                $currency,
+                $paymentMethod
+            ) !== null) {
+                throw new InvalidArgumentException('Este pago ya está registrado en el control financiero; no se duplicó.');
+            }
+
             $sellerStmt = $conn->prepare(
                 'SELECT seller_id FROM gora_finance_sellers WHERE seller_id = ? AND active = 1 LIMIT 1 FOR UPDATE'
             );
@@ -268,103 +219,76 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new InvalidArgumentException('El vendedor seleccionado no existe o está inactivo.');
             }
 
-            $accessPaymentStmt = $conn->prepare(
-                'SELECT username FROM videotips_suscription_payments WHERE username = ? LIMIT 1 FOR UPDATE'
-            );
-            $accessPaymentStmt->bind_param('s', $userEmail);
-            $accessPaymentStmt->execute();
-            $accessPaymentExists = $accessPaymentStmt->get_result()->fetch_assoc();
-            $accessPaymentStmt->close();
-            if (!$accessPaymentExists) {
-                throw new RuntimeException('El usuario no tiene un registro de suscripción asociado. No se guardó el pago.');
-            }
-
-            $saleStmt = $conn->prepare(
-                'INSERT INTO gora_subscription_sales
-                    (user_email, package_name, payment_date, payment_month, amount, currency, payment_method, payment_reference, seller_id, recorded_by)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-            );
-            $saleStmt->bind_param(
-                'ssssssssis',
+            $matchingRequest = financeFindMatchingPendingPaymentRequest(
+                $conn,
                 $userEmail,
                 $packageName,
                 $paymentDate,
-                $paymentMonth,
+                $amount,
+                $currency,
+                $paymentMethod
+            );
+            if ($paymentReferenceValue === null && $matchingRequest !== null) {
+                $paymentReferenceValue = $matchingRequest['payment_reference'];
+            }
+            $legacyPaymentReference = $paymentReferenceValue ?? '';
+            $storedProofFile = goraStorePaymentProof($_FILES['payment_proof'] ?? []);
+            $paymentRequestId = $matchingRequest === null
+                ? null
+                : (int) $matchingRequest['request_id'];
+
+            financeRecordSaleWithAllocations(
+                $conn,
+                $userEmail,
+                $packageName,
+                $paymentDate,
                 $amount,
                 $currency,
                 $paymentMethod,
                 $paymentReferenceValue,
                 $sellerId,
-                $adminEmail
+                $adminEmail,
+                $paymentRequestId,
+                $storedProofFile
             );
-            $saleStmt->execute();
-            $paymentId = (int) $conn->insert_id;
-            $saleStmt->close();
 
-            $allocations = financeSplitAmount($amountCents);
-            $allocationStmt = $conn->prepare(
-                'INSERT INTO gora_subscription_allocations
-                    (payment_id, allocation_type, percentage, amount, currency, payment_month, status)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)'
-            );
-            foreach ($allocations as [$allocationType, $percentage, $allocationCents]) {
-                $allocationAmount = financeAmountFromCents($allocationCents);
-                $allocationStatus = $allocationCents === 0 ? 'not_applicable' : 'pending';
-                $allocationStmt->bind_param(
-                    'issssss',
-                    $paymentId,
-                    $allocationType,
-                    $percentage,
-                    $allocationAmount,
-                    $currency,
-                    $paymentMonth,
-                    $allocationStatus
-                );
-                $allocationStmt->execute();
-            }
-            $allocationStmt->close();
-
-            $subscriptionUpdate = $conn->prepare(
-                "UPDATE videotips_app_access_list
-                 SET active = 1, suscriptionactive = 1, suscriptionpayed = 1,
-                     lastsuscriptionpaymentdate = ?, suscriptionkind = 'De Pago',
-                     suscription_package = ?
-                 WHERE username = ?"
-            );
-            $subscriptionUpdate->bind_param('sss', $paymentDate, $packageName, $userEmail);
-            $subscriptionUpdate->execute();
-            $subscriptionUpdate->close();
-
-            $existingPaymentUpdate = $conn->prepare(
-                'UPDATE videotips_suscription_payments
-                 SET currentpaid = currentpaid + 1,
-                     paymentcounter = paymentcounter + 1,
-                     lastpaymentdate = ?,
-                     suscription_package = ?,
-                     proofofpurchasenumber = ?
-                 WHERE username = ?'
-            );
-            $existingPaymentUpdate->bind_param(
-                'ssss',
-                $paymentDate,
+            goraApplyPaidSubscription(
+                $conn,
+                $userEmail,
                 $packageName,
-                $legacyPaymentReference,
-                $userEmail
+                $paymentDate,
+                $legacyPaymentReference
             );
-            $existingPaymentUpdate->execute();
-            if ($existingPaymentUpdate->affected_rows !== 1) {
-                $existingPaymentUpdate->close();
-                throw new RuntimeException('No fue posible actualizar la suscripción existente. El pago no se guardó.');
-            }
-            $existingPaymentUpdate->close();
 
             if (goraRefreshSubscriptionAccess($conn, $userEmail) === null) {
                 throw new RuntimeException('No fue posible verificar el acceso actualizado. El pago no se guardó.');
             }
+
+            if ($paymentRequestId !== null) {
+                $requestUpdate = $conn->prepare(
+                    "UPDATE gora_subscription_payment_requests
+                     SET status = 'approved', reviewed_by = ?, reviewed_at = NOW(), rejection_reason = NULL
+                     WHERE request_id = ? AND status = 'pending'"
+                );
+                $requestUpdate->bind_param('si', $adminEmail, $paymentRequestId);
+                $requestUpdate->execute();
+                if ($requestUpdate->affected_rows !== 1) {
+                    $requestUpdate->close();
+                    throw new RuntimeException('No fue posible vincular el reporte pendiente con el pago financiero.');
+                }
+                $requestUpdate->close();
+            }
+
             $conn->commit();
             $transactionStarted = false;
+            $storedProofFile = null;
 
-            $_SESSION['subscription_finance_flash'] = ['type' => 'success', 'message' => 'Pago registrado y suscripción actualizada.'];
+            $_SESSION['subscription_finance_flash'] = [
+                'type' => 'success',
+                'message' => $paymentRequestId === null
+                    ? 'Pago registrado, comprobante guardado y suscripción actualizada.'
+                    : 'Pago registrado en control financiero; el reporte pendiente quedó confirmado y vinculado.',
+            ];
             financeRedirect($paymentMonth, $userEmail, 'subscription-payments');
         }
 
@@ -402,6 +326,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 error_log('Subscription finance rollback failed: ' . $rollbackException->getMessage());
             }
         }
+        if ($storedProofFile !== null && !$transactionStarted) {
+            $proofPath = goraPrivatePaymentProofDirectory() . DIRECTORY_SEPARATOR . $storedProofFile;
+            if (is_file($proofPath) && !unlink($proofPath)) {
+                error_log('Could not remove an unclaimed manual subscription payment proof.');
+            }
+        }
         error_log('Subscription finance operation failed: ' . $exception->getMessage());
         $errorMessage = $exception instanceof InvalidArgumentException || $exception instanceof RuntimeException
             ? $exception->getMessage()
@@ -435,7 +365,7 @@ $sellerResult->free();
 
 $paymentStmt = $conn->prepare(
     'SELECT p.payment_id, p.user_email, p.package_name, p.payment_date, p.amount, p.currency,
-            p.payment_method, p.payment_reference, s.first_name, s.last_name, s.sales_code,
+            p.payment_method, p.payment_reference, p.proof_file, s.first_name, s.last_name, s.sales_code,
             p.recorded_by
      FROM gora_subscription_sales p
      JOIN gora_finance_sellers s ON s.seller_id = p.seller_id
@@ -579,6 +509,7 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
 <main class="finance-shell">
     <header class="finance-header">
         <h1 data-finance-i18n="page_title">Control financiero de suscripciones</h1>
+        <a href="SubscriptionPaymentReview.php" class="finance-button secondary"><i class="fa-solid fa-receipt"></i> Revisar reportes de pago</a>
         <a href="AppMgmt.php?section=Administration" class="finance-button secondary"><i class="fa-solid fa-arrow-left"></i> <span data-finance-i18n="back_admin">Volver a administración</span></a>
     </header>
 
@@ -630,7 +561,7 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
 
         <section class="finance-card" id="register-payment">
             <h2 data-finance-i18n="register_subscription_payment">Registro de pago de suscripción</h2>
-            <form method="post">
+            <form method="post" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="<?php echo financeEscape($csrfToken); ?>">
                 <input type="hidden" name="action" value="add_subscription_payment">
                 <input type="hidden" name="month" value="<?php echo financeEscape($selectedMonth); ?>">
@@ -667,7 +598,8 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
                         <option value="Otro" data-finance-i18n="other">Otro</option>
                     </select>
                 </label>
-                <label><span data-finance-i18n="payment_reference">Comprobante o referencia (opcional)</span><input name="payment_reference" maxlength="150"></label>
+                <label><span data-finance-i18n="payment_reference">Referencia de pago (opcional)</span><input name="payment_reference" maxlength="150"></label>
+                <label><span data-finance-i18n="payment_proof">Comprobante (obligatorio, máximo 5 MB)</span><input name="payment_proof" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" required></label>
                 <label><span data-finance-i18n="seller">Vendedor</span>
                     <select name="seller_id" required>
                         <option value="" data-finance-i18n="select_seller">Seleccione vendedor</option>
@@ -720,12 +652,12 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
                 <thead><tr>
                     <th data-finance-i18n="payment_date">Fecha</th><th data-finance-i18n="user">Usuario</th>
                     <th data-finance-i18n="package">Paquete</th><th data-finance-i18n="amount">Importe</th>
-                    <th data-finance-i18n="payment_method">Medio</th><th data-finance-i18n="payment_reference_short">Referencia</th>
+                    <th data-finance-i18n="payment_method">Medio</th><th data-finance-i18n="payment_reference_short">Referencia</th><th data-finance-i18n="payment_proof_short">Comprobante</th>
                     <th data-finance-i18n="seller">Vendedor</th><th data-finance-i18n="recorded_by">Registrado por</th>
                 </tr></thead>
                 <tbody>
                 <?php if (!$payments): ?>
-                    <tr><td class="finance-empty" colspan="8" data-finance-i18n="no_month_payments">Sin pagos registrados para este filtro.</td></tr>
+                    <tr><td class="finance-empty" colspan="9" data-finance-i18n="no_month_payments">Sin pagos registrados para este filtro.</td></tr>
                 <?php else: foreach ($payments as $payment): ?>
                     <tr>
                         <td><?php echo financeEscape($payment['payment_date']); ?></td>
@@ -734,6 +666,7 @@ $statusLabels = ['pending' => 'Pendiente', 'paid' => 'Pagado', 'not_applicable' 
                         <td><?php echo financeEscape($payment['currency'] . ' ' . number_format((float) $payment['amount'], 2)); ?></td>
                         <td><?php echo financeEscape($payment['payment_method']); ?></td>
                         <td><?php echo financeEscape($payment['payment_reference'] ?? '—'); ?></td>
+                        <td><?php if ($payment['proof_file'] !== null): ?><a href="SubscriptionPaymentProof.php?type=sale&amp;id=<?php echo (int) $payment['payment_id']; ?>" target="_blank" rel="noopener" data-finance-i18n="view_proof">Ver comprobante</a><?php else: ?>—<?php endif; ?></td>
                         <td><?php echo financeEscape($payment['sales_code'] . ' — ' . $payment['first_name'] . ' ' . $payment['last_name']); ?></td>
                         <td><?php echo financeEscape($payment['recorded_by']); ?></td>
                     </tr>
@@ -816,7 +749,7 @@ const financeTranslations = {
         active:'Activo',inactive:'Inactivo',register_subscription_payment:'Registro de pago de suscripción',user:'Usuario',select_user:'Seleccione usuario',
         package:'Paquete',select_package:'Seleccione paquete',quarterly:'Trimestral (90 días)',semiannual:'Semestral (185 días)',annual:'Anual (365 días)',
         payment_date:'Fecha de pago',amount:'Importe',currency:'Moneda',payment_method:'Medio de pago',select_method:'Seleccione medio',
-        bank_transfer:'Transferencia',cash:'Efectivo',other:'Otro',payment_reference:'Comprobante o referencia (opcional)',select_seller:'Seleccione vendedor',
+        bank_transfer:'Transferencia',cash:'Efectivo',other:'Otro',payment_reference:'Referencia de pago (opcional)',payment_proof:'Comprobante (obligatorio, máximo 5 MB)',payment_proof_short:'Comprobante',view_proof:'Ver comprobante',select_seller:'Seleccione vendedor',
         save_payment:'Guardar pago y actualizar acceso',split_note:'El importe se reparte automáticamente: 10% inversión, 10% vendedor, 40% FedSal y 40% JulGon. Se redondea al centavo y el reparto siempre suma el pago total. Las cuotas se registran pendientes para el mes del pago; los importes se mantienen separados por moneda.',
         monthly_reports:'Reportes por mes o usuario',month:'Mes',filter_user:'Usuario (opcional)',all_users:'Todos los usuarios',apply_filter:'Aplicar filtro',
         no_month_payments:'Sin pagos registrados para este filtro.',subscription_payments:'Pagos de suscripción',payment_reference_short:'Referencia',recorded_by:'Registrado por',
@@ -835,7 +768,7 @@ const financeTranslations = {
         active:'Active',inactive:'Inactive',register_subscription_payment:'Subscription payment registration',user:'User',select_user:'Select user',
         package:'Plan',select_package:'Select a plan',quarterly:'Quarterly (90 days)',semiannual:'Semiannual (185 days)',annual:'Annual (365 days)',
         payment_date:'Payment date',amount:'Amount',currency:'Currency',payment_method:'Payment method',select_method:'Select a method',
-        bank_transfer:'Bank transfer',cash:'Cash',other:'Other',payment_reference:'Receipt or reference (optional)',select_seller:'Select seller',
+        bank_transfer:'Bank transfer',cash:'Cash',other:'Other',payment_reference:'Payment reference (optional)',payment_proof:'Receipt (required, maximum 5 MB)',payment_proof_short:'Receipt',view_proof:'View receipt',select_seller:'Select seller',
         save_payment:'Save payment and update access',split_note:'The amount is automatically allocated: 10% investment, 10% seller, 40% FedSal and 40% JulGon. Allocations are rounded to the cent and always add up to the full payment. They are pending in the payment month; amounts remain separated by currency.',
         monthly_reports:'Reports by month or user',month:'Month',filter_user:'User (optional)',all_users:'All users',apply_filter:'Apply filter',
         no_month_payments:'No payments for this filter.',subscription_payments:'Subscription payments',payment_reference_short:'Reference',recorded_by:'Recorded by',
@@ -854,7 +787,7 @@ const financeTranslations = {
         active:'Ativo',inactive:'Inativo',register_subscription_payment:'Cadastro de pagamento da assinatura',user:'Usuário',select_user:'Selecione o usuário',
         package:'Plano',select_package:'Selecione um plano',quarterly:'Trimestral (90 dias)',semiannual:'Semestral (185 dias)',annual:'Anual (365 dias)',
         payment_date:'Data do pagamento',amount:'Valor',currency:'Moeda',payment_method:'Forma de pagamento',select_method:'Selecione a forma',
-        bank_transfer:'Transferência',cash:'Dinheiro',other:'Outro',payment_reference:'Comprovante ou referência (opcional)',select_seller:'Selecione o vendedor',
+        bank_transfer:'Transferência',cash:'Dinheiro',other:'Outro',payment_reference:'Referência de pagamento (opcional)',payment_proof:'Comprovante (obrigatório, máximo 5 MB)',payment_proof_short:'Comprovante',view_proof:'Ver comprovante',select_seller:'Selecione o vendedor',
         save_payment:'Salvar pagamento e atualizar acesso',split_note:'O valor é distribuído automaticamente: 10% investimento, 10% vendedor, 40% FedSal e 40% JulGon. Os valores são arredondados ao centavo e sempre somam o total pago. As parcelas ficam pendentes no mês do pagamento; os valores permanecem separados por moeda.',
         monthly_reports:'Relatórios por mês ou usuário',month:'Mês',filter_user:'Usuário (opcional)',all_users:'Todos os usuários',apply_filter:'Aplicar filtro',
         no_month_payments:'Não há pagamentos para este filtro.',subscription_payments:'Pagamentos de assinatura',payment_reference_short:'Referência',recorded_by:'Registrado por',

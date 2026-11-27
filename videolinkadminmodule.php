@@ -22,6 +22,13 @@ $name = $_SESSION['name'];
 $delconfirm = $_SESSION['delconfirm'];
 
 include "db_connection1.php";
+require_once __DIR__ . '/subscription_access.php';
+$subscription = goraRefreshSubscriptionAccess($conn, (string) $local_username);
+if (!goraCanAccessVideoModule($subscription)) {
+    $_SESSION['suscriptiondue'] = 1;
+    header('Location: suscriptionpayment.php?subscription_due=1', true, 303);
+    exit();
+}
 include "header.php";
 ?>  
 

@@ -9,6 +9,7 @@ include "sessions.php";
 include "sessionvalidation.php";
 include "headermgmt.php";
 include "db_connection1.php";
+require_once __DIR__ . '/subscription_access.php';
 //include "nobackpage.php"; 
 include "SessionTimeOut.php";
 // Verificar si el usuario está autenticado (si $_SESSION['email'] está definido)
@@ -21,88 +22,18 @@ if (!isset($_SESSION['email'])) {
 // Si el usuario está autenticado, continuar con el resto del código
 $local_username = $_SESSION['email']; // Obtener el email del usuario desde la sesión
 
-//habilitar la actualizacion masiva 
-$query7="SET SQL_SAFE_UPDATES = 0";
-$result7=mysqli_query($conn, $query7);
-$query8="SET SQL_SAFE_UPDATES = 0";
-$result8=mysqli_query($conn, $query8);
-
-//habilitar la actualizacion masiva    
-$query1="SET SQL_SAFE_UPDATES = 0";
-$result1=mysqli_query($conn, $query1);
-$query2="SET SQL_SAFE_UPDATES = 0";
-$result2=mysqli_query($conn, $query2);
-				
-//Asignación del valor de dias de suscripción a disfrutar   
-$query4="UPDATE videotips_app_access_list SET daystoenjoy = DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate),  suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), registrationdate) where suscriptionkind in ('Suspendida', 'Vencida', 'De Pago','Owner', 'Partner')"; 
-$result4=mysqli_query($conn, $query4);
-
-//habilitar la actualizacion masiva    
-$query1="SET SQL_SAFE_UPDATES = 0";
-$result1=mysqli_query($conn, $query1);
-$query2="SET SQL_SAFE_UPDATES = 0";
-$result2=mysqli_query($conn, $query2);
-				
-//Asignar los días de uso de Trial y ponerlos en cero cuando haya vencido
-$query5="UPDATE videotips_app_access_list SET daystoenjoy = IF(DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate) > 32, 0, DATEDIFF(CURRENT_DATE(), lastsuscriptionpaymentdate)) where suscriptionkind = 'Trial'";
-$result5=mysqli_query($conn, $query5);
-
-//habilitar la actualizacion masiva    
-$query1="SET SQL_SAFE_UPDATES = 0";
-$result1=mysqli_query($conn, $query1);
-$query2="SET SQL_SAFE_UPDATES = 0";
-$result2=mysqli_query($conn, $query2);
-
-
-/*Sync daysleft */
-//actualizar los días restantes de suscripción y de los dias de prueba para todos los usuarios
-$query20="UPDATE videotips_app_access_list SET suscriptiondaysleft = DATEDIFF(CURDATE(), lastsuscriptionpaymentdate), trialdaysleft = DATEDIFF(CURDATE(), registrationdate)"; 
-$result20=mysqli_query($conn, $query20);
-
-//habilitar la actualizacion masiva    
-$query1="SET SQL_SAFE_UPDATES = 0";
-$result1=mysqli_query($conn, $query1);
-$query2="SET SQL_SAFE_UPDATES = 0";
-$result2=mysqli_query($conn, $query2);
-
-
-//actualiza el estado de suscripción a trial si el tiempo de Trial no ha vencido
-$query25="UPDATE videotips_app_access_list SET suscriptionkind = 'Trial' where trialdaysleft < 32 and suscriptionactive = 0 and suscriptionpayed = 0"; 
-$result25=mysqli_query($conn, $query25);
-
-
-//habilitar la actualizacion masiva    
-$query1="SET SQL_SAFE_UPDATES = 0";
-$result1=mysqli_query($conn, $query1);
-$query2="SET SQL_SAFE_UPDATES = 0";
-$result2=mysqli_query($conn, $query2);
-
-
-//actualiza el estado de pago a suspendido si el tiempo de suscripcion ha vencido
-$query9="UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' where (suscriptionpayed = 0 and active = 1 AND suscriptiondaysleft > 365) AND (suscriptionkind = 'De Pago' OR suscriptionkind = 'Vencida' OR suscriptionkind = 'Suspendida')"; 
-$result9=mysqli_query($conn, $query9);
-
-$query1="SET SQL_SAFE_UPDATES = 0";
-$result1=mysqli_query($conn, $query1);
-$query2="SET SQL_SAFE_UPDATES = 0";
-$result2=mysqli_query($conn, $query2);
-
-//actualiza la suscripcion a vencida si el tiempo de suscripcion ha vencido
-$query8 = "UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' WHERE suscriptionpayed = 1 AND daystoenjoy = 0 AND active = 1 AND suscriptionactive = 1 AND suscriptionkind = 'De Pago'";
-$result8 = mysqli_query($conn, $query8);
-				
-
-
-//habilitar la actualizacion masiva 
-$query1="SET SQL_SAFE_UPDATES = 0";
-$result1=mysqli_query($conn, $query1);
-$query2="SET SQL_SAFE_UPDATES = 0";
-$result2=mysqli_query($conn, $query2);
-
-
-//actualiza el estado de pago a vencido si el tiempo de trial ha vencido
-$query3="UPDATE videotips_app_access_list SET suscriptionkind = 'Vencida' where (suscriptionpayed = 0 and suscriptionactive = 0 and active = 1 AND trialdaysleft > 32 and daystoenjoy = 0)  and suscriptionkind = 'Trial' "; 
-$result3=mysqli_query($conn, $query3);
+// Refresh subscription counters through the same date logic used at login.
+$subscriptionUsersResult = $conn->query(
+    "SELECT username
+     FROM videotips_app_access_list
+     WHERE suscriptionkind IN ('De Pago', 'Vencida', 'Suspendida', 'Trial')"
+);
+while ($subscriptionUser = $subscriptionUsersResult->fetch_assoc()) {
+    if (goraRefreshSubscriptionAccess($conn, (string) $subscriptionUser['username']) === null) {
+        throw new RuntimeException('No fue posible actualizar una suscripción para el panel administrativo.');
+    }
+}
+$subscriptionUsersResult->free();
 
 /*Consulta para contar los usuarios suscritos*/
 $query = "SELECT COUNT(suscriptionpayed) as total_suscriptions FROM videotips_app_access_list WHERE suscriptionpayed = 1 and suscriptionkind = 'De Pago'";
@@ -114,46 +45,46 @@ $result1 = mysqli_query($conn, $query1);*/
 $query1 = "SELECT COUNT(active) as active_users FROM videotips_app_access_list WHERE suscriptionkind <> 'De Pago'";
 $result1 = mysqli_query($conn, $query1);
 
-$query2 = "SELECT COUNT(*) as suscriptionstodue FROM videotips_app_access_list WHERE (active = 1 and suscriptionpayed = 1 and suscriptiondaysleft > 335 and suscriptionkind = 'De Pago')";
+$query2 = "SELECT COUNT(*) as suscriptionstodue FROM videotips_app_access_list WHERE (active = 1 and suscriptionpayed = 1 and suscriptiondaysleft BETWEEN 0 AND 30 and suscriptionkind = 'De Pago')";
 $result2 = mysqli_query($conn, $query2);
 
 $query3 = "SELECT COUNT(*) as pendingaccess FROM videotips_accessrequests WHERE (processed = 'No'and granted = 'No')";
 $result3 = mysqli_query($conn, $query3);
 
-$query5 = "SELECT COUNT(*) as monthsuscriptions FROM videotips_app_access_list  WHERE  suscriptionkind = 'De Pago' and (365-suscriptiondaysleft between 0 and 30)";
+$query5 = "SELECT COUNT(*) as monthsuscriptions FROM videotips_app_access_list  WHERE  suscriptionkind = 'De Pago' and (suscriptiondaysleft between 0 and 30)";
 $result5 = mysqli_query($conn, $query5);
 
-$query6 = "SELECT COUNT(*) as twosuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (365-suscriptiondaysleft between 31 and 60)";
+$query6 = "SELECT COUNT(*) as twosuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 31 and 60)";
 $result6 = mysqli_query($conn, $query6);
 
-$query7 = "SELECT COUNT(*) as threesuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (365-suscriptiondaysleft between 61 and 90)";
+$query7 = "SELECT COUNT(*) as threesuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 61 and 90)";
 $result7 = mysqli_query($conn, $query7);
 
-$query8 = "SELECT COUNT(*) as foursuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (365-suscriptiondaysleft between 91 and 120)";
+$query8 = "SELECT COUNT(*) as foursuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 91 and 120)";
 $result8 = mysqli_query($conn, $query8);
 
-$query9 = "SELECT COUNT(*) as fivesuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (365-suscriptiondaysleft between 121 and 150)";
+$query9 = "SELECT COUNT(*) as fivesuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 121 and 150)";
 $result9 = mysqli_query($conn, $query9);
 
-$query10 = "SELECT COUNT(*) as sixsuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (365-suscriptiondaysleft between 151 and 180)";
+$query10 = "SELECT COUNT(*) as sixsuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 151 and 180)";
 $result10 = mysqli_query($conn, $query10);
 
-$query11 = "SELECT COUNT(*) as sevensuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (365-suscriptiondaysleft between 181 and 210)";
+$query11 = "SELECT COUNT(*) as sevensuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 181 and 210)";
 $result11 = mysqli_query($conn, $query11);
 
-$query12 = "SELECT COUNT(*) as eightsuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (365-suscriptiondaysleft between 211 and 240)";
+$query12 = "SELECT COUNT(*) as eightsuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 211 and 240)";
 $result12 = mysqli_query($conn, $query12);
 
-$query13 = "SELECT COUNT(*) as ninesuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (365-suscriptiondaysleft between 241 and 270)";
+$query13 = "SELECT COUNT(*) as ninesuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 241 and 270)";
 $result13 = mysqli_query($conn, $query13);
 
-$query14 = "SELECT COUNT(*) as tensuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (365-suscriptiondaysleft between 271 and 300)";
+$query14 = "SELECT COUNT(*) as tensuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 271 and 300)";
 $result14 = mysqli_query($conn, $query14);
 
-$query15 = "SELECT COUNT(*) as elevensuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (365-suscriptiondaysleft between 301 and 330)";
+$query15 = "SELECT COUNT(*) as elevensuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 301 and 330)";
 $result15 = mysqli_query($conn, $query15);
 
-$query16 = "SELECT COUNT(*) as twelvesuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (365-suscriptiondaysleft between 331 and 366)";
+$query16 = "SELECT COUNT(*) as twelvesuscriptions FROM videotips_app_access_list  WHERE suscriptionkind = 'De Pago' and (suscriptiondaysleft between 331 and 366)";
 $result16 = mysqli_query($conn, $query16);
 
 $query17 = "UPDATE videotips_app_access_list SET suscriptionpayed = 0 WHERE trialdaysleft  > 31 and suscriptionkind = 'Trial'";
@@ -648,6 +579,9 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                     <a class="admin-sidebar-link" href="SubscriptionFinance.php">
                         <i class="fas fa-wallet"></i><span data-admin-i18n="financial_control">Control financiero</span>
                     </a>
+                    <a class="admin-sidebar-link" href="SubscriptionPaymentReview.php">
+                        <i class="fas fa-receipt"></i><span data-admin-i18n="review_subscription_payments">Revisar pagos reportados</span>
+                    </a>
                 </div>
                 <a class="admin-sidebar-link" href="closetaskscon.php">
                     <i class="fas fa-right-from-bracket"></i><span data-admin-i18n="logout">Salir</span>
@@ -775,6 +709,7 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                                         <div class="grid-item-body">
                                             <p class="p-title">Vendedores, pagos de suscripción y repartos</p>
                                             <a class="btn-primary" href="SubscriptionFinance.php">Abrir control financiero</a>
+                                            <a class="btn-primary" href="SubscriptionPaymentReview.php" data-admin-i18n="review_subscription_payments">Revisar pagos reportados</a>
                                         </div>
                                     </div>
                         </div>
@@ -1023,6 +958,7 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                 'Control financiero': 'Financial control',
                 'Vendedores, pagos de suscripción y repartos': 'Sellers, subscription payments and allocations',
                 'Abrir control financiero': 'Open financial control',
+                'Revisar pagos reportados': 'Review reported payments',
                 'Visitas de Usuarios': 'User Visits',
                 'Registro de visitas por fecha': 'Visit records by date',
                 'Abrir visitas de usuarios': 'Open user visits',
@@ -1091,6 +1027,7 @@ $local_username = $_SESSION['email']; // Obtener el email del usuario desde la s
                 'Control financiero': 'Controle financeiro',
                 'Vendedores, pagos de suscripción y repartos': 'Vendedores, pagamentos de assinatura e distribuições',
                 'Abrir control financiero': 'Abrir controle financeiro',
+                'Revisar pagos reportados': 'Revisar pagamentos reportados',
                 'Visitas de Usuarios': 'Visitas de Usuários',
                 'Registro de visitas por fecha': 'Registro de visitas por data',
                 'Abrir visitas de usuarios': 'Abrir visitas de usuários',
