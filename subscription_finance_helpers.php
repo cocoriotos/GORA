@@ -73,10 +73,15 @@ function financeFindDuplicateSubscriptionSale(
     string $paymentMethod
 ): ?array {
     $stmt = $conn->prepare(
-        'SELECT payment_id, payment_request_id
-         FROM gora_subscription_sales
-         WHERE user_email = ? AND package_name = ? AND payment_date = ?
-           AND amount = ? AND currency = ? AND payment_method = ?
+        'SELECT p.payment_id, p.payment_request_id
+         FROM gora_subscription_sales p
+         WHERE p.user_email = ? AND p.package_name = ? AND p.payment_date = ?
+           AND p.amount = ? AND p.currency = ? AND p.payment_method = ?
+           AND (p.payment_request_id IS NULL OR EXISTS (
+               SELECT 1
+               FROM gora_subscription_payment_requests r
+               WHERE r.request_id = p.payment_request_id AND r.status = \'approved\'
+           ))
          LIMIT 1
          FOR UPDATE'
     );
@@ -117,6 +122,43 @@ function financeFindMatchingPendingPaymentRequest(
     }
 
     return $matches[0] ?? null;
+}
+
+function financeFindMatchingRejectedPaymentRequest(
+    mysqli $conn,
+    string $userEmail,
+    string $packageName,
+    string $paymentDate,
+    string $amount,
+    string $currency,
+    string $paymentMethod,
+    ?string $paymentReference
+): ?array {
+    $stmt = $conn->prepare(
+        "SELECT request_id, payment_reference
+         FROM gora_subscription_payment_requests
+         WHERE username = ? AND package_name = ? AND payment_date = ?
+           AND amount_paid = ? AND currency = ? AND payment_method = ?
+           AND status = 'rejected'
+         ORDER BY request_id DESC
+         FOR UPDATE"
+    );
+    $stmt->bind_param('ssssss', $userEmail, $packageName, $paymentDate, $amount, $currency, $paymentMethod);
+    $stmt->execute();
+    $matches = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    foreach ($matches as $match) {
+        $rejectedReference = $match['payment_reference'];
+        if ($paymentReference === null
+            || $rejectedReference === null
+            || hash_equals((string) $rejectedReference, $paymentReference)
+        ) {
+            return $match;
+        }
+    }
+
+    return null;
 }
 
 function financeRecordSaleWithAllocations(

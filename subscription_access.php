@@ -231,12 +231,30 @@ function goraApplyPaidSubscription(
     string $username,
     string $package,
     string $paymentDate,
-    string $paymentReference
+    string $paymentReference,
+    ?int $paymentRequestId = null
 ): array {
     $termDays = goraSubscriptionTermDays($package);
     $paidOn = goraSubscriptionDate($paymentDate);
     if ($termDays === 0 || $paidOn === null || $paidOn > goraSubscriptionToday()) {
         throw new InvalidArgumentException('El paquete o la fecha del pago no son válidos.');
+    }
+
+    if ($paymentRequestId !== null) {
+        $requestCheck = $conn->prepare(
+            "SELECT request_id
+             FROM gora_subscription_payment_requests
+             WHERE request_id = ? AND username = ? AND status = 'pending'
+             LIMIT 1
+             FOR UPDATE"
+        );
+        $requestCheck->bind_param('is', $paymentRequestId, $username);
+        $requestCheck->execute();
+        $validPendingRequest = $requestCheck->get_result()->fetch_assoc();
+        $requestCheck->close();
+        if (!$validPendingRequest) {
+            throw new InvalidArgumentException('El reporte de pago no está pendiente y no puede activar la suscripción.');
+        }
     }
 
     $stmt = $conn->prepare(

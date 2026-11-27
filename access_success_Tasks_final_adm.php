@@ -81,18 +81,17 @@ $_SESSION['email'] = $local_username;
 $_SESSION['LAST_ACTIVITY'] = time();
 $_SESSION['gora_session_generation'] = bin2hex(random_bytes(32));
 
-$stmt = $conn->prepare("UPDATE videotips_app_access_list SET suscriptiondaysleft = DATEDIFF(CURDATE(), registrationdate) WHERE username = ?");
-$stmt->bind_param("s", $local_username);
-$stmt->execute();
+require_once __DIR__ . '/subscription_access.php';
+$subscription = goraRefreshSubscriptionAccess($conn, $local_username);
+if ($subscription === null) {
+    error_log('Authenticated user subscription record was not found.');
+    http_response_code(500);
+    exit('No fue posible cargar los datos de la cuenta.');
+}
+$trialElapsedDays = (int) ($subscription['trialdaysleft'] ?? 0);
+$subscriptionPaid = (int) $subscription['suscriptionpayed'];
 
-$stmt = $conn->prepare("SELECT suscriptiondaysleft, suscriptionpayed FROM videotips_app_access_list WHERE username = ?");
-$stmt->bind_param("s", $local_username);
-$stmt->execute();
-$userData = $stmt->get_result()->fetch_assoc();
-$suscriptiondaysleft = (int) ($userData['suscriptiondaysleft'] ?? 0);
-$suscriptionpayed = (int) ($userData['suscriptionpayed'] ?? 0);
-
-if ($suscriptiondaysleft > 8 && $suscriptionpayed === 0) {
+if ($trialElapsedDays > 8 && $subscriptionPaid === 0) {
     $_SESSION['suscriptiondue'] = 1;
     header("Location: suscriptionpayment.php");
     exit();
